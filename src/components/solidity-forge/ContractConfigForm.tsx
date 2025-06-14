@@ -284,7 +284,7 @@ export function ContractConfigForm({
   const parameterGroups = selectedTemplate ? getParameterGroups(selectedTemplate, isAdvancedMode) : [];
 
   return (
-    <div className="space-y-6 p-6"> {/* Added p-6 here for overall padding */}
+    <div className="space-y-6 p-6"> 
       <div className="text-center">
         <CardTitle className="text-2xl font-headline mb-1">Configure Your Contract</CardTitle>
         <CardDescription>Define contract parameters. Or don't. See if I care.</CardDescription>
@@ -351,11 +351,11 @@ export function ContractConfigForm({
                       value={tabValue}
                       disabled={anyPrimaryActionLoading && activeTabValue !== tabValue}
                       className="
-                        whitespace-nowrap px-3 py-2 text-sm font-medium rounded-md transition-all
+                        whitespace-nowrap px-3 py-2 text-base font-medium rounded-md transition-all
                         hover:bg-muted/60 hover:text-accent-foreground 
                         focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
                         data-[state=active]:bg-muted data-[state=active]:text-primary data-[state=active]:font-semibold data-[state=active]:shadow-inner
-                        md:w-full md:justify-start"
+                        md:w-full md:justify-start animate-multicolor-border-glow"
                     >
                       {group.title}
                     </TabsTrigger>
