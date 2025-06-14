@@ -119,22 +119,6 @@
   font-weight: bold;
 }
 
-/* Pulsating glow for Cards - Kept if needed for other elements, but replaced for main cards */
-@keyframes cardPulsatingGlow {
-  0% {
-    box-shadow: 0 0 8px 2px hsla(var(--primary), 0.15), 0 0 2px 0px hsla(var(--primary), 0.1);
-  }
-  50% {
-    box-shadow: 0 0 16px 4px hsla(var(--primary), 0.25), 0 0 8px 2px hsla(var(--primary), 0.15);
-  }
-  100% {
-    box-shadow: 0 0 8px 2px hsla(var(--primary), 0.15), 0 0 2px 0px hsla(var(--primary), 0.1);
-  }
-}
-
-.animated-border-glow {
-  animation: cardPulsatingGlow 3s ease-in-out infinite;
-}
 
 /* New Multi-color Border Glow Animation */
 @keyframes multiColorBorderGlow {
@@ -153,17 +137,5 @@
   /* Ensure elements have border-radius for rounded glow. */
 }
 
+/* Removed .tab-trigger-glow and @keyframes activeTabPulse as it's replaced by animate-multicolor-border-glow on tabs */
 
-/* Glow for active tab trigger */
-.tab-trigger-glow[data-state=active] {
-  animation: activeTabPulse 2s infinite alternate ease-in-out;
-}
-
-@keyframes activeTabPulse {
-  from {
-    box-shadow: 0 0 5px 0px hsla(var(--accent), 0.4), inset 0 0 3px hsla(var(--accent), 0.2);
-  }
-  to {
-    box-shadow: 0 0 10px 1px hsla(var(--accent), 0.6), inset 0 0 6px hsla(var(--accent), 0.3);
-  }
-}

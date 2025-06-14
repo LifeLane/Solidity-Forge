@@ -91,8 +91,8 @@ export function CodeDisplay({
 
   return (
     <div className="flex flex-col h-full p-4 md:p-6">
-      <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-4 gap-2">
-        <div className="text-center sm:text-left">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-4 gap-2 text-center sm:text-left">
+        <div>
             <CardTitle className="text-2xl font-headline">Generated Code</CardTitle>
             <CardDescription>Review your code and AI insights.</CardDescription>
         </div>
@@ -111,10 +111,17 @@ export function CodeDisplay({
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-grow flex flex-col">
         <TabsList className="mb-4 grid w-full grid-cols-2 animate-multicolor-border-glow">
-          <TabsTrigger value="code" className="hover:bg-accent/10 data-[state=active]:bg-accent/20 data-[state=active]:text-accent-foreground tab-trigger-glow">
+          <TabsTrigger 
+            value="code" 
+            className="hover:bg-accent/10 data-[state=active]:bg-accent/20 data-[state=active]:text-accent-foreground animate-multicolor-border-glow rounded-sm"
+          >
             <CheckCircle2 className="mr-2 h-4 w-4" /> Generated Code
           </TabsTrigger>
-          <TabsTrigger value="suggestions" className="hover:bg-accent/10 data-[state=active]:bg-accent/20 data-[state=active]:text-accent-foreground tab-trigger-glow" disabled={!code && !isLoadingSuggestions}>
+          <TabsTrigger 
+            value="suggestions" 
+            className="hover:bg-accent/10 data-[state=active]:bg-accent/20 data-[state=active]:text-accent-foreground animate-multicolor-border-glow rounded-sm" 
+            disabled={!code && !isLoadingSuggestions}
+          >
              <Lightbulb className="mr-2 h-4 w-4" /> AI Suggestions
           </TabsTrigger>
         </TabsList>
@@ -159,7 +166,7 @@ export function CodeDisplay({
                   </div>
                 )}
                 <Separator className="my-3"/>
-                <h3 className="text-base font-semibold mb-2 text-center sm:text-left">AI Suggestions:</h3>
+                <h3 className="text-base font-semibold mb-2 text-center">AI Suggestions:</h3>
                 <ul className="space-y-3">
                   {suggestions.map((suggestion) => (
                     <li key={suggestion.id} className="flex items-start gap-2 p-3 bg-card/50 rounded-md text-sm">
