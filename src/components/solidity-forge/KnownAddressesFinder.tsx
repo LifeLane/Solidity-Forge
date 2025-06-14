@@ -54,17 +54,17 @@ export function KnownAddressesFinder({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="text-center">
-        <CardTitle className="text-2xl font-headline mb-1 flex items-center justify-center gap-2 p-2 rounded-md animate-multicolor-border-glow">
+        <CardTitle className="text-2xl font-headline mb-2 flex items-center justify-center gap-2 p-2 rounded-md animate-multicolor-border-glow">
           <Network className="w-7 h-7 text-primary"/> Find Common Contract Addresses
         </CardTitle>
-        <CardDescription className="p-2 rounded-md animate-multicolor-border-glow">
+        <CardDescription className="p-2 rounded-md animate-multicolor-border-glow mb-6">
           Use natural language to find known contract addresses (e.g., "Uniswap V2 Router on Ethereum", "PancakeSwap factories", "WETH on Polygon").
         </CardDescription>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2">
+      <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 mb-6">
         <Input
           type="text"
           value={query}
@@ -73,7 +73,7 @@ export function KnownAddressesFinder({
             if (setInitialQuery) setInitialQuery(e.target.value);
           }}
           placeholder="e.g., Uniswap V2 Router Ethereum"
-          className="flex-grow bg-input/50 focus:bg-input"
+          className="flex-grow bg-input/50 focus:bg-input p-2 rounded-md animate-multicolor-border-glow"
           aria-label="Contract address query"
         />
         <Button type="submit" disabled={isLoading} className="hover:shadow-lg hover:scale-105 transition-transform">
@@ -87,7 +87,7 @@ export function KnownAddressesFinder({
       </form>
 
       {isLoading && (
-        <div className="space-y-3 mt-4">
+        <div className="space-y-4 mt-4">
           {[1, 2, 3].map(i => (
             <Card key={i} className="bg-muted/30 animate-pulse">
               <CardHeader>
@@ -104,14 +104,14 @@ export function KnownAddressesFinder({
 
       {results && !isLoading && (
         <div className="mt-6 space-y-4">
-          <h3 className="text-lg font-semibold text-center text-primary p-1 rounded-md animate-multicolor-border-glow">{results.summary}</h3>
+          <h3 className="text-lg font-semibold text-center text-primary p-2 rounded-md animate-multicolor-border-glow mb-4">{results.summary}</h3>
           {results.results && results.results.length > 0 && (
             <ScrollArea className="h-[400px] p-1 rounded-md border border-border/50 bg-muted/20 animate-multicolor-border-glow">
-              <div className="space-y-3 p-3">
+              <div className="space-y-4 p-3">
                 {results.results.map((item, index) => (
                   <Card key={index} className="bg-card/70 backdrop-blur-sm shadow-md animate-multicolor-border-glow">
                     <CardHeader className="pb-3">
-                      <CardTitle className="text-lg flex items-center gap-2 p-1 rounded-md animate-multicolor-border-glow">
+                      <CardTitle className="text-lg flex items-center gap-2 p-2 rounded-md animate-multicolor-border-glow mb-1">
                         <FileJson className="w-5 h-5 text-primary" />
                         {item.contractName}
                       </CardTitle>

@@ -213,15 +213,15 @@ export function ContractConfigForm({
     };
 
     return (
-      <div key={param.name} className="space-y-2">
+      <div key={param.name} className="space-y-3">
         <TooltipProvider>
           <Tooltip delayDuration={300}>
             <TooltipTrigger asChild>
               <Label 
                 htmlFor={param.name} 
                 className={cn(
-                  "flex items-center justify-center gap-1.5",
-                  "animate-multicolor-border-glow p-1 rounded-md" // Glow effect for Label
+                  "flex items-center justify-center gap-1.5 mb-2",
+                  "animate-multicolor-border-glow p-2 rounded-md"
                 )}
               >
                 {param.label}
@@ -238,7 +238,7 @@ export function ContractConfigForm({
             defaultValue={param.defaultValue || param.options[0]?.value}
             render={({ field }) => (
               <Select onValueChange={field.onChange} value={field.value as string} defaultValue={field.value as string || undefined} disabled={anyPrimaryActionLoading}>
-                <SelectTrigger id={param.name} className="bg-input/50 focus:bg-input text-center">
+                <SelectTrigger id={param.name} className="bg-input/50 focus:bg-input text-center p-2 rounded-md animate-multicolor-border-glow">
                   <SelectValue placeholder={param.placeholder || `Select ${param.label}`} />
                 </SelectTrigger>
                 <SelectContent>
@@ -259,7 +259,7 @@ export function ContractConfigForm({
                 placeholder={param.placeholder}
                 rows={param.rows || 3}
                 {...field}
-                className="bg-input/50 focus:bg-input"
+                className="bg-input/50 focus:bg-input p-2 rounded-md animate-multicolor-border-glow"
                 disabled={anyPrimaryActionLoading}
               />
             )}
@@ -274,13 +274,13 @@ export function ContractConfigForm({
                 type={param.type === 'number' ? 'number' : 'text'}
                 placeholder={param.placeholder}
                 {...field}
-                className="bg-input/50 focus:bg-input"
+                className="bg-input/50 focus:bg-input p-2 rounded-md animate-multicolor-border-glow"
                 disabled={anyPrimaryActionLoading}
               />
             )}
           />
         )}
-        {errors[param.name] && <p className="text-sm text-destructive text-center">{(errors[param.name] as any).message}</p>}
+        {errors[param.name] && <p className="text-sm text-destructive text-center mt-1">{(errors[param.name] as any).message}</p>}
       </div>
     );
   };
@@ -291,22 +291,22 @@ export function ContractConfigForm({
   const parameterGroups = selectedTemplate ? getParameterGroups(selectedTemplate, isAdvancedMode) : [];
 
   return (
-    <div className="space-y-6 p-6"> 
+    <div className="space-y-8 p-6"> 
       <div className="text-center">
-        <CardTitle className="text-2xl font-headline mb-1 p-2 rounded-md animate-multicolor-border-glow">Configure Your Contract</CardTitle>
-        <CardDescription className="p-2 rounded-md animate-multicolor-border-glow">Define contract parameters. Or don't. See if I care.</CardDescription>
+        <CardTitle className="text-2xl font-headline mb-2 p-2 rounded-md animate-multicolor-border-glow">Configure Your Contract</CardTitle>
+        <CardDescription className="p-2 rounded-md animate-multicolor-border-glow mb-4">Define contract parameters. Or don't. See if I care.</CardDescription>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-3">
         <Label 
           htmlFor="contractType" 
           className={cn(
-            "text-center block",
-            "animate-multicolor-border-glow p-1 rounded-md" // Glow effect for Label
+            "text-center block mb-2",
+            "animate-multicolor-border-glow p-2 rounded-md"
             )}
         >Contract Type</Label>
         <Select onValueChange={handleTemplateChange} defaultValue={selectedTemplate?.id} disabled={anyPrimaryActionLoading}>
-          <SelectTrigger id="contractType" className="bg-input/50 focus:bg-input text-center">
+          <SelectTrigger id="contractType" className="bg-input/50 focus:bg-input text-center p-2 rounded-md animate-multicolor-border-glow mb-2">
             <SelectValue placeholder="Select contract type" />
           </SelectTrigger>
           <SelectContent>
@@ -320,17 +320,17 @@ export function ContractConfigForm({
             ))}
           </SelectContent>
         </Select>
-        {selectedTemplate && <p className="text-sm text-muted-foreground mt-1 text-center p-1 rounded-md animate-multicolor-border-glow">{selectedTemplate.description}</p>}
+        {selectedTemplate && <p className="text-sm text-muted-foreground mt-1 text-center p-2 rounded-md animate-multicolor-border-glow mb-4">{selectedTemplate.description}</p>}
       </div>
 
       {selectedTemplate && (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="flex items-center justify-center space-x-2 my-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="flex items-center justify-center space-x-2 my-6">
             <Label 
               htmlFor="mode-switch" 
               className={cn(
                 "cursor-pointer",
-                "animate-multicolor-border-glow p-1 rounded-md" // Glow effect for Label
+                "animate-multicolor-border-glow p-2 rounded-md" 
               )}
             >Mode:</Label>
             <span className="text-sm text-muted-foreground">Basic</span>
@@ -354,12 +354,12 @@ export function ContractConfigForm({
             <Tabs 
               value={activeTabValue} 
               onValueChange={setActiveTabValue} 
-              className="flex flex-col md:flex-row gap-4 md:gap-6"
+              className="flex flex-col md:flex-row gap-6 md:gap-8" // Increased gap
             >
               <TabsList 
                 className="
-                  flex flex-row overflow-x-auto pb-2 
-                  md:pb-0 md:overflow-x-visible md:flex-col md:space-y-1 md:w-48 lg:w-56 shrink-0 
+                  flex flex-row overflow-x-auto pb-2 gap-3 
+                  md:pb-0 md:overflow-x-visible md:flex-col md:space-y-2 md:w-48 lg:w-56 shrink-0 
                   bg-transparent md:bg-background/30 md:p-3 rounded-lg"
               >
                 {parameterGroups.map(group => {
@@ -395,7 +395,7 @@ export function ContractConfigForm({
           )}
 
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6">
             <Button 
               type="submit" 
               disabled={anyPrimaryActionLoading} 

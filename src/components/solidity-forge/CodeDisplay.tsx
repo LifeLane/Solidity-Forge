@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertTriangle, CheckCircle2, ExternalLink, Lightbulb, Copy, Check, ShieldAlert, Zap, Wrench, Info, Fuel, Coins, Beaker, Sparkles, Loader2 } from 'lucide-react';
-import { CardTitle, CardDescription, CardHeader, CardContent as ShadCNCardContent } from '@/components/ui/card'; // Renamed to avoid conflict
+import { CardTitle, CardDescription, CardHeader, CardContent as ShadCNCardContent } from '@/components/ui/card';
 import { Badge, type BadgeProps } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
@@ -163,24 +163,24 @@ export function CodeDisplay({
     ...vscDarkPlus,
     'pre[class*="language-"]': {
       ...vscDarkPlus['pre[class*="language-"]'],
-      backgroundColor: 'transparent', // Make background transparent to use parent's bg
-      margin: 0, // Remove default margins
-      padding: '1rem', // Keep padding consistent
-      fontSize: '0.875rem', // text-sm
-      fontFamily: 'var(--font-code)', // Use font from Tailwind config
+      backgroundColor: 'transparent', 
+      margin: 0, 
+      padding: '1rem', 
+      fontSize: '0.875rem', 
+      fontFamily: 'var(--font-code)', 
     },
     'code[class*="language-"]': {
       ...vscDarkPlus['code[class*="language-"]'],
-       fontFamily: 'var(--font-code)', // Use font from Tailwind config
+       fontFamily: 'var(--font-code)', 
     }
   };
 
 
   return (
     <div className="flex flex-col h-full p-4 md:p-6">
-      <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-4 gap-2 text-center sm:text-left">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-2 text-center sm:text-left">
         <div>
-            <CardTitle className="text-2xl font-headline p-2 rounded-md animate-multicolor-border-glow">Generated Artifacts</CardTitle>
+            <CardTitle className="text-2xl font-headline p-2 rounded-md animate-multicolor-border-glow mb-2">Generated Artifacts</CardTitle>
             <CardDescription className="p-2 rounded-md animate-multicolor-border-glow">Behold! The fruits of my (and your, I guess) labor.</CardDescription>
         </div>
         {activeTab === "code" && code && !overallLoading && (
@@ -205,7 +205,7 @@ export function CodeDisplay({
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-grow flex flex-col">
-        <TabsList className="mb-4 grid w-full grid-cols-4 animate-multicolor-border-glow">
+        <TabsList className="mb-6 grid w-full grid-cols-2 sm:grid-cols-4 animate-multicolor-border-glow gap-1 p-1">
           <TabsTrigger 
             value="code" 
             className="hover:bg-accent/10 data-[state=active]:bg-accent/20 data-[state=active]:text-accent-foreground animate-multicolor-border-glow rounded-sm"
@@ -265,7 +265,7 @@ export function CodeDisplay({
                 htmlFor="refinementRequest" 
                 className={cn(
                   "text-sm font-medium flex items-center justify-center gap-1.5 mb-2",
-                  "animate-multicolor-border-glow p-1 rounded-md"
+                  "animate-multicolor-border-glow p-2 rounded-md"
                   )}
               >
                 <Sparkles className="h-4 w-4 text-primary" />
@@ -277,7 +277,7 @@ export function CodeDisplay({
                 onChange={(e) => setRefinementInput(e.target.value)}
                 placeholder="e.g., 'Add NatSpec comments to all public functions' or 'Optimize the transfer function for gas...'"
                 rows={3}
-                className="mb-2 bg-background/70 focus:bg-background placeholder:text-center"
+                className="mb-2 bg-background/70 focus:bg-background placeholder:text-center p-2 rounded-md animate-multicolor-border-glow"
                 disabled={overallLoading || anySubActionLoading}
               />
               <Button 
@@ -305,14 +305,14 @@ export function CodeDisplay({
             ) : suggestions.length > 0 || securityScore !== null ? (
               <div className="p-4 space-y-4">
                 {securityScore !== null && (
-                  <div className="flex items-center justify-between p-3 bg-card rounded-md shadow mb-3 animate-multicolor-border-glow">
-                    <h3 className="text-base font-semibold p-1 rounded-md animate-multicolor-border-glow">Overall Audit Readiness</h3>
+                  <div className="flex items-center justify-between p-3 bg-card rounded-md shadow mb-4 animate-multicolor-border-glow">
+                    <h3 className="text-base font-semibold p-2 rounded-md animate-multicolor-border-glow">Overall Audit Readiness</h3>
                     {getSecurityScoreBadge(securityScore)}
                   </div>
                 )}
-                {suggestions.length > 0 && <Separator className="my-3"/>}
-                {suggestions.length > 0 && <h3 className="text-base font-semibold mb-2 text-center p-1 rounded-md animate-multicolor-border-glow">My Sage Advice:</h3>}
-                <ul className="space-y-3">
+                {suggestions.length > 0 && <Separator className="my-4"/>}
+                {suggestions.length > 0 && <h3 className="text-base font-semibold mb-3 text-center p-2 rounded-md animate-multicolor-border-glow">My Sage Advice:</h3>}
+                <ul className="space-y-4">
                   {suggestions.map((suggestion) => (
                     <li key={suggestion.id} className="p-3 bg-card/50 rounded-md text-sm space-y-2 animate-multicolor-border-glow">
                       <div className="flex items-center gap-2">
@@ -349,16 +349,16 @@ export function CodeDisplay({
               <div className="p-4 space-y-4">
                 <div className="bg-card/50 rounded-md shadow-md animate-multicolor-border-glow">
                   <CardHeader>
-                    <CardTitle className="text-xl flex items-center gap-2 p-1 rounded-md animate-multicolor-border-glow"><Fuel className="w-5 h-5 text-primary"/>Gas Guesstimations</CardTitle>
+                    <CardTitle className="text-xl flex items-center gap-2 p-2 rounded-md animate-multicolor-border-glow mb-2"><Fuel className="w-5 h-5 text-primary"/>Gas Guesstimations</CardTitle>
                   </CardHeader>
                   <ShadCNCardContent className="space-y-3">
                     <div>
-                      <h4 className="font-semibold text-base text-primary p-1 rounded-md animate-multicolor-border-glow">Estimated Gas Range (Wild Guess):</h4>
+                      <h4 className="font-semibold text-base text-primary p-2 rounded-md animate-multicolor-border-glow mb-1">Estimated Gas Range (Wild Guess):</h4>
                       <p className="text-sm whitespace-pre-line">{gasEstimation.estimatedGasRange}</p>
                     </div>
-                    <Separator />
+                    <Separator className="my-3" />
                     <div>
-                      <h4 className="font-semibold text-base text-primary p-1 rounded-md animate-multicolor-border-glow">My Two Cents on Why:</h4>
+                      <h4 className="font-semibold text-base text-primary p-2 rounded-md animate-multicolor-border-glow mb-1">My Two Cents on Why:</h4>
                       <p className="text-sm whitespace-pre-line">{gasEstimation.explanation}</p>
                     </div>
                   </ShadCNCardContent>

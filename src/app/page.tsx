@@ -281,13 +281,13 @@ Specific guidance: ${template.aiPromptEnhancement}`;
     <div className="min-h-screen text-foreground flex flex-col">
       <Header />
       <main 
-        className={`flex-grow container mx-auto p-4 md:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-start justify-items-center transition-opacity duration-700 ease-out ${mainContentVisible ? 'opacity-100' : 'opacity-0'}`}
+        className={`flex-grow container mx-auto p-4 md:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-start justify-items-center transition-opacity duration-700 ease-out ${mainContentVisible ? 'opacity-100' : 'opacity-0'}`}
       >
         <Card 
           className="transition-all duration-300 bg-card/80 backdrop-blur-sm animate-fadeInUp animate-multicolor-border-glow w-full max-w-2xl" 
           style={{ animationDelay: '0.3s' }}
         >
-          <CardContent className="p-0"> {/* Changed p-6 to p-0 */}
+          <CardContent className="p-0">
             <ContractConfigForm
               templates={CONTRACT_TEMPLATES}
               onGenerateCode={handleGenerateCode}
