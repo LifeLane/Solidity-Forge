@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { CardTitle, CardDescription } from '@/components/ui/card'; // Card related imports for structure
+import { CardTitle, CardDescription } from '@/components/ui/card'; 
 import { AlertCircle, Loader2, Wand2, Brain, Fuel, Beaker } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Switch } from "@/components/ui/switch"; 
@@ -18,33 +18,15 @@ import { cn } from '@/lib/utils';
 
 export type FormData = Record<string, any>;
 
-interface ContractConfigFormProps {
-  templates: ContractTemplate[];
-  onGenerateCode: (template: ContractTemplate, formData: FormData) => Promise<void>;
-  onGetAISuggestions: (template: ContractTemplate, formData: FormData) => Promise<void>;
-  onEstimateGasCosts: () => Promise<void>;
-  onGenerateTestCases: () => Promise<void>;
-  isGeneratingCode: boolean;
-  isGettingSuggestions: boolean;
-  isEstimatingGas: boolean;
-  isGeneratingTestCases: boolean;
-  isRefiningCode: boolean;
-  generatedCode: string;
-  selectedTemplateProp?: ContractTemplate;
-}
-
 interface ParameterGroup {
   title: string;
   parameters: ContractParameter[];
   defaultActive?: boolean;
-  glowClass: string; // Added for unique glow per tab
 }
-
-const PARAM_TAB_GLOW_CLASSES = ['param-tab-glow-yellow', 'param-tab-glow-cyan', 'param-tab-glow-magenta', 'param-tab-glow-primary'];
 
 const getParameterGroups = (template: ContractTemplate, isAdvancedMode: boolean): ParameterGroup[] => {
   const visibleParams = template.parameters.filter(p => isAdvancedMode || !p.advancedOnly);
-  let groups: Omit<ParameterGroup, 'glowClass'>[] = [];
+  let groups: ParameterGroup[] = [];
   
   if (template.id === 'erc20') {
     groups = [
@@ -110,11 +92,7 @@ const getParameterGroups = (template: ContractTemplate, isAdvancedMode: boolean)
      groups = [{ title: 'Parameters', parameters: visibleParams, defaultActive: true }];
   }
 
-  return groups.filter(group => group.parameters.length > 0)
-               .map((group, index) => ({
-                 ...group,
-                 glowClass: PARAM_TAB_GLOW_CLASSES[index % PARAM_TAB_GLOW_CLASSES.length]
-               }));
+  return groups.filter(group => group.parameters.length > 0);
 };
 
 
@@ -216,7 +194,7 @@ export function ContractConfigForm({
     const commonProps = {
       name: param.name,
       control: control,
-      rules: { required: param.type !== 'boolean' ? `${param.label} is required.` : false }, // Booleans are not usually "required" in the same way
+      rules: { required: param.type !== 'boolean' ? `${param.label} is required.` : false }, 
     };
 
     return (
@@ -226,7 +204,7 @@ export function ContractConfigForm({
             <TooltipTrigger asChild>
               <Label 
                 htmlFor={param.name} 
-                className="flex items-center text-glow-primary font-medium"
+                className="flex items-center text-glow-primary font-bold" 
               >
                 {param.label}
                 {param.description && <AlertCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help ml-1.5" />}
@@ -313,39 +291,43 @@ export function ContractConfigForm({
   const parameterGroups = selectedTemplate ? getParameterGroups(selectedTemplate, isAdvancedMode) : [];
 
   return (
-    <div className="space-y-6 p-4 md:p-6 lg:p-8"> 
-      <div className="text-center mb-6"> 
-        <CardTitle className="text-2xl font-headline mb-2 text-glow-primary">Blueprint Your Brilliance</CardTitle>
-        <CardDescription className="max-w-md mx-auto text-sm text-muted-foreground">Sculpt your smart contract's soul. Or, you know, just click randomly. My circuits won't judge. Much.</CardDescription>
+    <div className="space-y-8 p-4 md:p-6 lg:p-8"> 
+      <div className="text-center mb-8"> 
+        <CardTitle className="text-3xl font-headline mb-3 text-glow-primary">Blueprint Your Brilliance</CardTitle>
+        <CardDescription className="max-w-md mx-auto text-base text-muted-foreground">
+          Sculpt your smart contract's soul. Or, you know, just click randomly. My circuits won't judge. Much.
+        </CardDescription>
       </div>
 
-      <div className="space-y-3 mb-6"> 
-        <Label htmlFor="contractType" className="text-center block font-semibold text-foreground">
+      <div className="space-y-4 mb-8"> 
+        <Label htmlFor="contractType" className="text-center block font-bold text-xl text-glow-primary">
           Select Your Destiny (Contract Type)
         </Label>
         <Select onValueChange={handleTemplateChange} defaultValue={selectedTemplate?.id} disabled={anyPrimaryActionLoading}>
-          <SelectTrigger id="contractType" className="glow-border-purple bg-background/70 focus:bg-background">
+          <SelectTrigger id="contractType" className="glow-border-purple bg-background/70 focus:bg-background text-base py-6">
             <SelectValue placeholder="Choose Your Genesis Blueprint" />
           </SelectTrigger>
           <SelectContent>
             {templates.map(template => (
-              <SelectItem key={template.id} value={template.id}>
-                <div className="flex items-center gap-2">
-                  <template.icon className="h-4 w-4 text-muted-foreground" />
+              <SelectItem key={template.id} value={template.id} className="text-base py-3">
+                <div className="flex items-center gap-3">
+                  <template.icon className="h-5 w-5 text-muted-foreground" />
                   {template.name}
                 </div>
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-        {selectedTemplate && <p className="text-xs text-muted-foreground mt-1 text-center max-w-md mx-auto">{selectedTemplate.description}</p>}
+        {selectedTemplate && 
+          <p className="text-sm text-muted-foreground mt-2 text-center max-w-lg mx-auto">{selectedTemplate.description}</p>
+        }
       </div>
       
       {selectedTemplate && (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-          <div className="flex items-center justify-center space-x-3 my-6">
-            <Label htmlFor="mode-switch" className="text-sm font-medium text-muted-foreground">Complexity Dial:</Label>
-            <span className="text-xs text-muted-foreground">Basic</span>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
+          <div className="flex items-center justify-center space-x-4 my-8">
+            <Label htmlFor="mode-switch" className="text-base font-bold text-glow-primary">Complexity Dial:</Label>
+            <span className="text-sm text-muted-foreground">Basic</span>
             <Switch
               id="mode-switch"
               checked={isAdvancedMode}
@@ -353,7 +335,7 @@ export function ContractConfigForm({
               aria-label={isAdvancedMode ? "Switch to Basic Mode" : "Switch to Advanced Mode"}
               disabled={anyPrimaryActionLoading}
             />
-            <span className="text-xs text-muted-foreground">Advanced</span>
+            <span className="text-sm text-muted-foreground">Advanced</span>
           </div>
 
           {selectedTemplate.id === 'custom' || parameterGroups.length <= 1 ? ( 
@@ -367,9 +349,9 @@ export function ContractConfigForm({
               orientation="vertical"
               value={activeTabValue} 
               onValueChange={setActiveTabValue} 
-              className="flex flex-col md:flex-row gap-6 md:gap-8"
+              className="flex flex-col md:flex-row gap-6 md:gap-8 min-h-[300px]" 
             >
-              <TabsList className="flex flex-row md:flex-col md:space-y-1 md:w-56 shrink-0 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 bg-transparent p-0">
+              <TabsList className="flex flex-row md:flex-col md:space-y-2 md:w-60 shrink-0 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 bg-transparent p-0">
                 {parameterGroups.map((group) => {
                   const tabValue = group.title.toLowerCase().replace(/\s+/g, '-');
                   return (
@@ -377,19 +359,26 @@ export function ContractConfigForm({
                       key={tabValue} 
                       value={tabValue}
                       disabled={anyPrimaryActionLoading && activeTabValue !== tabValue}
-                      className={cn("param-tab-trigger whitespace-nowrap", group.glowClass)}
+                      className={cn(
+                        "tab-running-lines-border param-tab-trigger w-full justify-start whitespace-nowrap",
+                        "data-[state=active]:text-primary-foreground",
+                        "data-[state=inactive]:text-muted-foreground hover:text-foreground"
+                      )}
+                      style={{ animationDelay: '0s' }} // Let individual ::before handle unique start if needed
                     >
-                      {group.title}
+                       <span className="tab-running-lines-content px-4 py-3 text-sm md:text-base">
+                         {group.title}
+                       </span>
                     </TabsTrigger>
                   );
                 })}
               </TabsList>
-              <div className="flex-grow min-w-0"> 
+              <div className="flex-grow min-w-0 p-1 rounded-md border border-border/20 bg-card/30"> 
                 {parameterGroups.map(group => {
                   const tabValue = group.title.toLowerCase().replace(/\s+/g, '-');
                   return (
-                    <TabsContent key={tabValue} value={tabValue} className="mt-0 space-y-6 rounded-md">
-                      {group.parameters.length > 0 ? group.parameters.map(renderParameterInput) : <p className="text-sm text-muted-foreground p-4 text-center">No parameters in this section for the current mode.</p>}
+                    <TabsContent key={tabValue} value={tabValue} className="mt-0 space-y-6 p-4 md:p-6 rounded-md">
+                      {group.parameters.length > 0 ? group.parameters.map(renderParameterInput) : <p className="text-base text-muted-foreground p-4 text-center">No parameters in this section for the current mode.</p>}
                     </TabsContent>
                   );
                 })}
@@ -398,16 +387,16 @@ export function ContractConfigForm({
           )}
 
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-8">
             <Button 
               type="submit" 
               disabled={anyPrimaryActionLoading} 
-              className="w-full glow-border-primary bg-primary text-primary-foreground hover:bg-primary/90"
+              className="w-full glow-border-primary bg-primary text-primary-foreground hover:bg-primary/90 text-lg py-6"
             >
               {isGeneratingCode ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
               ) : (
-                <Wand2 className="mr-2 h-4 w-4" />
+                <Wand2 className="mr-2 h-5 w-5" />
               )}
               Forge Contract
             </Button>
@@ -416,12 +405,12 @@ export function ContractConfigForm({
               variant="outline"
               onClick={handleAISuggestionsClick}
               disabled={!generatedCode || anySubActionLoading}
-              className="w-full glow-border-purple hover:bg-accent/10 hover:text-accent-foreground"
+              className="w-full glow-border-purple hover:bg-accent/10 hover:text-accent-foreground text-lg py-6"
             >
               {isGettingSuggestions ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
               ) : (
-                 <Brain className="mr-2 h-4 w-4" />
+                 <Brain className="mr-2 h-5 w-5" />
               )}
               AI Scrutiny
             </Button>
@@ -430,12 +419,12 @@ export function ContractConfigForm({
               variant="outline"
               onClick={handleEstimateGasClick}
               disabled={!generatedCode || anySubActionLoading}
-              className="w-full glow-border-purple hover:bg-accent/10 hover:text-accent-foreground"
+              className="w-full glow-border-purple hover:bg-accent/10 hover:text-accent-foreground text-lg py-6"
             >
               {isEstimatingGas ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
               ) : (
-                 <Fuel className="mr-2 h-4 w-4" />
+                 <Fuel className="mr-2 h-5 w-5" />
               )}
               Gas Oracle Query
             </Button>
@@ -444,12 +433,12 @@ export function ContractConfigForm({
               variant="outline"
               onClick={handleGenerateTestCasesClick}
               disabled={!generatedCode || anySubActionLoading}
-              className="w-full glow-border-purple hover:bg-accent/10 hover:text-accent-foreground"
+              className="w-full glow-border-purple hover:bg-accent/10 hover:text-accent-foreground text-lg py-6"
             >
               {isGeneratingTestCases ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
               ) : (
-                 <Beaker className="mr-2 h-4 w-4" />
+                 <Beaker className="mr-2 h-5 w-5" />
               )}
               Conjure Test Suite
             </Button>
@@ -459,5 +448,7 @@ export function ContractConfigForm({
     </div>
   );
 }
+
+    
 
     

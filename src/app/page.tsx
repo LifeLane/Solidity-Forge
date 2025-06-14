@@ -21,7 +21,7 @@ import { cn } from '@/lib/utils';
 
 export default function SolidityForgePage() {
   const [selectedTemplate, setSelectedTemplate] = useState<ContractTemplate | undefined>(
-    CONTRACT_TEMPLATES[0] // Default to the first template
+    CONTRACT_TEMPLATES[0] 
   );
   const [generatedCode, setGeneratedCode] = useState<string>('');
   const [aiSuggestions, setAiSuggestions] = useState<AISuggestion[]>([]);
@@ -279,19 +279,19 @@ Specific guidance: ${template.aiPromptEnhancement}`;
   const anySubActionLoading = isGettingSuggestions || isEstimatingGas || isGeneratingTestCases || isRefiningCode;
 
   return (
-    <div className="min-h-screen text-foreground flex flex-col bg-background"> {/* Ensure base background is dark */}
+    <div className="min-h-screen text-foreground flex flex-col bg-background">
       <Header />
       <main 
-        className={`flex-grow container mx-auto p-4 md:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start justify-items-center transition-opacity duration-700 ease-out ${mainContentVisible ? 'opacity-100' : 'opacity-0'}`}
+        className={`flex-grow container mx-auto p-4 md:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-10 lg:gap-12 items-start justify-items-center transition-opacity duration-700 ease-out ${mainContentVisible ? 'opacity-100' : 'opacity-0'}`}
       >
         <Card 
           className={cn(
             "transition-all duration-300 bg-card/80 backdrop-blur-sm w-full max-w-2xl animate-fadeInUp glow-border-accent", 
-            "border" // ensure border is applied for glow to have an edge
+            "border" 
             )}
           style={{ animationDelay: '0.3s' }}
         >
-          <CardContent className="p-0"> {/* Padding handled by ContractConfigForm internally */}
+          <CardContent className="p-0"> 
             <ContractConfigForm
               templates={CONTRACT_TEMPLATES}
               onGenerateCode={handleGenerateCode}
@@ -315,7 +315,6 @@ Specific guidance: ${template.aiPromptEnhancement}`;
           )}
           style={{ animationDelay: '0.5s' }}
         >
-          {/* CardContent padding handled by CodeDisplay internally */}
           <CodeDisplay
             code={generatedCode}
             suggestions={aiSuggestions}
@@ -355,5 +354,7 @@ Specific guidance: ${template.aiPromptEnhancement}`;
     </div>
   );
 }
+
+    
 
     
