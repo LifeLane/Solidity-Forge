@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { ExternalLink, Copy, Check, Search, Loader2, AlertTriangle, Network, FileJson, CaseSensitive } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import type { GetKnownLiquidityPoolInfoOutput, KnownContractAddressInfo } from '@/ai/flows/get-known-liquidity-pool-info';
+import { cn } from '@/lib/utils';
 
 interface KnownAddressesFinderProps {
   onFindAddresses: (query: string) => Promise<void>;
@@ -55,10 +56,10 @@ export function KnownAddressesFinder({
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <CardTitle className="text-2xl font-headline mb-1 flex items-center justify-center gap-2">
+        <CardTitle className="text-2xl font-headline mb-1 flex items-center justify-center gap-2 p-2 rounded-md animate-multicolor-border-glow">
           <Network className="w-7 h-7 text-primary"/> Find Common Contract Addresses
         </CardTitle>
-        <CardDescription>
+        <CardDescription className="p-2 rounded-md animate-multicolor-border-glow">
           Use natural language to find known contract addresses (e.g., "Uniswap V2 Router on Ethereum", "PancakeSwap factories", "WETH on Polygon").
         </CardDescription>
       </div>
@@ -103,14 +104,14 @@ export function KnownAddressesFinder({
 
       {results && !isLoading && (
         <div className="mt-6 space-y-4">
-          <h3 className="text-lg font-semibold text-center text-primary">{results.summary}</h3>
+          <h3 className="text-lg font-semibold text-center text-primary p-1 rounded-md animate-multicolor-border-glow">{results.summary}</h3>
           {results.results && results.results.length > 0 && (
             <ScrollArea className="h-[400px] p-1 rounded-md border border-border/50 bg-muted/20 animate-multicolor-border-glow">
               <div className="space-y-3 p-3">
                 {results.results.map((item, index) => (
-                  <Card key={index} className="bg-card/70 backdrop-blur-sm shadow-md">
+                  <Card key={index} className="bg-card/70 backdrop-blur-sm shadow-md animate-multicolor-border-glow">
                     <CardHeader className="pb-3">
-                      <CardTitle className="text-lg flex items-center gap-2">
+                      <CardTitle className="text-lg flex items-center gap-2 p-1 rounded-md animate-multicolor-border-glow">
                         <FileJson className="w-5 h-5 text-primary" />
                         {item.contractName}
                       </CardTitle>

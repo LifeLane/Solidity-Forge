@@ -14,6 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from "@/hooks/use-toast";
 import type { EstimateGasCostOutput } from '@/ai/flows/estimate-gas-cost';
+import { cn } from '@/lib/utils';
 
 
 export type AISuggestionType = 'security' | 'optimization' | 'gas_saving' | 'best_practice' | 'informational';
@@ -161,8 +162,8 @@ export function CodeDisplay({
     <div className="flex flex-col h-full p-4 md:p-6">
       <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-4 gap-2 text-center sm:text-left">
         <div>
-            <CardTitle className="text-2xl font-headline">Generated Artifacts</CardTitle>
-            <CardDescription>Behold! The fruits of my (and your, I guess) labor.</CardDescription>
+            <CardTitle className="text-2xl font-headline p-2 rounded-md animate-multicolor-border-glow">Generated Artifacts</CardTitle>
+            <CardDescription className="p-2 rounded-md animate-multicolor-border-glow">Behold! The fruits of my (and your, I guess) labor.</CardDescription>
         </div>
         {activeTab === "code" && code && !overallLoading && (
           <div className="flex gap-2 mt-2 sm:mt-0 self-center sm:self-auto">
@@ -234,7 +235,13 @@ export function CodeDisplay({
           </ScrollArea>
           {code && !isLoadingCode && (
             <div className="p-4 border-t border-border/50 bg-muted/30 mt-auto">
-              <Label htmlFor="refinementRequest" className="text-sm font-medium flex items-center gap-1.5 mb-2">
+              <Label 
+                htmlFor="refinementRequest" 
+                className={cn(
+                  "text-sm font-medium flex items-center justify-center gap-1.5 mb-2",
+                  "animate-multicolor-border-glow p-1 rounded-md" // Glow effect for Label
+                  )}
+              >
                 <Sparkles className="h-4 w-4 text-primary" />
                 Request Code Refinement:
               </Label>
@@ -272,16 +279,16 @@ export function CodeDisplay({
             ) : suggestions.length > 0 || securityScore !== null ? (
               <div className="p-4 space-y-4">
                 {securityScore !== null && (
-                  <div className="flex items-center justify-between p-3 bg-card rounded-md shadow mb-3">
-                    <h3 className="text-base font-semibold">Overall Audit Readiness</h3>
+                  <div className="flex items-center justify-between p-3 bg-card rounded-md shadow mb-3 animate-multicolor-border-glow">
+                    <h3 className="text-base font-semibold p-1 rounded-md ">Overall Audit Readiness</h3>
                     {getSecurityScoreBadge(securityScore)}
                   </div>
                 )}
                 {suggestions.length > 0 && <Separator className="my-3"/>}
-                {suggestions.length > 0 && <h3 className="text-base font-semibold mb-2 text-center">My Sage Advice:</h3>}
+                {suggestions.length > 0 && <h3 className="text-base font-semibold mb-2 text-center p-1 rounded-md animate-multicolor-border-glow">My Sage Advice:</h3>}
                 <ul className="space-y-3">
                   {suggestions.map((suggestion) => (
-                    <li key={suggestion.id} className="p-3 bg-card/50 rounded-md text-sm space-y-2">
+                    <li key={suggestion.id} className="p-3 bg-card/50 rounded-md text-sm space-y-2 animate-multicolor-border-glow">
                       <div className="flex items-center gap-2">
                         {getTypeIcon(suggestion.type)}
                         <Badge variant={getSeverityBadgeVariant(suggestion.severity)} className="capitalize">{suggestion.severity}</Badge>
@@ -314,18 +321,18 @@ export function CodeDisplay({
               </div>
             ) : gasEstimation ? (
               <div className="p-4 space-y-4">
-                <div className="bg-card/50 rounded-md shadow-md">
+                <div className="bg-card/50 rounded-md shadow-md animate-multicolor-border-glow">
                   <CardHeader>
-                    <CardTitle className="text-xl flex items-center gap-2"><Fuel className="w-5 h-5 text-primary"/>Gas Guesstimations</CardTitle>
+                    <CardTitle className="text-xl flex items-center gap-2 p-1 rounded-md animate-multicolor-border-glow"><Fuel className="w-5 h-5 text-primary"/>Gas Guesstimations</CardTitle>
                   </CardHeader>
                   <ShadCNCardContent className="space-y-3">
                     <div>
-                      <h4 className="font-semibold text-base text-primary">Estimated Gas Range (Wild Guess):</h4>
+                      <h4 className="font-semibold text-base text-primary p-1 rounded-md animate-multicolor-border-glow">Estimated Gas Range (Wild Guess):</h4>
                       <p className="text-sm whitespace-pre-line">{gasEstimation.estimatedGasRange}</p>
                     </div>
                     <Separator />
                     <div>
-                      <h4 className="font-semibold text-base text-primary">My Two Cents on Why:</h4>
+                      <h4 className="font-semibold text-base text-primary p-1 rounded-md animate-multicolor-border-glow">My Two Cents on Why:</h4>
                       <p className="text-sm whitespace-pre-line">{gasEstimation.explanation}</p>
                     </div>
                   </ShadCNCardContent>
@@ -370,9 +377,3 @@ export function CodeDisplay({
     </div>
   );
 }
-
-// Make sure to import CardHeader and CardContent from ShadCN if not already.
-// For example, at the top:
-// import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-// I've aliased CardContent to ShadCNCardContent in the GasEstimation section to avoid naming conflict.
-

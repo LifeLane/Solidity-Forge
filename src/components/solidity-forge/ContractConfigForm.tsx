@@ -14,6 +14,7 @@ import { AlertCircle, Loader2, Wand2, Brain, Fuel, Beaker } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Switch } from "@/components/ui/switch"; 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from '@/lib/utils';
 
 export type FormData = Record<string, any>;
 
@@ -216,7 +217,13 @@ export function ContractConfigForm({
         <TooltipProvider>
           <Tooltip delayDuration={300}>
             <TooltipTrigger asChild>
-              <Label htmlFor={param.name} className="flex items-center justify-center gap-1.5">
+              <Label 
+                htmlFor={param.name} 
+                className={cn(
+                  "flex items-center justify-center gap-1.5",
+                  "animate-multicolor-border-glow p-1 rounded-md" // Glow effect for Label
+                )}
+              >
                 {param.label}
                 {param.description && <AlertCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />}
               </Label>
@@ -231,7 +238,7 @@ export function ContractConfigForm({
             defaultValue={param.defaultValue || param.options[0]?.value}
             render={({ field }) => (
               <Select onValueChange={field.onChange} value={field.value as string} defaultValue={field.value as string || undefined} disabled={anyPrimaryActionLoading}>
-                <SelectTrigger id={param.name} className="bg-input/50 focus:bg-input">
+                <SelectTrigger id={param.name} className="bg-input/50 focus:bg-input text-center">
                   <SelectValue placeholder={param.placeholder || `Select ${param.label}`} />
                 </SelectTrigger>
                 <SelectContent>
@@ -286,14 +293,20 @@ export function ContractConfigForm({
   return (
     <div className="space-y-6 p-6"> 
       <div className="text-center">
-        <CardTitle className="text-2xl font-headline mb-1">Configure Your Contract</CardTitle>
-        <CardDescription>Define contract parameters. Or don't. See if I care.</CardDescription>
+        <CardTitle className="text-2xl font-headline mb-1 p-2 rounded-md animate-multicolor-border-glow">Configure Your Contract</CardTitle>
+        <CardDescription className="p-2 rounded-md animate-multicolor-border-glow">Define contract parameters. Or don't. See if I care.</CardDescription>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="contractType" className="text-center block">Contract Type</Label>
+        <Label 
+          htmlFor="contractType" 
+          className={cn(
+            "text-center block",
+            "animate-multicolor-border-glow p-1 rounded-md" // Glow effect for Label
+            )}
+        >Contract Type</Label>
         <Select onValueChange={handleTemplateChange} defaultValue={selectedTemplate?.id} disabled={anyPrimaryActionLoading}>
-          <SelectTrigger id="contractType" className="bg-input/50 focus:bg-input">
+          <SelectTrigger id="contractType" className="bg-input/50 focus:bg-input text-center">
             <SelectValue placeholder="Select contract type" />
           </SelectTrigger>
           <SelectContent>
@@ -307,13 +320,19 @@ export function ContractConfigForm({
             ))}
           </SelectContent>
         </Select>
-        {selectedTemplate && <p className="text-sm text-muted-foreground mt-1 text-center">{selectedTemplate.description}</p>}
+        {selectedTemplate && <p className="text-sm text-muted-foreground mt-1 text-center p-1 rounded-md animate-multicolor-border-glow">{selectedTemplate.description}</p>}
       </div>
 
       {selectedTemplate && (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="flex items-center justify-center space-x-2 my-4">
-            <Label htmlFor="mode-switch" className="cursor-pointer">Mode:</Label>
+            <Label 
+              htmlFor="mode-switch" 
+              className={cn(
+                "cursor-pointer",
+                "animate-multicolor-border-glow p-1 rounded-md" // Glow effect for Label
+              )}
+            >Mode:</Label>
             <span className="text-sm text-muted-foreground">Basic</span>
             <Switch
               id="mode-switch"
@@ -355,7 +374,7 @@ export function ContractConfigForm({
                         hover:bg-muted/60 hover:text-accent-foreground 
                         focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
                         data-[state=active]:bg-muted data-[state=active]:text-primary data-[state=active]:font-semibold data-[state=active]:shadow-inner
-                        md:w-full animate-multicolor-border-glow"
+                        md:w-full animate-multicolor-border-glow text-center" 
                     >
                       {group.title}
                     </TabsTrigger>

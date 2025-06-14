@@ -33,7 +33,7 @@ export function Header() {
         style={{ animationDelay: '0.1s' }} // Animation applies to the visible header block
       >
         <div className="container mx-auto flex flex-col items-center gap-3 md:flex-row md:justify-between">
-          <div className="flex items-center gap-3 group cursor-default text-center md:text-left">
+          <div className="flex items-center gap-3 group cursor-default text-center md:text-left p-2 rounded-md animate-multicolor-border-glow">
             <SolidityForgeIcon />
             <h1 className="text-3xl font-headline font-bold text-primary group-hover:text-accent transition-colors duration-300">
               SolidityForge
