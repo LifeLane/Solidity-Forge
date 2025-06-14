@@ -27,6 +27,22 @@ export interface ContractTemplate {
   aiPromptEnhancement?: string; // Additional context for AI based on template
 }
 
+const COMMON_EVM_TOKEN_ADDRESSES_ETH_MAINNET = {
+  WETH: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+  USDC: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+  USDT: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+  DAI: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
+};
+
+const WETH_ADDRESSES_BY_NETWORK = {
+  ETH_MAINNET: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+  BNB_CHAIN: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c', // WBNB
+  POLYGON: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270', // WMATIC
+  ARBITRUM: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
+  OPTIMISM: '0x4200000000000000000000000000000000000006',
+};
+
+
 export const CONTRACT_TEMPLATES: ContractTemplate[] = [
   {
     id: 'erc20',
@@ -163,13 +179,37 @@ export const CONTRACT_TEMPLATES: ContractTemplate[] = [
   {
     id: 'liquidityPool',
     name: 'Liquidity Pool',
-    description: 'A contract for providing liquidity between two ERC20 tokens (Uniswap V2 style).',
+    description: 'A contract for providing liquidity between two ERC20 tokens (Uniswap V2 style). Select common tokens or provide custom addresses in the generated code.',
     icon: GitFork,
     parameters: [
       { name: 'poolName', label: 'Pool Name (for LP Token)', type: 'string', placeholder: 'TokenA/TokenB LP', description: 'A descriptive name for the liquidity pool token.' },
       { name: 'poolSymbol', label: 'Pool Symbol (for LP Token)', type: 'string', placeholder: 'LP-AB', description: 'A symbol for the liquidity pool token.' },
-      { name: 'tokenA_Address', label: 'Token A Address', type: 'address', placeholder: '0x...', description: 'The contract address of the first token (e.g., WETH).' },
-      { name: 'tokenB_Address', label: 'Token B Address', type: 'address', placeholder: '0x...', description: 'The contract address of the second token.' },
+      { 
+        name: 'tokenA_Address', 
+        label: 'Token A Address', 
+        type: 'select', 
+        defaultValue: COMMON_EVM_TOKEN_ADDRESSES_ETH_MAINNET.WETH,
+        options: [
+          { label: "WETH (Ethereum Mainnet)", value: COMMON_EVM_TOKEN_ADDRESSES_ETH_MAINNET.WETH },
+          { label: "USDC (Ethereum Mainnet)", value: COMMON_EVM_TOKEN_ADDRESSES_ETH_MAINNET.USDC },
+          { label: "USDT (Ethereum Mainnet)", value: COMMON_EVM_TOKEN_ADDRESSES_ETH_MAINNET.USDT },
+          { label: "DAI (Ethereum Mainnet)", value: COMMON_EVM_TOKEN_ADDRESSES_ETH_MAINNET.DAI },
+        ],
+        description: 'The contract address of the first token. Addresses are for Ethereum Mainnet; adjust if deploying elsewhere.' 
+      },
+      { 
+        name: 'tokenB_Address', 
+        label: 'Token B Address', 
+        type: 'select', 
+        defaultValue: COMMON_EVM_TOKEN_ADDRESSES_ETH_MAINNET.USDC,
+        options: [
+          { label: "USDC (Ethereum Mainnet)", value: COMMON_EVM_TOKEN_ADDRESSES_ETH_MAINNET.USDC },
+          { label: "WETH (Ethereum Mainnet)", value: COMMON_EVM_TOKEN_ADDRESSES_ETH_MAINNET.WETH },
+          { label: "USDT (Ethereum Mainnet)", value: COMMON_EVM_TOKEN_ADDRESSES_ETH_MAINNET.USDT },
+          { label: "DAI (Ethereum Mainnet)", value: COMMON_EVM_TOKEN_ADDRESSES_ETH_MAINNET.DAI },
+        ],
+        description: 'The contract address of the second token. Addresses are for Ethereum Mainnet; adjust if deploying elsewhere.' 
+      },
       { 
         name: 'feeBps', 
         label: 'Swap Fee (Basis Points)', 
@@ -228,12 +268,25 @@ export const CONTRACT_TEMPLATES: ContractTemplate[] = [
   {
     id: 'swapProtocol',
     name: 'Swap Protocol (Router)',
-    description: 'A router contract for facilitating swaps across multiple liquidity pools (Uniswap V2 style).',
+    description: 'A router contract for facilitating swaps across multiple liquidity pools (Uniswap V2 style). Select common WETH addresses or provide custom ones in code.',
     icon: ArrowRightLeft,
     parameters: [
       { name: 'routerName', label: 'Router Name', type: 'string', placeholder: 'MySwap Router', description: 'The name for your swap router contract (not used in bytecode).' },
       { name: 'factoryAddress', label: 'Pair Factory Address', type: 'address', placeholder: '0x...', description: 'The address of the contract factory that creates liquidity pair contracts (e.g., Uniswap V2 Factory).' },
-      { name: 'wethAddress', label: 'WETH Address', type: 'address', placeholder: '0x...', description: 'The address of the Wrapped Ether (WETH) contract on the target network.' },
+      { 
+        name: 'wethAddress', 
+        label: 'WETH Address (Network Specific)', 
+        type: 'select', 
+        defaultValue: WETH_ADDRESSES_BY_NETWORK.ETH_MAINNET,
+        options: [
+            { label: "WETH (Ethereum Mainnet)", value: WETH_ADDRESSES_BY_NETWORK.ETH_MAINNET },
+            { label: "WBNB (BNB Chain)", value: WETH_ADDRESSES_BY_NETWORK.BNB_CHAIN },
+            { label: "WMATIC (Polygon)", value: WETH_ADDRESSES_BY_NETWORK.POLYGON },
+            { label: "WETH (Arbitrum One)", value: WETH_ADDRESSES_BY_NETWORK.ARBITRUM },
+            { label: "WETH (Optimism)", value: WETH_ADDRESSES_BY_NETWORK.OPTIMISM },
+        ],
+        description: 'Select the Wrapped Native Token address for your target network (e.g., WETH for Ethereum, WBNB for BNB Chain). Ensure this is correct for your deployment network.' 
+      },
       {
         name: 'accessControl',
         label: 'Access Control (for admin functions)',
@@ -260,19 +313,19 @@ export const CONTRACT_TEMPLATES: ContractTemplate[] = [
       },
     ],
     aiPromptEnhancement: `Generate a Uniswap V2-style Router contract. Default to Solidity pragma ^0.8.20;
-- **Core Functionality**: The router facilitates swaps by interacting with liquidity pair contracts created by the \`factoryAddress\`. It must handle ETH directly by wrapping/unwrapping it using the \`wethAddress\`.
+- **Core Functionality**: The router facilitates swaps by interacting with liquidity pair contracts created by the \`factoryAddress\`. It must handle ETH directly by wrapping/unwrapping it using the \`wethAddress\` selected by the user (which corresponds to the wrapped native token of the target chain).
 - **Interfaces**:
     - \`IUniswapV2Factory\` (or a generic \`IPairFactory\`) with a \`getPair(address tokenA, address tokenB) external view returns (address pair)\` function.
     - \`IUniswapV2Pair\` (or a generic \`ILiquidityPair\`) with \`swap(uint amount0Out, uint amount1Out, address to, bytes calldata data)\`, \`token0()\`, \`token1()\`, \`getReserves()\` functions.
-    - \`IWETH\` with \`deposit() payable\`, \`withdraw(uint wad)\`, \`transfer(address to, uint value)\`.
+    - \`IWETH\` (matching the selected \`wethAddress\`) with \`deposit() payable\`, \`withdraw(uint wad)\`, \`transfer(address to, uint value)\`.
     - \`IERC20\` for general token interactions.
 - **Swap Functions (Implement all relevant variations)**:
     - \`swapExactTokensForTokens(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)\`
     - \`swapTokensForExactTokens(uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)\`
-    - \`swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline) payable\` (handles ETH -> WETH -> Tokens)
-    - \`swapTokensForExactETH(uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)\` (handles Tokens -> WETH -> ETH)
-    - \`swapExactTokensForETH(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)\` (handles Tokens -> WETH -> ETH)
-    - \`swapETHForExactTokens(uint amountOut, address[] calldata path, address to, uint deadline) payable\` (handles ETH -> WETH -> Tokens)
+    - \`swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline) payable\` (handles NativeCoin -> WETH -> Tokens)
+    - \`swapTokensForExactETH(uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)\` (handles Tokens -> WETH -> NativeCoin)
+    - \`swapExactTokensForETH(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)\` (handles Tokens -> WETH -> NativeCoin)
+    - \`swapETHForExactTokens(uint amountOut, address[] calldata path, address to, uint deadline) payable\` (handles NativeCoin -> WETH -> Tokens)
     - Consider supporting \`swapExactTokensForTokensSupportingFeeOnTransferTokens\` and \`swapExactETHForTokensSupportingFeeOnTransferTokens\` / \`swapExactTokensForETHSupportingFeeOnTransferTokens\` if you want to handle fee-on-transfer tokens robustly (this is more advanced).
 - **Liquidity Functions**:
     - \`addLiquidity(address tokenA, address tokenB, uint amountADesired, uint amountBDesired, uint amountAMin, uint amountBMin, address to, uint deadline)\`
