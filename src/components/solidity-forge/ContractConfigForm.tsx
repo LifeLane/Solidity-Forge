@@ -320,10 +320,10 @@ export function ContractConfigForm({
         <Label 
           htmlFor="contractType" 
           className={cn(
-            "text-center block font-bold text-xl text-glow-yellow"
+            "text-center block font-bold text-xl animate-text-multicolor-glow"
           )}
         >
-          Select Your Destiny (Contract<br />Type)
+          Select Your Destiny<br />(Contract Type)
         </Label>
         <Select onValueChange={handleTemplateChange} defaultValue={selectedTemplate?.id} disabled={anyPrimaryActionLoading}>
           <SelectTrigger id="contractType" className="glow-border-purple bg-background/70 focus:bg-background text-base py-6">
@@ -351,7 +351,7 @@ export function ContractConfigForm({
             <Label 
               htmlFor="mode-switch" 
               className={cn(
-                "text-base font-bold text-glow-yellow text-center"
+                "text-base font-bold animate-text-multicolor-glow text-center"
               )}
             >
               Complexity Dial:
@@ -395,7 +395,6 @@ export function ContractConfigForm({
                         "data-[state=active]:text-primary-foreground", 
                         "data-[state=inactive]:text-muted-foreground hover:text-foreground"
                       )}
-                      style={{ animationDelay: `${groupIndex * 1}s` }} 
                     >
                        <span className="tab-running-lines-content">
                          {group.title}
@@ -479,4 +478,3 @@ export function ContractConfigForm({
     </div>
   );
 }
-
