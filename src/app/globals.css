@@ -30,7 +30,7 @@
     --destructive-foreground: 0 0% 98%;
 
     --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
+    --input: 240 5.9% 90%; /* Default input border color */
     --ring: 145 60% 40%; /* Ring color related to primary */
 
     --radius: 0.5rem;
@@ -40,6 +40,12 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+
+    /* Custom Glow Colors */
+    --glow-yellow-hsl: 50 100% 50%;
+    --glow-magenta-hsl: 300 100% 50%;
+    --glow-purple-hsl: 270 80% 60%;
+    --glow-cyan-hsl: 180 70% 50%;
   }
 
   .dark {
@@ -68,7 +74,7 @@
     --destructive-foreground: 0 0% 98%;
 
     --border: 240 3.7% 15.9%; /* Darker border for dark mode */
-    --input: 240 3.7% 15.9%;
+    --input: 240 3.7% 10.9%; /* Darker input border for dark mode */
     --ring: 145 60% 40%; /* Ring color related to primary */
     
     --chart-1: 220 70% 50%;
@@ -84,7 +90,6 @@
     @apply border-border;
   }
   body {
-    /* @apply bg-background text-foreground; */ /* Removed bg-background here */
     @apply text-foreground;
     font-family: var(--font-inter), sans-serif;
   }
@@ -94,68 +99,96 @@
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 0; /* Ensure it's behind other content */
-    background-color: hsl(var(--background)); /* Match body background initially - this is the base for the canvas */
+    z-index: 0; 
+    background-color: hsl(var(--background)); 
+  }
+}
+
+@layer utilities {
+  .text-glow-primary {
+    color: hsl(var(--primary));
+    text-shadow: 0 0 8px hsl(var(--primary)), 0 0 10px hsl(var(--primary));
   }
 
-  /* New Running Lines Border for Tabs */
-  .tab-running-lines-border {
-    position: relative;
-    overflow: hidden !important; /* Crucial for clipping the ::before gradient */
-    padding: 2px !important; /* This makes space for the 2px visual border. Overrides other padding. */
-    border-radius: calc(var(--radius) - 2px); /* Matches 'rounded-md' */
-    border: none !important; /* Ensure no other border is applied */
-    background-color: transparent !important; /* Parent itself is transparent */
-    box-shadow: none !important; /* Remove existing glow */
+  .glow-border-primary {
+    box-shadow: 0 0 6px 1px hsl(var(--primary)), 0 0 8px 2px hsl(var(--primary) / 0.7);
+    border-color: hsl(var(--primary) / 0.5) !important;
+  }
+  .glow-border-accent {
+    box-shadow: 0 0 6px 1px hsl(var(--accent)), 0 0 8px 2px hsl(var(--accent) / 0.7);
+    border-color: hsl(var(--accent) / 0.5) !important;
+  }
+  .glow-border-yellow {
+    box-shadow: 0 0 6px 1px hsl(var(--glow-yellow-hsl)), 0 0 8px 2px hsl(var(--glow-yellow-hsl) / 0.7);
+    border-color: hsl(var(--glow-yellow-hsl) / 0.5) !important;
+  }
+  .glow-border-magenta {
+    box-shadow: 0 0 6px 1px hsl(var(--glow-magenta-hsl)), 0 0 8px 2px hsl(var(--glow-magenta-hsl) / 0.7);
+    border-color: hsl(var(--glow-magenta-hsl) / 0.5) !important;
+  }
+  .glow-border-purple {
+    box-shadow: 0 0 6px 1px hsl(var(--glow-purple-hsl)), 0 0 8px 2px hsl(var(--glow-purple-hsl) / 0.7);
+    border-color: hsl(var(--glow-purple-hsl) / 0.5) !important;
+  }
+   .glow-border-cyan {
+    box-shadow: 0 0 6px 1px hsl(var(--glow-cyan-hsl)), 0 0 8px 2px hsl(var(--glow-cyan-hsl) / 0.7);
+    border-color: hsl(var(--glow-cyan-hsl) / 0.5) !important;
   }
 
-  .tab-running-lines-border::before { /* The spinning gradient */
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 300%; /* Needs to be large enough to cover corners when rotating */
-    height: 300%;
-    background-image: conic-gradient(
-      from 90deg, /* Start angle can be adjusted for different initial look */
-      hsl(180, 70%, 50%), /* Cyan */
-      hsl(240, 70%, 65%), /* Blue */
-      hsl(300, 70%, 60%), /* Magenta */
-      hsl(0, 70%, 60%),   /* Red */
-      hsl(60, 70%, 50%),  /* Yellow */
-      hsl(120, 70%, 50%), /* Green */
-      hsl(180, 70%, 50%)  /* Loop back to Cyan for smooth animation */
-    );
-    animation: runningLinesSpin 6s linear infinite; /* Slower, smoother spin */
-    transform-origin: center center;
-    transform: translate(-50%, -50%); /* Center the gradient */
-    z-index: 1; /* Sit behind the ::after mask */
+  .param-tab-trigger {
+    padding: 0.75rem 1rem; /* Equivalent to py-3 px-4 */
+    border: 1px solid transparent; /* Keep border for structure but color comes from glow */
+    border-right: none;
+    margin-bottom: 0.5rem;
+    text-align: left;
+    font-weight: 500; /* medium */
+    transition: all 0.2s ease-in-out;
+    border-radius: var(--radius) 0 0 var(--radius); /* Rounded on left, square on right */
   }
 
-  .tab-running-lines-border::after { /* The mask creating the inner background and "border" effect */
-    content: '';
-    position: absolute;
-    inset: 2px; /* This IS the border thickness, matches padding on parent */
-    background-color: hsl(var(--background)); /* Default inner background (for inactive tabs, matches page background) */
-    border-radius: calc(var(--radius) - 4px); 
-    z-index: 2; /* Sits on top of the gradient, behind the text content */
-    transition: background-color 0.2s ease-out; /* Smooth background transition for hover/active */
+  .param-tab-trigger[data-state="active"] {
+    background-color: hsl(var(--primary) / 0.15);
+    color: hsl(var(--primary-foreground));
+    /* Active glow is part of its specific glow class */
+  }
+  .param-tab-trigger:not([data-state="active"]) {
+    opacity: 0.8;
+    color: hsl(var(--muted-foreground));
+  }
+  .param-tab-trigger:hover:not([data-state="active"]) {
+    opacity: 1;
+    background-color: hsl(var(--muted) / 0.1);
   }
 
-  /* Inner content wrapper for tab text/icons */
-  .tab-running-lines-content {
-    position: relative;
-    z-index: 3; /* Ensures content is on top of everything */
-    display: block; /* Or inline-block, flex, etc., as needed for layout */
+  /* Specific glow classes for parameter tabs */
+  .param-tab-glow-yellow {
+    border-left-color: hsl(var(--glow-yellow-hsl)) !important;
+    border-top-color: hsl(var(--glow-yellow-hsl)) !important;
+    border-bottom-color: hsl(var(--glow-yellow-hsl)) !important;
+    box-shadow: -2px 0 5px hsl(var(--glow-yellow-hsl)), 0 -2px 5px hsl(var(--glow-yellow-hsl)), 0 2px 5px hsl(var(--glow-yellow-hsl));
+  }
+  .param-tab-glow-yellow[data-state="active"] {
+    box-shadow: -2px 0 8px hsl(var(--glow-yellow-hsl)), 0 -2px 8px hsl(var(--glow-yellow-hsl)), 0 2px 8px hsl(var(--glow-yellow-hsl)), inset 2px 0 4px hsl(var(--glow-yellow-hsl)/0.3);
   }
 
-  /* Specific overrides for ::after background on hover and active states */
-  .tab-running-lines-border:hover::after {
-    background-color: hsl(var(--secondary)); /* Subtle background for hover, like bg-secondary */
+  .param-tab-glow-cyan {
+    border-left-color: hsl(var(--glow-cyan-hsl)) !important;
+    border-top-color: hsl(var(--glow-cyan-hsl)) !important;
+    border-bottom-color: hsl(var(--glow-cyan-hsl)) !important;
+    box-shadow: -2px 0 5px hsl(var(--glow-cyan-hsl)), 0 -2px 5px hsl(var(--glow-cyan-hsl)), 0 2px 5px hsl(var(--glow-cyan-hsl));
+  }
+  .param-tab-glow-cyan[data-state="active"] {
+     box-shadow: -2px 0 8px hsl(var(--glow-cyan-hsl)), 0 -2px 8px hsl(var(--glow-cyan-hsl)), 0 2px 8px hsl(var(--glow-cyan-hsl)), inset 2px 0 4px hsl(var(--glow-cyan-hsl)/0.3);
   }
 
-  .tab-running-lines-border[data-state="active"]::after {
-    background-color: hsl(var(--muted)); /* Background for active tabs, like bg-muted */
+  .param-tab-glow-magenta {
+    border-left-color: hsl(var(--glow-magenta-hsl)) !important;
+    border-top-color: hsl(var(--glow-magenta-hsl)) !important;
+    border-bottom-color: hsl(var(--glow-magenta-hsl)) !important;
+    box-shadow: -2px 0 5px hsl(var(--glow-magenta-hsl)), 0 -2px 5px hsl(var(--glow-magenta-hsl)), 0 2px 5px hsl(var(--glow-magenta-hsl));
+  }
+   .param-tab-glow-magenta[data-state="active"] {
+     box-shadow: -2px 0 8px hsl(var(--glow-magenta-hsl)), 0 -2px 8px hsl(var(--glow-magenta-hsl)), 0 2px 8px hsl(var(--glow-magenta-hsl)), inset 2px 0 4px hsl(var(--glow-magenta-hsl)/0.3);
   }
 }
 
@@ -175,54 +208,20 @@
   animation: fadeInUp 0.5s ease-out forwards;
 }
 
-.highlighted-term {
-  color: hsl(var(--primary)); /* Example highlighting color */
-  font-weight: bold;
-}
-
-
-/* Multi-color Border Glow Animation (existing) */
-@keyframes multiColorBorderGlow {
-  0%   { box-shadow: 0 0 3px hsl(0, 90%, 65%), 0 0 6px hsl(0, 90%, 65%), 0 0 9px hsl(0, 90%, 65%); } /* Red */
-  16%  { box-shadow: 0 0 3px hsl(60, 90%, 55%), 0 0 6px hsl(60, 90%, 55%), 0 0 9px hsl(60, 90%, 55%); } /* Yellow */
-  33%  { box-shadow: 0 0 3px hsl(120, 90%, 55%), 0 0 6px hsl(120, 90%, 55%), 0 0 9px hsl(120, 90%, 55%); } /* Green */
-  50%  { box-shadow: 0 0 3px hsl(180, 90%, 55%), 0 0 6px hsl(180, 90%, 55%), 0 0 9px hsl(180, 90%, 55%); } /* Cyan */
-  66%  { box-shadow: 0 0 3px hsl(240, 90%, 65%), 0 0 6px hsl(240, 90%, 65%), 0 0 9px hsl(240, 90%, 65%); } /* Blue */
-  83%  { box-shadow: 0 0 3px hsl(300, 90%, 65%), 0 0 6px hsl(300, 90%, 65%), 0 0 9px hsl(300, 90%, 65%); } /* Magenta */
-  100% { box-shadow: 0 0 3px hsl(0, 90%, 65%), 0 0 6px hsl(0, 90%, 65%), 0 0 9px hsl(0, 90%, 65%); } /* Red */
-}
-
-.animate-multicolor-border-glow {
-  animation: multiColorBorderGlow 8s linear infinite;
-}
-
-/* New Keyframe for Tab Running Lines Border */
-@keyframes runningLinesSpin {
-  0% { transform: translate(-50%, -50%) rotate(0deg); }
-  100% { transform: translate(-50%, -50%) rotate(360deg); }
-}
-
-/* Green Glow for ContractConfigForm Heading */
-@keyframes greenGlow {
-  0%, 100% { box-shadow: 0 0 5px hsl(var(--primary)), 0 0 10px hsl(var(--primary)), 0 0 15px hsl(var(--primary)); }
-  50% { box-shadow: 0 0 8px hsla(var(--primary), 0.8), 0 0 16px hsla(var(--primary), 0.8), 0 0 24px hsla(var(--primary), 0.8); }
-}
-.animate-green-glow {
-  animation: greenGlow 3s linear infinite;
-}
-
-
 /* Styles for Footer Story Word Glow & Label Letter Glow */
 .word-glow-active {
-  color: hsl(var(--primary-foreground)); 
+  color: hsl(var(--primary)); /* Use primary color for active word glow */
   text-shadow: 0 0 6px hsl(var(--primary)), 0 0 10px hsl(var(--primary));
   opacity: 1;
-  transition: all 0.3s ease-in-out;
+  transition: color 0.3s ease-in-out, text-shadow 0.3s ease-in-out, opacity 0.3s ease-in-out;
   display: inline-block; 
 }
 
 .word-dimmed {
-  opacity: 0.6;
-  transition: opacity 0.3s ease-in-out;
+  opacity: 0.7; /* Slightly more visible than before */
+  color: hsl(var(--muted-foreground));
+  transition: opacity 0.3s ease-in-out, color 0.3s ease-in-out;
   display: inline-block; 
 }
+
+    

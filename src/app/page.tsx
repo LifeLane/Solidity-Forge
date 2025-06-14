@@ -17,6 +17,7 @@ import { generateTestCases } from '@/ai/flows/generate-test-cases';
 import { refineSmartContractCode } from '@/ai/flows/refine-smart-contract-code';
 import { Card, CardContent } from '@/components/ui/card';
 import { CONTRACT_TEMPLATES, type ContractTemplate } from '@/config/contracts';
+import { cn } from '@/lib/utils';
 
 export default function SolidityForgePage() {
   const [selectedTemplate, setSelectedTemplate] = useState<ContractTemplate | undefined>(
@@ -278,16 +279,19 @@ Specific guidance: ${template.aiPromptEnhancement}`;
   const anySubActionLoading = isGettingSuggestions || isEstimatingGas || isGeneratingTestCases || isRefiningCode;
 
   return (
-    <div className="min-h-screen text-foreground flex flex-col">
+    <div className="min-h-screen text-foreground flex flex-col bg-background"> {/* Ensure base background is dark */}
       <Header />
       <main 
         className={`flex-grow container mx-auto p-4 md:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start justify-items-center transition-opacity duration-700 ease-out ${mainContentVisible ? 'opacity-100' : 'opacity-0'}`}
       >
         <Card 
-          className="transition-all duration-300 bg-card/80 backdrop-blur-sm animate-fadeInUp animate-multicolor-border-glow w-full max-w-2xl" 
+          className={cn(
+            "transition-all duration-300 bg-card/80 backdrop-blur-sm w-full max-w-2xl animate-fadeInUp glow-border-accent", 
+            "border" // ensure border is applied for glow to have an edge
+            )}
           style={{ animationDelay: '0.3s' }}
         >
-          <CardContent className="p-0">
+          <CardContent className="p-0"> {/* Padding handled by ContractConfigForm internally */}
             <ContractConfigForm
               templates={CONTRACT_TEMPLATES}
               onGenerateCode={handleGenerateCode}
@@ -305,9 +309,13 @@ Specific guidance: ${template.aiPromptEnhancement}`;
           </CardContent>
         </Card>
         <Card 
-          className="transition-all duration-300 bg-card/80 backdrop-blur-sm lg:sticky top-24 animate-fadeInUp animate-multicolor-border-glow w-full max-w-2xl"
+          className={cn(
+            "transition-all duration-300 bg-card/80 backdrop-blur-sm lg:sticky top-24 w-full max-w-2xl animate-fadeInUp glow-border-yellow",
+            "border"
+          )}
           style={{ animationDelay: '0.5s' }}
         >
+          {/* CardContent padding handled by CodeDisplay internally */}
           <CodeDisplay
             code={generatedCode}
             suggestions={aiSuggestions}
@@ -326,7 +334,10 @@ Specific guidance: ${template.aiPromptEnhancement}`;
         </Card>
         
         <Card 
-          className="transition-all duration-300 bg-card/80 backdrop-blur-sm animate-fadeInUp animate-multicolor-border-glow w-full max-w-2xl lg:col-span-2 lg:max-w-4xl justify-self-center"
+          className={cn(
+            "transition-all duration-300 bg-card/80 backdrop-blur-sm w-full max-w-2xl lg:col-span-2 lg:max-w-4xl justify-self-center animate-fadeInUp glow-border-magenta",
+            "border"
+          )}
           style={{ animationDelay: '0.7s' }}
         >
           <CardContent className="p-6 md:p-8">
@@ -344,3 +355,5 @@ Specific guidance: ${template.aiPromptEnhancement}`;
     </div>
   );
 }
+
+    

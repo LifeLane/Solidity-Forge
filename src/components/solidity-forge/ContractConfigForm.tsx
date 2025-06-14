@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { CardTitle, CardDescription } from '@/components/ui/card';
+import { CardTitle, CardDescription } from '@/components/ui/card'; // Card related imports for structure
 import { AlertCircle, Loader2, Wand2, Brain, Fuel, Beaker } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Switch } from "@/components/ui/switch"; 
@@ -37,13 +37,17 @@ interface ParameterGroup {
   title: string;
   parameters: ContractParameter[];
   defaultActive?: boolean;
+  glowClass: string; // Added for unique glow per tab
 }
+
+const PARAM_TAB_GLOW_CLASSES = ['param-tab-glow-yellow', 'param-tab-glow-cyan', 'param-tab-glow-magenta', 'param-tab-glow-primary'];
 
 const getParameterGroups = (template: ContractTemplate, isAdvancedMode: boolean): ParameterGroup[] => {
   const visibleParams = template.parameters.filter(p => isAdvancedMode || !p.advancedOnly);
+  let groups: Omit<ParameterGroup, 'glowClass'>[] = [];
   
   if (template.id === 'erc20') {
-    return [
+    groups = [
       { 
         title: 'Core Details', 
         parameters: visibleParams.filter(p => ['tokenName', 'tokenSymbol', 'initialSupply', 'decimals'].includes(p.name)),
@@ -61,10 +65,9 @@ const getParameterGroups = (template: ContractTemplate, isAdvancedMode: boolean)
         title: 'Control & Upgrades', 
         parameters: visibleParams.filter(p => ['accessControl', 'upgradable'].includes(p.name)) 
       },
-    ].filter(group => group.parameters.length > 0);
-  }
-  if (template.id === 'liquidityPool') {
-     return [
+    ];
+  } else if (template.id === 'liquidityPool') {
+     groups = [
       { 
         title: 'Pool Setup', 
         parameters: visibleParams.filter(p => ['poolName', 'poolSymbol', 'tokenA_Address', 'tokenB_Address'].includes(p.name)),
@@ -74,10 +77,9 @@ const getParameterGroups = (template: ContractTemplate, isAdvancedMode: boolean)
         title: 'Configuration', 
         parameters: visibleParams.filter(p => ['feeBps', 'accessControl', 'upgradable'].includes(p.name)) 
       },
-    ].filter(group => group.parameters.length > 0);
-  }
-  if (template.id === 'swapProtocol') {
-    return [
+    ];
+  } else if (template.id === 'swapProtocol') {
+    groups = [
       {
         title: 'Router Setup',
         parameters: visibleParams.filter(p => ['routerName', 'factoryAddress', 'wethAddress'].includes(p.name)),
@@ -87,10 +89,9 @@ const getParameterGroups = (template: ContractTemplate, isAdvancedMode: boolean)
         title: 'Control & Upgrades',
         parameters: visibleParams.filter(p => ['accessControl', 'upgradable'].includes(p.name)),
       }
-    ].filter(group => group.parameters.length > 0);
-  }
-  if (template.id === 'dao') {
-    return [
+    ];
+  } else if (template.id === 'dao') {
+    groups = [
        {
         title: 'DAO Basics',
         parameters: visibleParams.filter(p => ['daoName', 'proposalTokenAddress'].includes(p.name)),
@@ -104,10 +105,16 @@ const getParameterGroups = (template: ContractTemplate, isAdvancedMode: boolean)
         title: 'Advanced',
         parameters: visibleParams.filter(p => ['upgradable'].includes(p.name)),
       }
-    ].filter(group => group.parameters.length > 0);
+    ];
+  } else {
+     groups = [{ title: 'Parameters', parameters: visibleParams, defaultActive: true }];
   }
 
-  return [{ title: 'Parameters', parameters: visibleParams, defaultActive: true }].filter(group => group.parameters.length > 0);
+  return groups.filter(group => group.parameters.length > 0)
+               .map((group, index) => ({
+                 ...group,
+                 glowClass: PARAM_TAB_GLOW_CLASSES[index % PARAM_TAB_GLOW_CLASSES.length]
+               }));
 };
 
 
@@ -209,25 +216,23 @@ export function ContractConfigForm({
     const commonProps = {
       name: param.name,
       control: control,
-      rules: { required: `${param.label} is required.` },
+      rules: { required: param.type !== 'boolean' ? `${param.label} is required.` : false }, // Booleans are not usually "required" in the same way
     };
 
     return (
-      <div key={param.name} className="space-y-3 mb-6"> 
+      <div key={param.name} className="space-y-2 mb-6"> 
         <TooltipProvider>
           <Tooltip delayDuration={300}>
             <TooltipTrigger asChild>
               <Label 
                 htmlFor={param.name} 
-                className={cn(
-                  "flex items-center justify-center gap-1.5 mb-2 text-base p-2 rounded-md font-bold word-glow-active"
-                )}
+                className="flex items-center text-glow-primary font-medium"
               >
                 {param.label}
-                {param.description && <AlertCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />}
+                {param.description && <AlertCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help ml-1.5" />}
               </Label>
             </TooltipTrigger>
-            {param.description && <TooltipContent side="right"><p className="max-w-xs">{param.description}</p></TooltipContent>}
+            {param.description && <TooltipContent side="top" align="start"><p className="max-w-xs">{param.description}</p></TooltipContent>}
           </Tooltip>
         </TooltipProvider>
         
@@ -237,7 +242,7 @@ export function ContractConfigForm({
             defaultValue={param.defaultValue || param.options[0]?.value}
             render={({ field }) => (
               <Select onValueChange={field.onChange} value={field.value as string} defaultValue={field.value as string || undefined} disabled={anyPrimaryActionLoading}>
-                <SelectTrigger id={param.name} className="bg-input/50 focus:bg-input text-center p-2 rounded-md animate-multicolor-border-glow">
+                <SelectTrigger id={param.name} className="glow-border-purple bg-background/70 focus:bg-background">
                   <SelectValue placeholder={param.placeholder || `Select ${param.label}`} />
                 </SelectTrigger>
                 <SelectContent>
@@ -258,9 +263,27 @@ export function ContractConfigForm({
                 placeholder={param.placeholder}
                 rows={param.rows || 3}
                 {...field}
-                className="bg-input/50 focus:bg-input p-2 rounded-md animate-multicolor-border-glow"
+                className="glow-border-purple bg-background/70 focus:bg-background"
                 disabled={anyPrimaryActionLoading}
               />
+            )}
+          />
+        ) : param.type === 'boolean' ? (
+          <Controller
+            {...commonProps}
+            defaultValue={param.defaultValue || false}
+            render={({ field }) => (
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id={param.name}
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                  disabled={anyPrimaryActionLoading}
+                />
+                <Label htmlFor={param.name} className="text-sm text-muted-foreground">
+                  {field.value ? 'Enabled' : 'Disabled'}
+                </Label>
+              </div>
             )}
           />
         ) : (
@@ -273,13 +296,13 @@ export function ContractConfigForm({
                 type={param.type === 'number' ? 'number' : 'text'}
                 placeholder={param.placeholder}
                 {...field}
-                className="bg-input/50 focus:bg-input p-2 rounded-md animate-multicolor-border-glow"
+                className="glow-border-purple bg-background/70 focus:bg-background"
                 disabled={anyPrimaryActionLoading}
               />
             )}
           />
         )}
-        {errors[param.name] && <p className="text-sm text-destructive text-center mt-1">{(errors[param.name] as any).message}</p>}
+        {errors[param.name] && <p className="text-xs text-destructive mt-1">{(errors[param.name] as any).message}</p>}
       </div>
     );
   };
@@ -290,19 +313,18 @@ export function ContractConfigForm({
   const parameterGroups = selectedTemplate ? getParameterGroups(selectedTemplate, isAdvancedMode) : [];
 
   return (
-    <div className="space-y-8 p-4 md:p-6"> 
-      <div className="text-center mb-10"> 
-        <CardTitle className="text-2xl font-headline mb-4 p-2 rounded-md animate-green-glow">Blueprint Your Brilliance</CardTitle>
-        <CardDescription className="max-w-md mx-auto">Sculpt your smart contract's soul. Or, you know, just click randomly. My circuits won't judge. Much.</CardDescription>
+    <div className="space-y-6 p-4 md:p-6 lg:p-8"> 
+      <div className="text-center mb-6"> 
+        <CardTitle className="text-2xl font-headline mb-2 text-glow-primary">Blueprint Your Brilliance</CardTitle>
+        <CardDescription className="max-w-md mx-auto text-sm text-muted-foreground">Sculpt your smart contract's soul. Or, you know, just click randomly. My circuits won't judge. Much.</CardDescription>
       </div>
 
-      <div className="space-y-4 mb-10"> 
-        <Label 
-          htmlFor="contractType" 
-          className="text-center block mb-2 text-base"
-        >Select Your Destiny (Contract Type)</Label>
+      <div className="space-y-3 mb-6"> 
+        <Label htmlFor="contractType" className="text-center block font-semibold text-foreground">
+          Select Your Destiny (Contract Type)
+        </Label>
         <Select onValueChange={handleTemplateChange} defaultValue={selectedTemplate?.id} disabled={anyPrimaryActionLoading}>
-          <SelectTrigger id="contractType" className="bg-input/50 focus:bg-input text-center p-2 rounded-md animate-multicolor-border-glow mb-2">
+          <SelectTrigger id="contractType" className="glow-border-purple bg-background/70 focus:bg-background">
             <SelectValue placeholder="Choose Your Genesis Blueprint" />
           </SelectTrigger>
           <SelectContent>
@@ -316,17 +338,14 @@ export function ContractConfigForm({
             ))}
           </SelectContent>
         </Select>
-        {selectedTemplate && <p className="text-sm text-muted-foreground mt-1 text-center max-w-md mx-auto">{selectedTemplate.description}</p>}
+        {selectedTemplate && <p className="text-xs text-muted-foreground mt-1 text-center max-w-md mx-auto">{selectedTemplate.description}</p>}
       </div>
-
+      
       {selectedTemplate && (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
-          <div className="flex items-center justify-center space-x-2 my-10">
-            <Label 
-              htmlFor="mode-switch" 
-              className="cursor-pointer text-base"
-            >Complexity Dial:</Label>
-            <span className="text-sm text-muted-foreground">Basic</span>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+          <div className="flex items-center justify-center space-x-3 my-6">
+            <Label htmlFor="mode-switch" className="text-sm font-medium text-muted-foreground">Complexity Dial:</Label>
+            <span className="text-xs text-muted-foreground">Basic</span>
             <Switch
               id="mode-switch"
               checked={isAdvancedMode}
@@ -334,7 +353,7 @@ export function ContractConfigForm({
               aria-label={isAdvancedMode ? "Switch to Basic Mode" : "Switch to Advanced Mode"}
               disabled={anyPrimaryActionLoading}
             />
-            <span className="text-sm text-muted-foreground">Advanced</span>
+            <span className="text-xs text-muted-foreground">Advanced</span>
           </div>
 
           {selectedTemplate.id === 'custom' || parameterGroups.length <= 1 ? ( 
@@ -345,36 +364,22 @@ export function ContractConfigForm({
             </div>
           ) : (
             <Tabs 
+              orientation="vertical"
               value={activeTabValue} 
               onValueChange={setActiveTabValue} 
               className="flex flex-col md:flex-row gap-6 md:gap-8"
             >
-              <TabsList 
-                className={cn(
-                    "flex flex-row overflow-x-auto pb-2 gap-3", 
-                    "md:pb-0 md:overflow-x-visible md:flex-col md:space-y-2 md:w-48 lg:w-56 shrink-0",
-                    "bg-transparent md:bg-background/30 md:p-3 md:rounded-lg" 
-                )}
-              >
-                {parameterGroups.map((group, index) => {
+              <TabsList className="flex flex-row md:flex-col md:space-y-1 md:w-56 shrink-0 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 bg-transparent p-0">
+                {parameterGroups.map((group) => {
                   const tabValue = group.title.toLowerCase().replace(/\s+/g, '-');
                   return (
                     <TabsTrigger 
                       key={tabValue} 
                       value={tabValue}
                       disabled={anyPrimaryActionLoading && activeTabValue !== tabValue}
-                       className={cn(
-                        "tab-running-lines-border",
-                        "whitespace-nowrap text-base font-medium transition-all",
-                        "text-center",
-                        "hover:text-accent-foreground",
-                        "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                        "data-[state=active]:text-primary data-[state=active]:font-semibold",
-                        "md:w-full"
-                      )}
-                      style={{ animationDelay: `${index * 0.5}s` }} 
+                      className={cn("param-tab-trigger whitespace-nowrap", group.glowClass)}
                     >
-                      <span className="tab-running-lines-content px-3 py-2">{group.title}</span>
+                      {group.title}
                     </TabsTrigger>
                   );
                 })}
@@ -383,7 +388,7 @@ export function ContractConfigForm({
                 {parameterGroups.map(group => {
                   const tabValue = group.title.toLowerCase().replace(/\s+/g, '-');
                   return (
-                    <TabsContent key={tabValue} value={tabValue} className="mt-0 space-y-6">
+                    <TabsContent key={tabValue} value={tabValue} className="mt-0 space-y-6 rounded-md">
                       {group.parameters.length > 0 ? group.parameters.map(renderParameterInput) : <p className="text-sm text-muted-foreground p-4 text-center">No parameters in this section for the current mode.</p>}
                     </TabsContent>
                   );
@@ -393,11 +398,11 @@ export function ContractConfigForm({
           )}
 
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6">
             <Button 
               type="submit" 
               disabled={anyPrimaryActionLoading} 
-              className="w-full hover:shadow-lg hover:scale-105 transition-transform"
+              className="w-full glow-border-primary bg-primary text-primary-foreground hover:bg-primary/90"
             >
               {isGeneratingCode ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -411,7 +416,7 @@ export function ContractConfigForm({
               variant="outline"
               onClick={handleAISuggestionsClick}
               disabled={!generatedCode || anySubActionLoading}
-              className="w-full hover:shadow-lg hover:scale-105 transition-transform"
+              className="w-full glow-border-purple hover:bg-accent/10 hover:text-accent-foreground"
             >
               {isGettingSuggestions ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -425,7 +430,7 @@ export function ContractConfigForm({
               variant="outline"
               onClick={handleEstimateGasClick}
               disabled={!generatedCode || anySubActionLoading}
-              className="w-full hover:shadow-lg hover:scale-105 transition-transform"
+              className="w-full glow-border-purple hover:bg-accent/10 hover:text-accent-foreground"
             >
               {isEstimatingGas ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -439,7 +444,7 @@ export function ContractConfigForm({
               variant="outline"
               onClick={handleGenerateTestCasesClick}
               disabled={!generatedCode || anySubActionLoading}
-              className="w-full hover:shadow-lg hover:scale-105 transition-transform"
+              className="w-full glow-border-purple hover:bg-accent/10 hover:text-accent-foreground"
             >
               {isGeneratingTestCases ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -454,3 +459,5 @@ export function ContractConfigForm({
     </div>
   );
 }
+
+    
