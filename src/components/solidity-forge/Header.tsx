@@ -22,22 +22,29 @@ const SolidityForgeIcon = () => (
 
 export function Header() {
   return (
-    <header
-      className="py-4 px-4 md:px-8 bg-card border border-border/50 rounded-lg sticky top-0 z-50 animate-fadeInUp animate-multicolor-border-glow"
-      style={{ animationDelay: '0.1s', transform: 'translateZ(0)' }}
+    // Outer sticky positioning element. Provides "breathing room" for the glow.
+    // p-2 gives 0.5rem (8px) of space, which should be enough for the glow (max 9px blur).
+    <div
+      className="sticky top-0 z-50 p-2"
+      style={{ transform: 'translateZ(0)' }} // Rendering hint for sticky + effects
     >
-      <div className="container mx-auto flex flex-col items-center gap-3 md:flex-row md:justify-between">
-        <div className="flex items-center gap-3 group cursor-default text-center md:text-left">
-          <SolidityForgeIcon />
-          <h1 className="text-3xl font-headline font-bold text-primary group-hover:text-accent transition-colors duration-300">
-            SolidityForge
-          </h1>
+      <header
+        className="py-4 px-4 md:px-8 bg-card/80 backdrop-blur-sm border border-border/50 rounded-lg animate-fadeInUp animate-multicolor-border-glow"
+        style={{ animationDelay: '0.1s' }} // Animation applies to the visible header block
+      >
+        <div className="container mx-auto flex flex-col items-center gap-3 md:flex-row md:justify-between">
+          <div className="flex items-center gap-3 group cursor-default text-center md:text-left">
+            <SolidityForgeIcon />
+            <h1 className="text-3xl font-headline font-bold text-primary group-hover:text-accent transition-colors duration-300">
+              SolidityForge
+            </h1>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground text-center md:text-right">
+              <Sparkles className="w-5 h-5 text-accent" />
+              <span>AI-Powered Smart Contracts</span>
+          </div>
         </div>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground text-center md:text-right">
-            <Sparkles className="w-5 h-5 text-accent" />
-            <span>AI-Powered Smart Contracts</span>
-        </div>
-      </div>
-    </header>
+      </header>
+    </div>
   );
 }
