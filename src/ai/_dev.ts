@@ -5,3 +5,4 @@ config();
 import '@/ai/flows/suggest-error-prevention.ts';
 import '@/ai/flows/generate-smart-contract-code.ts';
 import '@/ai/flows/estimate-gas-cost.ts';
+import '@/ai/flows/get-known-liquidity-pool-info.ts';
