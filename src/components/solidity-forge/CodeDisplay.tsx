@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AlertTriangle, CheckCircle2, ExternalLink, Lightbulb, Copy, Check, ShieldAlert, Zap, Wrench, Info, Fuel, Coins } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, ExternalLink, Lightbulb, Copy, Check, ShieldAlert, Zap, Wrench, Info, Fuel, Coins, Beaker } from 'lucide-react'; // Added Beaker
 import { CardTitle, CardDescription, CardHeader, CardContent, Card } from '@/components/ui/card';
 import { Badge, type BadgeProps } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -29,9 +29,11 @@ interface CodeDisplayProps {
   suggestions: AISuggestion[];
   securityScore: number | null;
   gasEstimation: EstimateGasCostOutput | null;
+  testCasesCode: string; // New prop
   isLoadingCode: boolean;
   isLoadingSuggestions: boolean;
   isLoadingGasEstimation: boolean;
+  isLoadingTestCases: boolean; // New prop
 }
 
 export function CodeDisplay({
@@ -39,23 +41,25 @@ export function CodeDisplay({
   suggestions,
   securityScore,
   gasEstimation,
+  testCasesCode, // New prop
   isLoadingCode,
   isLoadingSuggestions,
   isLoadingGasEstimation,
+  isLoadingTestCases, // New prop
 }: CodeDisplayProps) {
   const [activeTab, setActiveTab] = useState("code");
-  const [copied, setCopied] = useState(false);
+  const [copiedStates, setCopiedStates] = useState<{ [key: string]: boolean }>({}); // For multiple copy buttons
   const { toast } = useToast();
 
-  const handleCopyToClipboard = () => {
-    if (!code) return;
-    navigator.clipboard.writeText(code).then(() => {
-      setCopied(true);
-      toast({ title: "Code Copied!", description: "Solidity code copied to clipboard." });
-      setTimeout(() => setCopied(false), 2000);
+  const handleCopyToClipboard = (textToCopy: string, type: string) => {
+    if (!textToCopy) return;
+    navigator.clipboard.writeText(textToCopy).then(() => {
+      setCopiedStates(prev => ({ ...prev, [type]: true }));
+      toast({ title: `${type} Copied!`, description: `${type} copied to clipboard.` });
+      setTimeout(() => setCopiedStates(prev => ({ ...prev, [type]: false })), 2000);
     }).catch(err => {
-      console.error("Failed to copy code: ", err);
-      toast({ variant: "destructive", title: "Copy Failed", description: "Could not copy code to clipboard." });
+      console.error(`Failed to copy ${type}: `, err);
+      toast({ variant: "destructive", title: "Copy Failed", description: `Could not copy ${type} to clipboard.` });
     });
   };
 
@@ -135,24 +139,32 @@ export function CodeDisplay({
     <div className="flex flex-col h-full p-4 md:p-6">
       <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-4 gap-2 text-center sm:text-left">
         <div>
-            <CardTitle className="text-2xl font-headline">Generated Code</CardTitle>
-            <CardDescription>Review your code and AI insights.</CardDescription>
+            <CardTitle className="text-2xl font-headline">Generated Artifacts</CardTitle>
+            <CardDescription>Review your code, AI insights, gas, and tests.</CardDescription>
         </div>
         {activeTab === "code" && code && !isLoadingCode && (
           <div className="flex gap-2 mt-2 sm:mt-0 self-center sm:self-auto">
-            <Button variant="outline" size="sm" onClick={handleCopyToClipboard} aria-label="Copy code">
-              {copied ? <Check className="h-4 w-4 mr-2" /> : <Copy className="h-4 w-4 mr-2" />}
-              {copied ? "Copied!" : "Copy"}
+            <Button variant="outline" size="sm" onClick={() => handleCopyToClipboard(code, "Code")} aria-label="Copy code">
+              {copiedStates['Code'] ? <Check className="h-4 w-4 mr-2" /> : <Copy className="h-4 w-4 mr-2" />}
+              {copiedStates['Code'] ? "Copied!" : "Copy Code"}
             </Button>
             <Button variant="outline" size="sm" onClick={handleDeployToRemix} aria-label="Deploy to Remix">
               Deploy to Remix <ExternalLink className="h-4 w-4 ml-2" />
             </Button>
           </div>
         )}
+         {activeTab === "tests" && testCasesCode && !isLoadingTestCases && (
+          <div className="flex gap-2 mt-2 sm:mt-0 self-center sm:self-auto">
+            <Button variant="outline" size="sm" onClick={() => handleCopyToClipboard(testCasesCode, "Test Cases")} aria-label="Copy test cases">
+              {copiedStates['Test Cases'] ? <Check className="h-4 w-4 mr-2" /> : <Copy className="h-4 w-4 mr-2" />}
+              {copiedStates['Test Cases'] ? "Copied!" : "Copy Tests"}
+            </Button>
+          </div>
+        )}
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-grow flex flex-col">
-        <TabsList className="mb-4 grid w-full grid-cols-3 animate-multicolor-border-glow">
+        <TabsList className="mb-4 grid w-full grid-cols-4 animate-multicolor-border-glow">
           <TabsTrigger 
             value="code" 
             className="hover:bg-accent/10 data-[state=active]:bg-accent/20 data-[state=active]:text-accent-foreground animate-multicolor-border-glow rounded-sm"
@@ -171,7 +183,14 @@ export function CodeDisplay({
             className="hover:bg-accent/10 data-[state=active]:bg-accent/20 data-[state=active]:text-accent-foreground animate-multicolor-border-glow rounded-sm" 
             disabled={!code && !isLoadingGasEstimation}
           >
-             <Fuel className="mr-2 h-4 w-4" /> Gas Estimation
+             <Fuel className="mr-2 h-4 w-4" /> Gas
+          </TabsTrigger>
+          <TabsTrigger 
+            value="tests" 
+            className="hover:bg-accent/10 data-[state=active]:bg-accent/20 data-[state=active]:text-accent-foreground animate-multicolor-border-glow rounded-sm" 
+            disabled={!code && !isLoadingTestCases}
+          >
+             <Beaker className="mr-2 h-4 w-4" /> Tests
           </TabsTrigger>
         </TabsList>
 
@@ -243,7 +262,7 @@ export function CodeDisplay({
           </ScrollArea>
         </TabsContent>
 
-         <TabsContent value="gas" className="flex-grow overflow-hidden rounded-md border border-border/50 bg-muted/20 animate-multicolor-border-glow">
+        <TabsContent value="gas" className="flex-grow overflow-hidden rounded-md border border-border/50 bg-muted/20 animate-multicolor-border-glow">
           <ScrollArea className="h-[calc(100vh-18rem)] lg:h-[calc(100vh-24rem)] max-h-[600px] p-1">
             {isLoadingGasEstimation ? (
               <div className="p-4 space-y-3">
@@ -284,7 +303,36 @@ export function CodeDisplay({
             )}
           </ScrollArea>
         </TabsContent>
+
+        <TabsContent value="tests" className="flex-grow overflow-hidden rounded-md border border-border/50 bg-muted/20 animate-multicolor-border-glow">
+          <ScrollArea className="h-[calc(100vh-18rem)] lg:h-[calc(100vh-24rem)] max-h-[600px] p-1">
+            {isLoadingTestCases ? (
+              <div className="p-4 space-y-3">
+                <Skeleton className="h-5 w-3/4" />
+                <Skeleton className="h-5 w-full" />
+                <Skeleton className="h-5 w-5/6" />
+                <Skeleton className="h-5 w-full" />
+                <Skeleton className="h-5 w-1/2" />
+                <Skeleton className="h-5 w-3/4" />
+                <Skeleton className="h-5 w-full" />
+              </div>
+            ) : testCasesCode ? (
+              <pre className="p-4 text-sm font-code whitespace-pre-wrap break-all">{testCasesCode}</pre>
+            ) : code && !isLoadingCode ? (
+              <div className="p-6 text-center text-muted-foreground flex flex-col items-center justify-center h-full">
+                <Beaker className="w-12 h-12 mb-4 text-muted-foreground/50" />
+                <p>Click "Generate Test Cases" to get AI-generated basic tests for your contract.</p>
+              </div>
+            ) : (
+              <div className="p-6 text-center text-muted-foreground flex flex-col items-center justify-center h-full">
+                <AlertTriangle className="mx-auto h-12 w-12 mb-4 text-muted-foreground/50" />
+                <p>Generate smart contract code first, then click "Generate Test Cases".</p>
+              </div>
+            )}
+          </ScrollArea>
+        </TabsContent>
       </Tabs>
     </div>
   );
 }
+

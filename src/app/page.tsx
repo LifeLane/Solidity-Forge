@@ -7,12 +7,13 @@ import { Footer } from '@/components/solidity-forge/Footer';
 import { ContractConfigForm, type FormData } from '@/components/solidity-forge/ContractConfigForm';
 import { CodeDisplay, type AISuggestion } from '@/components/solidity-forge/CodeDisplay';
 import type { EstimateGasCostOutput } from '@/ai/flows/estimate-gas-cost';
-import { KnownAddressesFinder } from '@/components/solidity-forge/KnownAddressesFinder'; // New Import
+import { KnownAddressesFinder } from '@/components/solidity-forge/KnownAddressesFinder';
 import { useToast } from "@/hooks/use-toast";
 import { generateSmartContractCode } from '@/ai/flows/generate-smart-contract-code';
 import { suggestErrorPrevention } from '@/ai/flows/suggest-error-prevention';
 import { estimateGasCost } from '@/ai/flows/estimate-gas-cost';
-import { getKnownLiquidityPoolInfo, type GetKnownLiquidityPoolInfoOutput, type KnownContractAddressInfo } from '@/ai/flows/get-known-liquidity-pool-info'; // New Import
+import { getKnownLiquidityPoolInfo, type GetKnownLiquidityPoolInfoOutput } from '@/ai/flows/get-known-liquidity-pool-info';
+import { generateTestCases, type GenerateTestCasesOutput } from '@/ai/flows/generate-test-cases'; // New Import
 import { Card, CardContent } from '@/components/ui/card';
 import { CONTRACT_TEMPLATES, type ContractTemplate } from '@/config/contracts';
 
@@ -24,12 +25,15 @@ export default function SolidityForgePage() {
   const [aiSuggestions, setAiSuggestions] = useState<AISuggestion[]>([]);
   const [securityScore, setSecurityScore] = useState<number | null>(null);
   const [gasEstimation, setGasEstimation] = useState<EstimateGasCostOutput | null>(null);
+  const [generatedTestCases, setGeneratedTestCases] = useState<string>(''); // New state for test cases
+
   const [isGeneratingCode, setIsGeneratingCode] = useState<boolean>(false);
   const [isGettingSuggestions, setIsGettingSuggestions] = useState<boolean>(false);
   const [isEstimatingGas, setIsEstimatingGas] = useState<boolean>(false);
+  const [isGeneratingTestCases, setIsGeneratingTestCases] = useState<boolean>(false); // New loading state
+
   const [mainContentVisible, setMainContentVisible] = useState(false);
 
-  // State for KnownAddressesFinder
   const [addressQuery, setAddressQuery] = useState<string>('');
   const [addressResults, setAddressResults] = useState<GetKnownLiquidityPoolInfoOutput | null>(null);
   const [isFindingAddresses, setIsFindingAddresses] = useState<boolean>(false);
@@ -49,6 +53,7 @@ export default function SolidityForgePage() {
     setAiSuggestions([]);
     setSecurityScore(null);
     setGasEstimation(null); 
+    setGeneratedTestCases(''); // Reset test cases
 
     let description = `Generate a Solidity smart contract for ${template.name}.`;
     if (template.id === 'custom' && formData.customDescription) {
@@ -160,6 +165,36 @@ Specific guidance: ${template.aiPromptEnhancement}`;
     }
   };
 
+  const handleGenerateTestCases = async () => {
+    if (!generatedCode) {
+      toast({
+        variant: "destructive",
+        title: "Cannot Generate Test Cases",
+        description: "Please generate smart contract code first.",
+      });
+      return;
+    }
+    setIsGeneratingTestCases(true);
+    setGeneratedTestCases('');
+    try {
+      const result = await generateTestCases({ code: generatedCode, contractName: selectedTemplate?.name });
+      setGeneratedTestCases(result.testCasesCode);
+      toast({
+        title: "Test Cases Generated!",
+        description: "Basic test cases for your contract are ready.",
+      });
+    } catch (error) {
+      console.error("Error generating test cases:", error);
+      toast({
+        variant: "destructive",
+        title: "Error Generating Test Cases",
+        description: (error as Error).message || "An unexpected error occurred. Please try again.",
+      });
+    } finally {
+      setIsGeneratingTestCases(false);
+    }
+  };
+
   const handleFindAddresses = async (query: string) => {
     if (!query.trim()) {
       toast({
@@ -207,9 +242,11 @@ Specific guidance: ${template.aiPromptEnhancement}`;
               onGenerateCode={handleGenerateCode}
               onGetAISuggestions={handleGetAISuggestions}
               onEstimateGasCosts={handleEstimateGasCosts}
+              onGenerateTestCases={handleGenerateTestCases} // New prop
               isGeneratingCode={isGeneratingCode}
               isGettingSuggestions={isGettingSuggestions}
               isEstimatingGas={isEstimatingGas}
+              isGeneratingTestCases={isGeneratingTestCases} // New prop
               generatedCode={generatedCode}
               selectedTemplateProp={selectedTemplate}
             />
@@ -224,13 +261,14 @@ Specific guidance: ${template.aiPromptEnhancement}`;
             suggestions={aiSuggestions}
             securityScore={securityScore}
             gasEstimation={gasEstimation}
+            testCasesCode={generatedTestCases} // New prop
             isLoadingCode={isGeneratingCode}
             isLoadingSuggestions={isGettingSuggestions}
             isLoadingGasEstimation={isEstimatingGas}
+            isLoadingTestCases={isGeneratingTestCases} // New prop
           />
         </Card>
         
-        {/* New KnownAddressesFinder Component */}
         <Card 
           className="transition-all duration-300 bg-card/80 backdrop-blur-sm animate-fadeInUp animate-multicolor-border-glow w-full max-w-2xl lg:col-span-2 lg:max-w-4xl justify-self-center"
           style={{ animationDelay: '0.7s' }}
@@ -250,3 +288,4 @@ Specific guidance: ${template.aiPromptEnhancement}`;
     </div>
   );
 }
+

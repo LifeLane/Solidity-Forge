@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { CardTitle, CardDescription } from '@/components/ui/card';
-import { AlertCircle, Loader2, Wand2, Brain, Fuel } from 'lucide-react';
+import { AlertCircle, Loader2, Wand2, Brain, Fuel, Beaker } from 'lucide-react'; // Added Beaker
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Switch } from "@/components/ui/switch"; 
 
@@ -21,9 +21,11 @@ interface ContractConfigFormProps {
   onGenerateCode: (template: ContractTemplate, formData: FormData) => Promise<void>;
   onGetAISuggestions: (template: ContractTemplate, formData: FormData) => Promise<void>;
   onEstimateGasCosts: () => Promise<void>;
+  onGenerateTestCases: () => Promise<void>; // New prop
   isGeneratingCode: boolean;
   isGettingSuggestions: boolean;
   isEstimatingGas: boolean;
+  isGeneratingTestCases: boolean; // New prop
   generatedCode: string;
   selectedTemplateProp?: ContractTemplate;
 }
@@ -33,9 +35,11 @@ export function ContractConfigForm({
   onGenerateCode,
   onGetAISuggestions,
   onEstimateGasCosts,
+  onGenerateTestCases, // New prop
   isGeneratingCode,
   isGettingSuggestions,
   isEstimatingGas,
+  isGeneratingTestCases, // New prop
   generatedCode,
   selectedTemplateProp,
 }: ContractConfigFormProps) {
@@ -62,7 +66,7 @@ export function ContractConfigForm({
         return acc;
       }, {} as FormData);
       if (selectedTemplate.id === 'custom' && !defaultValues.customDescription) {
-        defaultValues.customDescription = ''; // Ensure customDescription is initialized for custom template
+        defaultValues.customDescription = ''; 
       }
       reset(defaultValues);
     }
@@ -89,6 +93,10 @@ export function ContractConfigForm({
 
   const handleEstimateGasClick = async () => {
     await onEstimateGasCosts();
+  };
+
+  const handleGenerateTestCasesClick = async () => { // New handler
+    await onGenerateTestCases();
   };
 
   const renderParameterInput = (param: ContractParameter) => {
@@ -163,6 +171,8 @@ export function ContractConfigForm({
     );
   };
 
+  const anyLoading = isGeneratingCode || isGettingSuggestions || isEstimatingGas || isGeneratingTestCases;
+
   return (
     <div className="space-y-6">
       <div className="text-center">
@@ -211,7 +221,7 @@ export function ContractConfigForm({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4">
             <Button 
               type="submit" 
-              disabled={isGeneratingCode || isGettingSuggestions || isEstimatingGas} 
+              disabled={anyLoading} 
               className="w-full hover:shadow-lg hover:scale-105 transition-transform"
             >
               {isGeneratingCode ? (
@@ -225,7 +235,7 @@ export function ContractConfigForm({
               type="button"
               variant="outline"
               onClick={handleAISuggestionsClick}
-              disabled={!generatedCode || isGettingSuggestions || isGeneratingCode || isEstimatingGas}
+              disabled={!generatedCode || anyLoading}
               className="w-full hover:shadow-lg hover:scale-105 transition-transform"
             >
               {isGettingSuggestions ? (
@@ -239,8 +249,8 @@ export function ContractConfigForm({
               type="button"
               variant="outline"
               onClick={handleEstimateGasClick}
-              disabled={!generatedCode || isEstimatingGas || isGeneratingCode || isGettingSuggestions}
-              className="w-full sm:col-span-2 hover:shadow-lg hover:scale-105 transition-transform"
+              disabled={!generatedCode || anyLoading}
+              className="w-full hover:shadow-lg hover:scale-105 transition-transform"
             >
               {isEstimatingGas ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -249,9 +259,24 @@ export function ContractConfigForm({
               )}
               Estimate Gas Costs
             </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleGenerateTestCasesClick}
+              disabled={!generatedCode || anyLoading}
+              className="w-full hover:shadow-lg hover:scale-105 transition-transform"
+            >
+              {isGeneratingTestCases ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                 <Beaker className="mr-2 h-4 w-4" />
+              )}
+              Generate Test Cases
+            </Button>
           </div>
         </form>
       )}
     </div>
   );
 }
+
