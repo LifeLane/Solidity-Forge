@@ -147,6 +147,11 @@
     color: hsl(var(--primary));
     text-shadow: 0 0 8px hsl(var(--primary)), 0 0 10px hsl(var(--primary));
   }
+  
+  .text-glow-yellow {
+    color: hsl(var(--glow-yellow-hsl));
+    text-shadow: 0 0 8px hsl(var(--glow-yellow-hsl)), 0 0 10px hsl(var(--glow-yellow-hsl));
+  }
 
   .glow-border-animated {
     border: 1px solid transparent !important; /* Important to override base * apply rule */
@@ -323,3 +328,4 @@
   transition: opacity 0.3s ease-in-out, color 0.3s ease-in-out;
   display: inline-block; 
 }
+

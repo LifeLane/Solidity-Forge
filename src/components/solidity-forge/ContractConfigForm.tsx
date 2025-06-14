@@ -320,10 +320,10 @@ export function ContractConfigForm({
         <Label 
           htmlFor="contractType" 
           className={cn(
-            "text-center block font-bold text-xl animate-text-multicolor-glow"
+            "text-center block font-bold text-xl text-glow-yellow"
           )}
         >
-          Select Your Destiny (Contract Type)
+          Select Your Destiny (Contract<br />Type)
         </Label>
         <Select onValueChange={handleTemplateChange} defaultValue={selectedTemplate?.id} disabled={anyPrimaryActionLoading}>
           <SelectTrigger id="contractType" className="glow-border-purple bg-background/70 focus:bg-background text-base py-6">
@@ -347,11 +347,11 @@ export function ContractConfigForm({
       
       {selectedTemplate && (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
-         <div className="my-8 flex flex-col items-center space-y-3">
+          <div className="my-8 flex flex-col items-center space-y-2">
             <Label 
               htmlFor="mode-switch" 
               className={cn(
-                "text-base font-bold animate-text-multicolor-glow text-center"
+                "text-base font-bold text-glow-yellow text-center"
               )}
             >
               Complexity Dial:
@@ -391,10 +391,11 @@ export function ContractConfigForm({
                       value={tabValue}
                       disabled={anyPrimaryActionLoading && activeTabValue !== tabValue}
                       className={cn(
-                        "tab-running-lines-border param-tab-trigger w-full justify-start whitespace-nowrap",
+                        "tab-running-lines-border param-tab-trigger",
                         "data-[state=active]:text-primary-foreground", 
                         "data-[state=inactive]:text-muted-foreground hover:text-foreground"
                       )}
+                      style={{ animationDelay: `${groupIndex * 1}s` }} 
                     >
                        <span className="tab-running-lines-content">
                          {group.title}
