@@ -1,3 +1,4 @@
+
 import type { LucideIcon } from 'lucide-react';
 import { Coins, GitFork, ArrowRightLeft, Landmark, FileJson, Puzzle } from 'lucide-react';
 
@@ -12,6 +13,7 @@ export interface ContractParameter {
   placeholder?: string;
   description?: string;
   rows?: number; // for textarea
+  advancedOnly?: boolean; // True if this parameter should only appear in "Advanced" mode
 }
 
 export interface ContractTemplate {
@@ -33,7 +35,7 @@ export const CONTRACT_TEMPLATES: ContractTemplate[] = [
       { name: 'tokenName', label: 'Token Name', type: 'string', placeholder: 'My Awesome Token', description: 'The full name of your token.' },
       { name: 'tokenSymbol', label: 'Token Symbol', type: 'string', placeholder: 'MAT', description: 'The ticker symbol for your token (e.g., ETH).' },
       { name: 'initialSupply', label: 'Initial Supply', type: 'number', placeholder: '1000000', description: 'The total number of tokens to mint initially.' },
-      { name: 'decimals', label: 'Decimals', type: 'number', defaultValue: 18, description: 'The number of decimal places your token will have (typically 18).' },
+      { name: 'decimals', label: 'Decimals', type: 'number', defaultValue: 18, description: 'The number of decimal places your token will have (typically 18).', advancedOnly: true },
     ],
     aiPromptEnhancement: "Ensure the contract follows OpenZeppelin's ERC20 standards if possible. Include Ownable for access control.",
   },
@@ -52,7 +54,7 @@ export const CONTRACT_TEMPLATES: ContractTemplate[] = [
           { value: '0.3', label: '0.3%' },
           { value: '1.0', label: '1.0%' },
         ], 
-        defaultValue: '0.3', description: 'The percentage fee charged on swaps through this pool.' },
+        defaultValue: '0.3', description: 'The percentage fee charged on swaps through this pool.', advancedOnly: true },
     ],
     aiPromptEnhancement: "Generate a basic liquidity pool contract. Consider using a well-known AMM model like Uniswap V2 or a simpler constant product formula if specific framework is not mentioned. Focus on `addLiquidity`, `removeLiquidity` and `swap` functions. Include placeholder ERC20 interface for token interactions.",
   },
@@ -64,7 +66,7 @@ export const CONTRACT_TEMPLATES: ContractTemplate[] = [
     parameters: [
       { name: 'routerName', label: 'Router Name', type: 'string', placeholder: 'MySwap Router', description: 'The name for your swap router contract.' },
       { name: 'factoryAddress', label: 'Factory Address', type: 'address', placeholder: '0x...', description: 'The address of the contract factory that creates liquidity pools.' },
-      { name: 'wethAddress', label: 'WETH Address', type: 'address', placeholder: '0x...', description: 'The address of the Wrapped Ether (WETH) contract on the target network.' },
+      { name: 'wethAddress', label: 'WETH Address', type: 'address', placeholder: '0x...', description: 'The address of the Wrapped Ether (WETH) contract on the target network.', advancedOnly: true },
     ],
     aiPromptEnhancement: "This is a router contract. It should handle multi-hop swaps (tokenA to tokenB via an intermediary tokenC) and direct swaps. Include functions for swapping exact tokens for tokens, tokens for exact tokens, ETH for exact tokens, and exact ETH for tokens. Reference the factory to find pool addresses.",
   },
@@ -76,8 +78,8 @@ export const CONTRACT_TEMPLATES: ContractTemplate[] = [
     parameters: [
       { name: 'daoName', label: 'DAO Name', type: 'string', placeholder: 'My Governance DAO', description: 'The name of your DAO.' },
       { name: 'proposalTokenAddress', label: 'Governance Token Address', type: 'address', placeholder: '0x...', description: 'The ERC20 token used for voting power.' },
-      { name: 'quorumPercentage', label: 'Quorum Percentage', type: 'number', placeholder: '20', description: 'Minimum percentage of total token supply needed to vote for a proposal to pass (0-100).' },
-      { name: 'votingPeriod', label: 'Voting Period (Blocks)', type: 'number', placeholder: '17280', description: 'Duration for which a proposal remains open for voting (e.g., ~3 days if 1 block = 15s).' },
+      { name: 'quorumPercentage', label: 'Quorum Percentage', type: 'number', placeholder: '20', description: 'Minimum percentage of total token supply needed to vote for a proposal to pass (0-100).', advancedOnly: true },
+      { name: 'votingPeriod', label: 'Voting Period (Blocks)', type: 'number', placeholder: '17280', description: 'Duration for which a proposal remains open for voting (e.g., ~3 days if 1 block = 15s).', advancedOnly: true },
     ],
     aiPromptEnhancement: "Generate a simple DAO contract. It should allow token holders to create proposals, vote on proposals (yes/no), and execute passed proposals. Quorum and voting period are key parameters. Use the provided governance token for voting power.",
   },
