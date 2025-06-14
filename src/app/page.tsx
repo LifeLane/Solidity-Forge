@@ -7,10 +7,12 @@ import { Footer } from '@/components/solidity-forge/Footer';
 import { ContractConfigForm, type FormData } from '@/components/solidity-forge/ContractConfigForm';
 import { CodeDisplay, type AISuggestion } from '@/components/solidity-forge/CodeDisplay';
 import type { EstimateGasCostOutput } from '@/ai/flows/estimate-gas-cost';
+import { KnownAddressesFinder } from '@/components/solidity-forge/KnownAddressesFinder'; // New Import
 import { useToast } from "@/hooks/use-toast";
 import { generateSmartContractCode } from '@/ai/flows/generate-smart-contract-code';
 import { suggestErrorPrevention } from '@/ai/flows/suggest-error-prevention';
 import { estimateGasCost } from '@/ai/flows/estimate-gas-cost';
+import { getKnownLiquidityPoolInfo, type GetKnownLiquidityPoolInfoOutput, type KnownContractAddressInfo } from '@/ai/flows/get-known-liquidity-pool-info'; // New Import
 import { Card, CardContent } from '@/components/ui/card';
 import { CONTRACT_TEMPLATES, type ContractTemplate } from '@/config/contracts';
 
@@ -27,6 +29,12 @@ export default function SolidityForgePage() {
   const [isEstimatingGas, setIsEstimatingGas] = useState<boolean>(false);
   const [mainContentVisible, setMainContentVisible] = useState(false);
 
+  // State for KnownAddressesFinder
+  const [addressQuery, setAddressQuery] = useState<string>('');
+  const [addressResults, setAddressResults] = useState<GetKnownLiquidityPoolInfoOutput | null>(null);
+  const [isFindingAddresses, setIsFindingAddresses] = useState<boolean>(false);
+
+
   const { toast } = useToast();
 
   useEffect(() => {
@@ -40,7 +48,7 @@ export default function SolidityForgePage() {
     setGeneratedCode('');
     setAiSuggestions([]);
     setSecurityScore(null);
-    setGasEstimation(null); // Reset gas estimation
+    setGasEstimation(null); 
 
     let description = `Generate a Solidity smart contract for ${template.name}.`;
     if (template.id === 'custom' && formData.customDescription) {
@@ -152,6 +160,37 @@ Specific guidance: ${template.aiPromptEnhancement}`;
     }
   };
 
+  const handleFindAddresses = async (query: string) => {
+    if (!query.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Empty Query",
+        description: "Please enter a search query for contract addresses.",
+      });
+      return;
+    }
+    setIsFindingAddresses(true);
+    setAddressResults(null);
+    try {
+      const result = await getKnownLiquidityPoolInfo({ query });
+      setAddressResults(result);
+      toast({
+        title: "Address Search Complete",
+        description: result.summary || "Fetched contract addresses.",
+      });
+    } catch (error) {
+      console.error("Error finding addresses:", error);
+      toast({
+        variant: "destructive",
+        title: "Error Finding Addresses",
+        description: (error as Error).message || "An unexpected error occurred. Please try again.",
+      });
+    } finally {
+      setIsFindingAddresses(false);
+    }
+  };
+
+
   return (
     <div className="min-h-screen text-foreground flex flex-col">
       <Header />
@@ -189,6 +228,22 @@ Specific guidance: ${template.aiPromptEnhancement}`;
             isLoadingSuggestions={isGettingSuggestions}
             isLoadingGasEstimation={isEstimatingGas}
           />
+        </Card>
+        
+        {/* New KnownAddressesFinder Component */}
+        <Card 
+          className="transition-all duration-300 bg-card/80 backdrop-blur-sm animate-fadeInUp animate-multicolor-border-glow w-full max-w-2xl lg:col-span-2 lg:max-w-4xl justify-self-center"
+          style={{ animationDelay: '0.7s' }}
+        >
+          <CardContent className="p-6">
+            <KnownAddressesFinder
+              onFindAddresses={handleFindAddresses}
+              results={addressResults}
+              isLoading={isFindingAddresses}
+              initialQuery={addressQuery}
+              setInitialQuery={setAddressQuery}
+            />
+          </CardContent>
         </Card>
       </main>
       <Footer />
