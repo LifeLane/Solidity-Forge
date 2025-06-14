@@ -275,7 +275,7 @@ export function ContractConfigForm({
                   onCheckedChange={field.onChange}
                   disabled={anyPrimaryActionLoading}
                 />
-                <Label htmlFor={param.name} className="text-sm text-muted-foreground"> {/* No glow for switch sub-label */}
+                <Label htmlFor={param.name} className="text-sm text-muted-foreground">
                   {field.value ? 'Enabled' : 'Disabled'}
                 </Label>
               </div>
@@ -347,24 +347,26 @@ export function ContractConfigForm({
       
       {selectedTemplate && (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
-          <div className="flex items-center justify-center space-x-4 my-8">
+         <div className="my-8 flex flex-col items-center space-y-3">
             <Label 
               htmlFor="mode-switch" 
               className={cn(
-                "text-base font-bold animate-text-multicolor-glow"
+                "text-base font-bold animate-text-multicolor-glow text-center"
               )}
             >
               Complexity Dial:
             </Label>
-            <span className="text-sm text-muted-foreground">Basic</span>
-            <Switch
-              id="mode-switch"
-              checked={isAdvancedMode}
-              onCheckedChange={setIsAdvancedMode}
-              aria-label={isAdvancedMode ? "Switch to Basic Mode" : "Switch to Advanced Mode"}
-              disabled={anyPrimaryActionLoading}
-            />
-            <span className="text-sm text-muted-foreground">Advanced</span>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-muted-foreground">Basic</span>
+              <Switch
+                id="mode-switch"
+                checked={isAdvancedMode}
+                onCheckedChange={setIsAdvancedMode}
+                aria-label={isAdvancedMode ? "Switch to Basic Mode" : "Switch to Advanced Mode"}
+                disabled={anyPrimaryActionLoading}
+              />
+              <span className="text-sm text-muted-foreground">Advanced</span>
+            </div>
           </div>
 
           {selectedTemplate.id === 'custom' || parameterGroups.length <= 1 ? ( 
@@ -390,12 +392,11 @@ export function ContractConfigForm({
                       disabled={anyPrimaryActionLoading && activeTabValue !== tabValue}
                       className={cn(
                         "tab-running-lines-border param-tab-trigger w-full justify-start whitespace-nowrap",
-                        "data-[state=active]:text-primary-foreground", // Text color for active tab content
+                        "data-[state=active]:text-primary-foreground", 
                         "data-[state=inactive]:text-muted-foreground hover:text-foreground"
                       )}
-                       style={{ animationDelay: `${groupIndex * 1}s` }} 
                     >
-                       <span className="tab-running-lines-content"> {/* Padding handled by .param-tab-trigger .tab-running-lines-content */}
+                       <span className="tab-running-lines-content">
                          {group.title}
                        </span>
                     </TabsTrigger>
@@ -455,7 +456,7 @@ export function ContractConfigForm({
               ) : (
                  <Fuel className="mr-2 h-5 w-5" />
               )}
-              Gas Oracle Query
+              Query Gas Oracle
             </Button>
             <Button
               type="button"
@@ -477,3 +478,4 @@ export function ContractConfigForm({
     </div>
   );
 }
+
