@@ -22,7 +22,10 @@ const SolidityForgeIcon = () => (
 
 export function Header() {
   return (
-    <header className="py-4 px-4 md:px-8 border-b border-border/50 shadow-lg bg-background/70 backdrop-blur-md sticky top-0 z-50 animate-fadeInUp animate-multicolor-border-glow" style={{ animationDelay: '0.1s' }}>
+    <header 
+      className="py-4 px-4 md:px-8 bg-background/70 backdrop-blur-md sticky top-0 z-50 animate-fadeInUp animate-multicolor-border-glow" 
+      style={{ animationDelay: '0.1s' }}
+    >
       <div className="container mx-auto flex flex-col items-center gap-3 md:flex-row md:justify-between">
         <div className="flex items-center gap-3 group cursor-default text-center md:text-left">
           <SolidityForgeIcon />
