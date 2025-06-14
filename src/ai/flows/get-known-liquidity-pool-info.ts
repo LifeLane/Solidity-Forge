@@ -44,7 +44,7 @@ export type GetKnownLiquidityPoolInfoOutput = z.infer<typeof GetKnownLiquidityPo
 const fetchKnownLiquidityPoolAddressesTool = ai.defineTool(
   {
     name: 'fetchKnownLiquidityPoolAddressesTool',
-    description: 'Fetches known contract addresses for liquidity pools, factories, or wrapped native tokens on major mainnets based on specified criteria. Use this to get actual contract addresses.',
+    description: 'Fetches known contract addresses for common EVM-based DeFi protocols (like DEX Routers, Factories, or Wrapped Native Tokens) on major EVM mainnets based on specified criteria. Use this to get actual contract addresses from a predefined list.',
     inputSchema: z.object({
       mainnetName: z.string().optional().describe('The name of the mainnet (e.g., "Ethereum", "BNB Chain", "Polygon"). Case-insensitive partial matches are okay.'),
       systemName: z.string().optional().describe('The name of the DeFi system or DEX (e.g., "Uniswap V2", "PancakeSwap", "Sushiswap"). Case-insensitive partial matches are okay.'),
@@ -69,24 +69,39 @@ const getKnownLiquidityPoolInfoPrompt = ai.definePrompt({
   input: { schema: GetKnownLiquidityPoolInfoInputSchema },
   output: { schema: GetKnownLiquidityPoolInfoOutputSchema },
   tools: [fetchKnownLiquidityPoolAddressesTool],
-  prompt: `You are an expert assistant helping users find common smart contract addresses for DeFi protocols like liquidity pools, DEX routers, factories, and wrapped native tokens on major mainnets.
+  prompt: `You are an expert assistant helping users find common smart contract addresses.
+**IMPORTANT: Your knowledge for finding specific addresses is limited to a predefined list of common EVM-compatible DeFi protocol contracts (like DEX Routers, Factories, Wrapped Native Tokens) on major EVM mainnets (Ethereum, BNB Chain, Polygon, Arbitrum, Optimism). You use the 'fetchKnownLiquidityPoolAddressesTool' for this.**
 
 User query: "{{query}}"
 
 Your goal is to:
-1. Understand the user's query.
-2. Use the 'fetchKnownLiquidityPoolAddressesTool' to find the requested addresses.
-   - If the user specifies a mainnet (e.g., "Ethereum", "BNB Chain", "Polygon", "Arbitrum One", "Optimism"), pass it to the 'mainnetName' parameter of the tool.
-   - If the user specifies a system/DEX (e.g., "Uniswap V2", "PancakeSwap V3", "Sushiswap"), pass it to the 'systemName' parameter.
-   - If the user specifies a contract type (e.g., "Router", "Factory", "WETH", "Wrapped Token"), map it to the 'contractType' parameter ('Router', 'Factory', 'WrappedNativeToken', 'Other').
-   - If the query is general (e.g., "any liquidity pools on Ethereum"), you may omit some tool parameters to get broader results.
-   - If the query asks for "WETH", "WBNB", "WMATIC", etc., use 'WrappedNativeToken' as the contractType.
-3. If the tool returns results, populate the 'results' array in the output.
-4. Provide a concise 'summary' of what was found, or a polite message if no specific addresses match the query based on the tool's output. For example, if results are found, say "Found X addresses matching your query." If not, say "Could not find specific addresses for your query based on available data."
+1. Analyze the user's query.
+2. Determine if the query likely refers to a contract type and chain that the 'fetchKnownLiquidityPoolAddressesTool' can look up.
+   - Keywords for EVM chains: "Ethereum", "BNB", "BSC", "Polygon", "Matic", "Arbitrum", "Optimism".
+   - Keywords for DeFi infrastructure: "Router", "Factory", "DEX", "Swap", "WETH", "WBNB", "Wrapped Token", specific DEX names like "Uniswap", "PancakeSwap", "Sushiswap", etc.
 
-IMPORTANT: Only use the tool to fetch addresses. Do not make up addresses. If the tool returns empty, reflect that in the summary.
-Prioritize accuracy and rely on the tool's output.
-If the user asks for something very generic like "all addresses", you might suggest they refine their query if the tool returns too many results or if it's too broad for a single tool call. However, try to be helpful with common defaults if the query is slightly ambiguous (e.g. "Uniswap router" might imply Ethereum if no network is specified).
+3. **If the query seems to be for common EVM DeFi infrastructure (within the tool's scope):**
+   - Use the 'fetchKnownLiquidityPoolAddressesTool' to find the requested addresses.
+     - If the user specifies a mainnet (e.g., "Ethereum", "BNB Chain"), pass it to the 'mainnetName' parameter of the tool.
+     - If the user specifies a system/DEX (e.g., "Uniswap V2", "PancakeSwap V3"), pass it to the 'systemName' parameter.
+     - If the user specifies a contract type (e.g., "Router", "Factory", "WETH"), map it to the 'contractType' parameter.
+   - If the tool returns results, populate the 'results' array and provide a 'summary' like "Found X addresses matching your query."
+   - If the tool returns no results for an in-scope query, set 'results' to an empty array and set 'summary' to "I couldn't find specific addresses for '{{query}}' in my current list of known DeFi contracts. Please ensure the names and chain are correct or try a broader query for known infrastructure."
+
+4. **If the query is for a non-EVM chain (e.g., contains "Solana", "Cardano", "Polkadot", "Near", "Tron", "Tezos", etc.):**
+   - Set 'results' to an empty array.
+   - Set 'summary' to: "I apologize, but I can only search for contract addresses on EVM-compatible chains (like Ethereum, BNB Chain, Polygon, etc.). I do not have information for non-EVM chains like the one mentioned in '{{query}}'."
+
+5. **If the query is for a specific project name (especially NFTs), a general contract type I don't track, or seems like a general blockchain search (e.g., "Bored Ape Yacht Club contract", "a gaming contract", "find contract for MyCoin", "latest deployed contracts"):**
+   - Set 'results' to an empty array.
+   - Set 'summary' to: "My search is focused on common DeFi infrastructure contracts (Routers, Factories, Wrapped Tokens) on EVM chains. I am unable to perform general searches for specific project names, NFTs, or other arbitrary contract types. You might need a specialized blockchain explorer for that kind of query."
+
+6. **If the query is too vague or too general for the tool (e.g., "any contract", "address list"):**
+   - Set 'results' to an empty array.
+   - Set 'summary' to: "Your query '{{query}}' is a bit too general for me to search effectively. Please try to specify a DEX name, token type (like Router, Factory, WETH), and optionally an EVM chain (e.g., 'Uniswap V2 Router on Ethereum')."
+
+Output your response according to the GetKnownLiquidityPoolInfoOutputSchema. Do not make up addresses or information.
+If the tool is used, base your 'results' and 'summary' on its output.
 `,
 });
 
@@ -100,15 +115,18 @@ const getKnownLiquidityPoolInfoFlow = ai.defineFlow(
   async (input) => {
     const { output } = await getKnownLiquidityPoolInfoPrompt(input);
     if (!output) {
+        // This case should ideally be handled by the improved prompt logic leading to a specific summary.
+        // However, as a fallback:
         return {
             results: [],
-            summary: "An unexpected error occurred while trying to fetch liquidity pool information."
+            summary: "I was unable to process your request. Please try rephrasing your query."
         }
     }
     // Ensure results is always an array, even if the LLM fails to structure it perfectly (though schema should enforce it)
     return {
         results: output.results || [],
-        summary: output.summary || "Summary was not generated."
+        summary: output.summary || "A summary could not be generated for your query." // Provide a default if summary is missing
     };
   }
 );
+
