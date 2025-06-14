@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { CardTitle, CardDescription } from '@/components/ui/card';
-import { AlertCircle, Loader2, Wand2, Brain, Fuel, Beaker } from 'lucide-react'; // Added Beaker
+import { AlertCircle, Loader2, Wand2, Brain, Fuel, Beaker } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Switch } from "@/components/ui/switch"; 
 
@@ -21,11 +21,12 @@ interface ContractConfigFormProps {
   onGenerateCode: (template: ContractTemplate, formData: FormData) => Promise<void>;
   onGetAISuggestions: (template: ContractTemplate, formData: FormData) => Promise<void>;
   onEstimateGasCosts: () => Promise<void>;
-  onGenerateTestCases: () => Promise<void>; // New prop
+  onGenerateTestCases: () => Promise<void>;
   isGeneratingCode: boolean;
   isGettingSuggestions: boolean;
   isEstimatingGas: boolean;
-  isGeneratingTestCases: boolean; // New prop
+  isGeneratingTestCases: boolean;
+  isRefiningCode: boolean; // New prop for refinement loading state
   generatedCode: string;
   selectedTemplateProp?: ContractTemplate;
 }
@@ -35,11 +36,12 @@ export function ContractConfigForm({
   onGenerateCode,
   onGetAISuggestions,
   onEstimateGasCosts,
-  onGenerateTestCases, // New prop
+  onGenerateTestCases,
   isGeneratingCode,
   isGettingSuggestions,
   isEstimatingGas,
-  isGeneratingTestCases, // New prop
+  isGeneratingTestCases,
+  isRefiningCode, // New prop
   generatedCode,
   selectedTemplateProp,
 }: ContractConfigFormProps) {
@@ -95,7 +97,7 @@ export function ContractConfigForm({
     await onEstimateGasCosts();
   };
 
-  const handleGenerateTestCasesClick = async () => { // New handler
+  const handleGenerateTestCasesClick = async () => {
     await onGenerateTestCases();
   };
 
@@ -171,18 +173,20 @@ export function ContractConfigForm({
     );
   };
 
-  const anyLoading = isGeneratingCode || isGettingSuggestions || isEstimatingGas || isGeneratingTestCases;
+  const anyPrimaryActionLoading = isGeneratingCode || isRefiningCode;
+  const anySubActionLoading = isGettingSuggestions || isEstimatingGas || isGeneratingTestCases || isRefiningCode;
+
 
   return (
     <div className="space-y-6">
       <div className="text-center">
         <CardTitle className="text-2xl font-headline mb-1">Configure Your Contract</CardTitle>
-        <CardDescription>Define contract parameters.</CardDescription>
+        <CardDescription>Define contract parameters. Or don't. See if I care.</CardDescription>
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="contractType">Contract Type</Label>
-        <Select onValueChange={handleTemplateChange} defaultValue={selectedTemplate?.id}>
+        <Select onValueChange={handleTemplateChange} defaultValue={selectedTemplate?.id} disabled={anyPrimaryActionLoading}>
           <SelectTrigger id="contractType" className="bg-input/50 focus:bg-input">
             <SelectValue placeholder="Select contract type" />
           </SelectTrigger>
@@ -210,6 +214,7 @@ export function ContractConfigForm({
               checked={isAdvancedMode}
               onCheckedChange={setIsAdvancedMode}
               aria-label={isAdvancedMode ? "Switch to Basic Mode" : "Switch to Advanced Mode"}
+              disabled={anyPrimaryActionLoading}
             />
             <span className="text-sm text-muted-foreground">Advanced</span>
           </div>
@@ -221,7 +226,7 @@ export function ContractConfigForm({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4">
             <Button 
               type="submit" 
-              disabled={anyLoading} 
+              disabled={anyPrimaryActionLoading} 
               className="w-full hover:shadow-lg hover:scale-105 transition-transform"
             >
               {isGeneratingCode ? (
@@ -235,7 +240,7 @@ export function ContractConfigForm({
               type="button"
               variant="outline"
               onClick={handleAISuggestionsClick}
-              disabled={!generatedCode || anyLoading}
+              disabled={!generatedCode || anySubActionLoading}
               className="w-full hover:shadow-lg hover:scale-105 transition-transform"
             >
               {isGettingSuggestions ? (
@@ -249,7 +254,7 @@ export function ContractConfigForm({
               type="button"
               variant="outline"
               onClick={handleEstimateGasClick}
-              disabled={!generatedCode || anyLoading}
+              disabled={!generatedCode || anySubActionLoading}
               className="w-full hover:shadow-lg hover:scale-105 transition-transform"
             >
               {isEstimatingGas ? (
@@ -263,7 +268,7 @@ export function ContractConfigForm({
               type="button"
               variant="outline"
               onClick={handleGenerateTestCasesClick}
-              disabled={!generatedCode || anyLoading}
+              disabled={!generatedCode || anySubActionLoading}
               className="w-full hover:shadow-lg hover:scale-105 transition-transform"
             >
               {isGeneratingTestCases ? (

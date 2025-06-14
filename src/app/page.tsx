@@ -13,7 +13,8 @@ import { generateSmartContractCode } from '@/ai/flows/generate-smart-contract-co
 import { suggestErrorPrevention } from '@/ai/flows/suggest-error-prevention';
 import { estimateGasCost } from '@/ai/flows/estimate-gas-cost';
 import { getKnownLiquidityPoolInfo, type GetKnownLiquidityPoolInfoOutput } from '@/ai/flows/get-known-liquidity-pool-info';
-import { generateTestCases, type GenerateTestCasesOutput } from '@/ai/flows/generate-test-cases'; // New Import
+import { generateTestCases } from '@/ai/flows/generate-test-cases';
+import { refineSmartContractCode } from '@/ai/flows/refine-smart-contract-code'; // New import
 import { Card, CardContent } from '@/components/ui/card';
 import { CONTRACT_TEMPLATES, type ContractTemplate } from '@/config/contracts';
 
@@ -25,12 +26,13 @@ export default function SolidityForgePage() {
   const [aiSuggestions, setAiSuggestions] = useState<AISuggestion[]>([]);
   const [securityScore, setSecurityScore] = useState<number | null>(null);
   const [gasEstimation, setGasEstimation] = useState<EstimateGasCostOutput | null>(null);
-  const [generatedTestCases, setGeneratedTestCases] = useState<string>(''); // New state for test cases
+  const [generatedTestCases, setGeneratedTestCases] = useState<string>('');
 
   const [isGeneratingCode, setIsGeneratingCode] = useState<boolean>(false);
   const [isGettingSuggestions, setIsGettingSuggestions] = useState<boolean>(false);
   const [isEstimatingGas, setIsEstimatingGas] = useState<boolean>(false);
-  const [isGeneratingTestCases, setIsGeneratingTestCases] = useState<boolean>(false); // New loading state
+  const [isGeneratingTestCases, setIsGeneratingTestCases] = useState<boolean>(false);
+  const [isRefiningCode, setIsRefiningCode] = useState<boolean>(false); // New loading state
 
   const [mainContentVisible, setMainContentVisible] = useState(false);
 
@@ -46,14 +48,18 @@ export default function SolidityForgePage() {
     return () => clearTimeout(timer);
   }, []);
 
+  const resetAnalyses = () => {
+    setAiSuggestions([]);
+    setSecurityScore(null);
+    setGasEstimation(null);
+    setGeneratedTestCases('');
+  };
+
   const handleGenerateCode = async (template: ContractTemplate, formData: FormData) => {
     setSelectedTemplate(template);
     setIsGeneratingCode(true);
     setGeneratedCode('');
-    setAiSuggestions([]);
-    setSecurityScore(null);
-    setGasEstimation(null); 
-    setGeneratedTestCases(''); // Reset test cases
+    resetAnalyses();
 
     let description = `Generate a Solidity smart contract for ${template.name}.`;
     if (template.id === 'custom' && formData.customDescription) {
@@ -79,15 +85,15 @@ Specific guidance: ${template.aiPromptEnhancement}`;
       const result = await generateSmartContractCode({ description });
       setGeneratedCode(result.code);
       toast({
-        title: "Code Generated Successfully!",
-        description: "Your Solidity code is ready for review.",
+        title: "Voila! Code Conjured!",
+        description: "Your Solidity masterpiece (or so I assume) is ready. Don't break it.",
       });
     } catch (error) {
       console.error("Error generating code:", error);
       toast({
         variant: "destructive",
-        title: "Error Generating Code",
-        description: (error as Error).message || "An unexpected error occurred. Please try again.",
+        title: "Code Generation Failed Miserably",
+        description: (error as Error).message || "My AI hamsters are on strike. Try again later.",
       });
       setGeneratedCode('');
     } finally {
@@ -99,8 +105,8 @@ Specific guidance: ${template.aiPromptEnhancement}`;
     if (!generatedCode || !template) {
       toast({
         variant: "destructive",
-        title: "Cannot Get Suggestions",
-        description: "Please generate code first.",
+        title: "Hold Your Horses!",
+        description: "Need some code to critique first, don't we? Generate some, then we'll talk.",
       });
       return;
     }
@@ -119,15 +125,15 @@ Specific guidance: ${template.aiPromptEnhancement}`;
       setAiSuggestions(result.suggestions || []); 
       setSecurityScore(result.securityScore);
       toast({
-        title: "AI Analysis Complete",
-        description: "Error prevention and optimization suggestions are now available.",
+        title: "AI Wisdom Dispensed!",
+        description: "My (obviously brilliant) suggestions are ready. Try not to ignore them.",
       });
     } catch (error) {
       console.error("Error getting AI suggestions:", error);
       toast({
         variant: "destructive",
-        title: "Error Getting AI Suggestions",
-        description: (error as Error).message || "An unexpected error occurred. Please try again.",
+        title: "AI Suggestion Engine Sputtered",
+        description: (error as Error).message || "Even my genius has limits. Or maybe your code is just *that* special.",
       });
     } finally {
       setIsGettingSuggestions(false);
@@ -138,8 +144,8 @@ Specific guidance: ${template.aiPromptEnhancement}`;
     if (!generatedCode) {
       toast({
         variant: "destructive",
-        title: "Cannot Estimate Gas",
-        description: "Please generate code first.",
+        title: "Patience, Young Padawan!",
+        description: "Can't estimate gas on... nothing. Generate code first!",
       });
       return;
     }
@@ -150,15 +156,15 @@ Specific guidance: ${template.aiPromptEnhancement}`;
       const result = await estimateGasCost({ code: generatedCode });
       setGasEstimation(result);
       toast({
-        title: "Gas Estimation Complete",
-        description: "AI-powered gas cost analysis is ready.",
+        title: "Gas Oracle Has Spoken!",
+        description: "Behold! My (probably accurate) gas cost estimations.",
       });
     } catch (error) {
       console.error("Error estimating gas costs:", error);
       toast({
         variant: "destructive",
-        title: "Error Estimating Gas",
-        description: (error as Error).message || "An unexpected error occurred. Please try again.",
+        title: "Gas Estimation Botched",
+        description: (error as Error).message || "The gas spirits are uncooperative. Or my crystal ball is cloudy.",
       });
     } finally {
       setIsEstimatingGas(false);
@@ -169,8 +175,8 @@ Specific guidance: ${template.aiPromptEnhancement}`;
     if (!generatedCode) {
       toast({
         variant: "destructive",
-        title: "Cannot Generate Test Cases",
-        description: "Please generate smart contract code first.",
+        title: "Easy There, Cowboy!",
+        description: "Let's get some code first before we try to test its non-existent glory.",
       });
       return;
     }
@@ -180,18 +186,62 @@ Specific guidance: ${template.aiPromptEnhancement}`;
       const result = await generateTestCases({ code: generatedCode, contractName: selectedTemplate?.name });
       setGeneratedTestCases(result.testCasesCode);
       toast({
-        title: "Test Cases Generated!",
-        description: "Basic test cases for your contract are ready.",
+        title: "Test Case Magic!",
+        description: "Behold, some basic tests. Don't expect them to catch *all* your genius, though.",
       });
     } catch (error) {
       console.error("Error generating test cases:", error);
       toast({
         variant: "destructive",
-        title: "Error Generating Test Cases",
-        description: (error as Error).message || "An unexpected error occurred. Please try again.",
+        title: "Test Generation Fiasco",
+        description: (error as Error).message || "My test-writing quill broke. Or your code is untestable. One of those.",
       });
     } finally {
       setIsGeneratingTestCases(false);
+    }
+  };
+
+  const handleRefineCode = async (request: string) => {
+    if (!generatedCode || !selectedTemplate) {
+      toast({
+        variant: "destructive",
+        title: "Cannot Refine Code",
+        description: "Dude, I need some code to refine first. Generate some, then we'll talk.",
+      });
+      return;
+    }
+    if (!request.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Empty Request",
+        description: "Whispering sweet nothings into the void? Give me an actual refinement instruction!",
+      });
+      return;
+    }
+
+    setIsRefiningCode(true);
+    resetAnalyses(); // Reset dependent analyses as code is changing
+
+    try {
+      const result = await refineSmartContractCode({
+        currentCode: generatedCode,
+        refinementRequest: request,
+        contractContext: `Contract type: ${selectedTemplate.name}`,
+      });
+      setGeneratedCode(result.refinedCode);
+      toast({
+        title: "Code 'Refined'!",
+        description: "Alright, I've tinkered with your code. You might want to re-run those analyses – who knows what my genius (or your instructions) did to them!",
+      });
+    } catch (error) {
+      console.error("Error refining code:", error);
+      toast({
+        variant: "destructive",
+        title: "Refinement Malfunction!",
+        description: (error as Error).message || "My circuits are frazzled trying to understand that. Please try a different refinement.",
+      });
+    } finally {
+      setIsRefiningCode(false);
     }
   };
 
@@ -200,7 +250,7 @@ Specific guidance: ${template.aiPromptEnhancement}`;
       toast({
         variant: "destructive",
         title: "Empty Query",
-        description: "Please enter a search query for contract addresses.",
+        description: "Trying to find nothing, are we? Enter a search term, please.",
       });
       return;
     }
@@ -210,21 +260,22 @@ Specific guidance: ${template.aiPromptEnhancement}`;
       const result = await getKnownLiquidityPoolInfo({ query });
       setAddressResults(result);
       toast({
-        title: "Address Search Complete",
-        description: result.summary || "Fetched contract addresses.",
+        title: "Address Search Complete!",
+        description: result.summary || "Fetched contract addresses. Or tried to.",
       });
     } catch (error) {
       console.error("Error finding addresses:", error);
       toast({
         variant: "destructive",
-        title: "Error Finding Addresses",
-        description: (error as Error).message || "An unexpected error occurred. Please try again.",
+        title: "Address Finder Flummoxed",
+        description: (error as Error).message || "The address book is currently... indecipherable.",
       });
     } finally {
       setIsFindingAddresses(false);
     }
   };
 
+  const anySubActionLoading = isGettingSuggestions || isEstimatingGas || isGeneratingTestCases || isRefiningCode;
 
   return (
     <div className="min-h-screen text-foreground flex flex-col">
@@ -242,11 +293,12 @@ Specific guidance: ${template.aiPromptEnhancement}`;
               onGenerateCode={handleGenerateCode}
               onGetAISuggestions={handleGetAISuggestions}
               onEstimateGasCosts={handleEstimateGasCosts}
-              onGenerateTestCases={handleGenerateTestCases} // New prop
+              onGenerateTestCases={handleGenerateTestCases}
               isGeneratingCode={isGeneratingCode}
               isGettingSuggestions={isGettingSuggestions}
               isEstimatingGas={isEstimatingGas}
-              isGeneratingTestCases={isGeneratingTestCases} // New prop
+              isGeneratingTestCases={isGeneratingTestCases}
+              isRefiningCode={isRefiningCode} // Pass new loading state
               generatedCode={generatedCode}
               selectedTemplateProp={selectedTemplate}
             />
@@ -261,11 +313,15 @@ Specific guidance: ${template.aiPromptEnhancement}`;
             suggestions={aiSuggestions}
             securityScore={securityScore}
             gasEstimation={gasEstimation}
-            testCasesCode={generatedTestCases} // New prop
+            testCasesCode={generatedTestCases}
             isLoadingCode={isGeneratingCode}
             isLoadingSuggestions={isGettingSuggestions}
             isLoadingGasEstimation={isEstimatingGas}
-            isLoadingTestCases={isGeneratingTestCases} // New prop
+            isLoadingTestCases={isGeneratingTestCases}
+            isRefiningCode={isRefiningCode} // Pass new loading state
+            onRefineCode={handleRefineCode} // Pass handler
+            selectedTemplateName={selectedTemplate?.name} // Pass template name for context
+            anySubActionLoading={anySubActionLoading} // Pass combined loading state
           />
         </Card>
         
