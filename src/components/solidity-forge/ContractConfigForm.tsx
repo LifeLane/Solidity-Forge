@@ -13,6 +13,7 @@ import { CardTitle, CardDescription } from '@/components/ui/card';
 import { AlertCircle, Loader2, Wand2, Brain, Fuel, Beaker } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Switch } from "@/components/ui/switch"; 
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export type FormData = Record<string, any>;
 
@@ -26,10 +27,90 @@ interface ContractConfigFormProps {
   isGettingSuggestions: boolean;
   isEstimatingGas: boolean;
   isGeneratingTestCases: boolean;
-  isRefiningCode: boolean; // New prop for refinement loading state
+  isRefiningCode: boolean;
   generatedCode: string;
   selectedTemplateProp?: ContractTemplate;
 }
+
+// Helper to group parameters for tabs
+interface ParameterGroup {
+  title: string;
+  parameters: ContractParameter[];
+  defaultActive?: boolean;
+}
+
+const getParameterGroups = (template: ContractTemplate, isAdvancedMode: boolean): ParameterGroup[] => {
+  const visibleParams = template.parameters.filter(p => isAdvancedMode || !p.advancedOnly);
+  
+  if (template.id === 'erc20') {
+    return [
+      { 
+        title: 'Core Details', 
+        parameters: visibleParams.filter(p => ['tokenName', 'tokenSymbol', 'initialSupply', 'decimals'].includes(p.name)),
+        defaultActive: true,
+      },
+      { 
+        title: 'Features', 
+        parameters: visibleParams.filter(p => ['mintable', 'burnable', 'pausable'].includes(p.name)) 
+      },
+      { 
+        title: 'Economics', 
+        parameters: visibleParams.filter(p => ['transactionFeePercent', 'feeRecipientAddress', 'maxTransactionAmount'].includes(p.name)) 
+      },
+      { 
+        title: 'Control & Upgrades', 
+        parameters: visibleParams.filter(p => ['accessControl', 'upgradable'].includes(p.name)) 
+      },
+    ].filter(group => group.parameters.length > 0);
+  }
+  if (template.id === 'liquidityPool') {
+     return [
+      { 
+        title: 'Pool Setup', 
+        parameters: visibleParams.filter(p => ['poolName', 'poolSymbol', 'tokenA_Address', 'tokenB_Address'].includes(p.name)),
+        defaultActive: true,
+      },
+      { 
+        title: 'Configuration', 
+        parameters: visibleParams.filter(p => ['feeBps', 'accessControl', 'upgradable'].includes(p.name)) 
+      },
+    ].filter(group => group.parameters.length > 0);
+  }
+  if (template.id === 'swapProtocol') {
+    return [
+      {
+        title: 'Router Setup',
+        parameters: visibleParams.filter(p => ['routerName', 'factoryAddress', 'wethAddress'].includes(p.name)),
+        defaultActive: true,
+      },
+      {
+        title: 'Control & Upgrades',
+        parameters: visibleParams.filter(p => ['accessControl', 'upgradable'].includes(p.name)),
+      }
+    ].filter(group => group.parameters.length > 0);
+  }
+  if (template.id === 'dao') {
+    return [
+       {
+        title: 'DAO Basics',
+        parameters: visibleParams.filter(p => ['daoName', 'proposalTokenAddress'].includes(p.name)),
+        defaultActive: true,
+      },
+      {
+        title: 'Governance Rules',
+        parameters: visibleParams.filter(p => ['votingDelay', 'votingPeriod', 'proposalThreshold', 'quorumNumerator'].includes(p.name)),
+      },
+       {
+        title: 'Advanced',
+        parameters: visibleParams.filter(p => ['upgradable'].includes(p.name)),
+      }
+    ].filter(group => group.parameters.length > 0);
+  }
+
+  // Default for custom or simpler templates
+  return [{ title: 'Parameters', parameters: visibleParams, defaultActive: true }].filter(group => group.parameters.length > 0);
+};
+
 
 export function ContractConfigForm({
   templates,
@@ -41,12 +122,14 @@ export function ContractConfigForm({
   isGettingSuggestions,
   isEstimatingGas,
   isGeneratingTestCases,
-  isRefiningCode, // New prop
+  isRefiningCode,
   generatedCode,
   selectedTemplateProp,
 }: ContractConfigFormProps) {
   const [selectedTemplate, setSelectedTemplate] = React.useState<ContractTemplate | undefined>(selectedTemplateProp || templates[0]);
   const [isAdvancedMode, setIsAdvancedMode] = useState(false);
+  const [activeTabValue, setActiveTabValue] = useState<string | undefined>(undefined);
+
 
   const { control, handleSubmit, reset, watch, formState: { errors } } = useForm<FormData>({
     defaultValues: selectedTemplate?.parameters.reduce((acc, param) => {
@@ -71,8 +154,16 @@ export function ContractConfigForm({
         defaultValues.customDescription = ''; 
       }
       reset(defaultValues);
+      // Set initial active tab
+      const groups = getParameterGroups(selectedTemplate, isAdvancedMode);
+      const defaultActiveGroup = groups.find(g => g.defaultActive) || groups[0];
+      if (defaultActiveGroup) {
+        setActiveTabValue(defaultActiveGroup.title.toLowerCase().replace(/\s+/g, '-'));
+      } else {
+        setActiveTabValue(undefined);
+      }
     }
-  }, [selectedTemplate, reset]);
+  }, [selectedTemplate, reset, isAdvancedMode]);
 
   const currentFormData = watch();
 
@@ -102,6 +193,19 @@ export function ContractConfigForm({
   };
 
   const renderParameterInput = (param: ContractParameter) => {
+    // Conditional rendering based on dependencies, if isAdvancedMode allows it
+    if (param.dependsOn && (!isAdvancedMode && param.advancedOnly)) {
+      const dependentValue = currentFormData[param.dependsOn];
+      let shouldShow = false;
+      if (typeof param.dependsOnValue === 'function') {
+        shouldShow = param.dependsOnValue(dependentValue);
+      } else {
+        shouldShow = dependentValue === param.dependsOnValue;
+      }
+      if (!shouldShow) return null;
+    }
+
+
     const commonProps = {
       name: param.name,
       control: control,
@@ -127,8 +231,8 @@ export function ContractConfigForm({
             {...commonProps}
             defaultValue={param.defaultValue || param.options[0]?.value}
             render={({ field }) => (
-              <Select onValueChange={field.onChange} value={field.value as string} defaultValue={field.value as string || undefined}>
-                <SelectTrigger id={param.name}>
+              <Select onValueChange={field.onChange} value={field.value as string} defaultValue={field.value as string || undefined} disabled={anyPrimaryActionLoading}>
+                <SelectTrigger id={param.name} className="bg-input/50 focus:bg-input">
                   <SelectValue placeholder={param.placeholder || `Select ${param.label}`} />
                 </SelectTrigger>
                 <SelectContent>
@@ -150,6 +254,7 @@ export function ContractConfigForm({
                 rows={param.rows || 3}
                 {...field}
                 className="bg-input/50 focus:bg-input"
+                disabled={anyPrimaryActionLoading}
               />
             )}
           />
@@ -164,6 +269,7 @@ export function ContractConfigForm({
                 placeholder={param.placeholder}
                 {...field}
                 className="bg-input/50 focus:bg-input"
+                disabled={anyPrimaryActionLoading}
               />
             )}
           />
@@ -176,6 +282,7 @@ export function ContractConfigForm({
   const anyPrimaryActionLoading = isGeneratingCode || isRefiningCode;
   const anySubActionLoading = isGettingSuggestions || isEstimatingGas || isGeneratingTestCases || isRefiningCode;
 
+  const parameterGroups = selectedTemplate ? getParameterGroups(selectedTemplate, isAdvancedMode) : [];
 
   return (
     <div className="space-y-6">
@@ -219,9 +326,46 @@ export function ContractConfigForm({
             <span className="text-sm text-muted-foreground">Advanced</span>
           </div>
 
-          {selectedTemplate.parameters
+          {selectedTemplate.id === 'custom' ? ( // Custom template has no tabs
+            selectedTemplate.parameters
             .filter(param => isAdvancedMode || !param.advancedOnly) 
-            .map(renderParameterInput)}
+            .map(renderParameterInput)
+          ) : parameterGroups.length > 0 ? (
+            <Tabs 
+              value={activeTabValue} 
+              onValueChange={setActiveTabValue} 
+              className="w-full"
+            >
+              <TabsList className="grid w-full grid-cols-min-4 gap-1 h-auto flex-wrap justify-start">
+                {parameterGroups.map(group => {
+                  const tabValue = group.title.toLowerCase().replace(/\s+/g, '-');
+                  return (
+                    <TabsTrigger 
+                      key={tabValue} 
+                      value={tabValue}
+                      disabled={anyPrimaryActionLoading && activeTabValue !== tabValue}
+                      className="text-xs px-2 py-1.5 sm:text-sm sm:px-3 sm:py-1.5 h-auto" // smaller padding for many tabs
+                    >
+                      {group.title}
+                    </TabsTrigger>
+                  );
+                })}
+              </TabsList>
+              {parameterGroups.map(group => {
+                const tabValue = group.title.toLowerCase().replace(/\s+/g, '-');
+                return (
+                  <TabsContent key={tabValue} value={tabValue} className="mt-4 space-y-4">
+                    {group.parameters.length > 0 ? group.parameters.map(renderParameterInput) : <p className="text-sm text-muted-foreground p-4 text-center">No parameters in this section for the current mode.</p>}
+                  </TabsContent>
+                );
+              })}
+            </Tabs>
+          ) : (
+             selectedTemplate.parameters
+            .filter(param => isAdvancedMode || !param.advancedOnly) 
+            .map(renderParameterInput)
+          )}
+
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4">
             <Button 
@@ -284,4 +428,3 @@ export function ContractConfigForm({
     </div>
   );
 }
-
