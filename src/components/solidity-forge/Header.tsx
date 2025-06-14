@@ -3,12 +3,12 @@ import { Sparkles } from 'lucide-react';
 
 // SolidityForge Icon - a simple geometric representation
 const SolidityForgeIcon = () => (
-  <svg 
-    width="40" 
-    height="40" 
-    viewBox="0 0 100 100" 
-    fill="none" 
-    xmlns="http://www.w3.org/2000/svg" 
+  <svg
+    width="40"
+    height="40"
+    viewBox="0 0 100 100"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
     className="text-primary group-hover:text-accent transition-colors duration-300 animate-pulse"
     aria-label="SolidityForge Logo"
   >
@@ -22,9 +22,9 @@ const SolidityForgeIcon = () => (
 
 export function Header() {
   return (
-    <header 
-      className="py-4 px-4 md:px-8 bg-card/80 backdrop-blur-sm border border-border/50 rounded-lg sticky top-0 z-50 animate-fadeInUp animate-multicolor-border-glow" 
-      style={{ animationDelay: '0.1s' }}
+    <header
+      className="py-4 px-4 md:px-8 bg-card border border-border/50 rounded-lg sticky top-0 z-50 animate-fadeInUp animate-multicolor-border-glow"
+      style={{ animationDelay: '0.1s', transform: 'translateZ(0)' }}
     >
       <div className="container mx-auto flex flex-col items-center gap-3 md:flex-row md:justify-between">
         <div className="flex items-center gap-3 group cursor-default text-center md:text-left">
@@ -41,4 +41,3 @@ export function Header() {
     </header>
   );
 }
-
