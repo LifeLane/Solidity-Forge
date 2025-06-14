@@ -2,6 +2,8 @@
 "use client";
 
 import React, { useState } from 'react';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -157,6 +159,22 @@ export function CodeDisplay({
     }
   };
 
+  const customSyntaxHighlighterStyle = {
+    ...vscDarkPlus,
+    'pre[class*="language-"]': {
+      ...vscDarkPlus['pre[class*="language-"]'],
+      backgroundColor: 'transparent', // Make background transparent to use parent's bg
+      margin: 0, // Remove default margins
+      padding: '1rem', // Keep padding consistent
+      fontSize: '0.875rem', // text-sm
+      fontFamily: 'var(--font-code)', // Use font from Tailwind config
+    },
+    'code[class*="language-"]': {
+      ...vscDarkPlus['code[class*="language-"]'],
+       fontFamily: 'var(--font-code)', // Use font from Tailwind config
+    }
+  };
+
 
   return (
     <div className="flex flex-col h-full p-4 md:p-6">
@@ -219,13 +237,21 @@ export function CodeDisplay({
         </TabsList>
 
         <TabsContent value="code" className="flex-grow flex flex-col overflow-hidden rounded-md border border-border/50 bg-muted/20 animate-multicolor-border-glow">
-          <ScrollArea className="h-[calc(100vh-24rem)] lg:h-[calc(100vh-30rem)] max-h-[500px] p-1">
+          <ScrollArea className="h-[calc(100vh-24rem)] lg:h-[calc(100vh-30rem)] max-h-[500px]">
             {isLoadingCode ? (
               <div className="p-4 space-y-3">
                 {[...Array(7)].map((_, i) => <Skeleton key={i} className={`h-5 ${i % 3 === 0 ? 'w-3/4' : i % 3 === 1 ? 'w-full' : 'w-5/6'}`} />)}
               </div>
             ) : code ? (
-              <pre className="p-4 text-sm font-code whitespace-pre-wrap break-all">{code}</pre>
+              <SyntaxHighlighter
+                language="solidity"
+                style={customSyntaxHighlighterStyle}
+                showLineNumbers
+                wrapLines
+                wrapLongLines
+              >
+                {code}
+              </SyntaxHighlighter>
             ) : (
               <div className="p-6 text-center text-muted-foreground flex flex-col items-center justify-center h-full">
                 <CheckCircle2 className="w-12 h-12 mb-4 text-muted-foreground/50" />
@@ -239,7 +265,7 @@ export function CodeDisplay({
                 htmlFor="refinementRequest" 
                 className={cn(
                   "text-sm font-medium flex items-center justify-center gap-1.5 mb-2",
-                  "animate-multicolor-border-glow p-1 rounded-md" // Glow effect for Label
+                  "animate-multicolor-border-glow p-1 rounded-md"
                   )}
               >
                 <Sparkles className="h-4 w-4 text-primary" />
@@ -251,7 +277,7 @@ export function CodeDisplay({
                 onChange={(e) => setRefinementInput(e.target.value)}
                 placeholder="e.g., 'Add NatSpec comments to all public functions' or 'Optimize the transfer function for gas...'"
                 rows={3}
-                className="mb-2 bg-background/70 focus:bg-background"
+                className="mb-2 bg-background/70 focus:bg-background placeholder:text-center"
                 disabled={overallLoading || anySubActionLoading}
               />
               <Button 
@@ -280,7 +306,7 @@ export function CodeDisplay({
               <div className="p-4 space-y-4">
                 {securityScore !== null && (
                   <div className="flex items-center justify-between p-3 bg-card rounded-md shadow mb-3 animate-multicolor-border-glow">
-                    <h3 className="text-base font-semibold p-1 rounded-md ">Overall Audit Readiness</h3>
+                    <h3 className="text-base font-semibold p-1 rounded-md animate-multicolor-border-glow">Overall Audit Readiness</h3>
                     {getSecurityScoreBadge(securityScore)}
                   </div>
                 )}
@@ -353,13 +379,21 @@ export function CodeDisplay({
         </TabsContent>
 
         <TabsContent value="tests" className="flex-grow overflow-hidden rounded-md border border-border/50 bg-muted/20 animate-multicolor-border-glow">
-          <ScrollArea className="h-[calc(100vh-18rem)] lg:h-[calc(100vh-24rem)] max-h-[600px] p-1">
+          <ScrollArea className="h-[calc(100vh-18rem)] lg:h-[calc(100vh-24rem)] max-h-[600px]">
             {isLoadingTestCases ? (
               <div className="p-4 space-y-3">
                 {[...Array(7)].map((_, i) => <Skeleton key={i} className={`h-5 ${i % 3 === 0 ? 'w-3/4' : i % 3 === 1 ? 'w-full' : 'w-5/6'}`} />)}
               </div>
             ) : testCasesCode ? (
-              <pre className="p-4 text-sm font-code whitespace-pre-wrap break-all">{testCasesCode}</pre>
+              <SyntaxHighlighter
+                language="javascript"
+                style={customSyntaxHighlighterStyle}
+                showLineNumbers
+                wrapLines
+                wrapLongLines
+              >
+                {testCasesCode}
+              </SyntaxHighlighter>
             ) : code && !isLoadingCode && !overallLoading ? (
               <div className="p-6 text-center text-muted-foreground flex flex-col items-center justify-center h-full">
                 <Beaker className="w-12 h-12 mb-4 text-muted-foreground/50" />
