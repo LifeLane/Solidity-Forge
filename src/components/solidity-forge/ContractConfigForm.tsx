@@ -32,7 +32,6 @@ interface ContractConfigFormProps {
   selectedTemplateProp?: ContractTemplate;
 }
 
-// Helper to group parameters for tabs
 interface ParameterGroup {
   title: string;
   parameters: ContractParameter[];
@@ -107,7 +106,6 @@ const getParameterGroups = (template: ContractTemplate, isAdvancedMode: boolean)
     ].filter(group => group.parameters.length > 0);
   }
 
-  // Default for custom or simpler templates
   return [{ title: 'Parameters', parameters: visibleParams, defaultActive: true }].filter(group => group.parameters.length > 0);
 };
 
@@ -154,12 +152,15 @@ export function ContractConfigForm({
         defaultValues.customDescription = ''; 
       }
       reset(defaultValues);
-      // Set initial active tab
+      
       const groups = getParameterGroups(selectedTemplate, isAdvancedMode);
       const defaultActiveGroup = groups.find(g => g.defaultActive) || groups[0];
       if (defaultActiveGroup) {
         setActiveTabValue(defaultActiveGroup.title.toLowerCase().replace(/\s+/g, '-'));
-      } else {
+      } else if (groups.length > 0) {
+        setActiveTabValue(groups[0].title.toLowerCase().replace(/\s+/g, '-'));
+      }
+       else {
         setActiveTabValue(undefined);
       }
     }
@@ -193,7 +194,6 @@ export function ContractConfigForm({
   };
 
   const renderParameterInput = (param: ContractParameter) => {
-    // Conditional rendering based on dependencies, if isAdvancedMode allows it
     if (param.dependsOn && (!isAdvancedMode && param.advancedOnly)) {
       const dependentValue = currentFormData[param.dependsOn];
       let shouldShow = false;
@@ -204,7 +204,6 @@ export function ContractConfigForm({
       }
       if (!shouldShow) return null;
     }
-
 
     const commonProps = {
       name: param.name,
@@ -285,7 +284,7 @@ export function ContractConfigForm({
   const parameterGroups = selectedTemplate ? getParameterGroups(selectedTemplate, isAdvancedMode) : [];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6"> {/* Added p-6 here for overall padding */}
       <div className="text-center">
         <CardTitle className="text-2xl font-headline mb-1">Configure Your Contract</CardTitle>
         <CardDescription>Define contract parameters. Or don't. See if I care.</CardDescription>
@@ -326,17 +325,24 @@ export function ContractConfigForm({
             <span className="text-sm text-muted-foreground">Advanced</span>
           </div>
 
-          {selectedTemplate.id === 'custom' ? ( // Custom template has no tabs
-            selectedTemplate.parameters
-            .filter(param => isAdvancedMode || !param.advancedOnly) 
-            .map(renderParameterInput)
-          ) : parameterGroups.length > 0 ? (
+          {selectedTemplate.id === 'custom' || parameterGroups.length <= 1 ? ( 
+            <div className="space-y-4">
+              {selectedTemplate.parameters
+                .filter(param => isAdvancedMode || !param.advancedOnly) 
+                .map(renderParameterInput)}
+            </div>
+          ) : (
             <Tabs 
               value={activeTabValue} 
               onValueChange={setActiveTabValue} 
-              className="w-full"
+              className="flex flex-col md:flex-row gap-4 md:gap-6"
             >
-              <TabsList className="grid w-full grid-cols-min-4 gap-1 h-auto flex-wrap justify-start">
+              <TabsList 
+                className="
+                  flex flex-row overflow-x-auto pb-2 
+                  md:pb-0 md:overflow-x-visible md:flex-col md:space-y-1 md:w-48 lg:w-56 shrink-0 
+                  bg-transparent md:bg-background/30 md:p-3 rounded-lg"
+              >
                 {parameterGroups.map(group => {
                   const tabValue = group.title.toLowerCase().replace(/\s+/g, '-');
                   return (
@@ -344,26 +350,29 @@ export function ContractConfigForm({
                       key={tabValue} 
                       value={tabValue}
                       disabled={anyPrimaryActionLoading && activeTabValue !== tabValue}
-                      className="text-xs px-2 py-1.5 sm:text-sm sm:px-3 sm:py-1.5 h-auto" // smaller padding for many tabs
+                      className="
+                        whitespace-nowrap px-3 py-2 text-sm font-medium rounded-md transition-all
+                        hover:bg-muted/60 hover:text-accent-foreground 
+                        focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
+                        data-[state=active]:bg-muted data-[state=active]:text-primary data-[state=active]:font-semibold data-[state=active]:shadow-inner
+                        md:w-full md:justify-start"
                     >
                       {group.title}
                     </TabsTrigger>
                   );
                 })}
               </TabsList>
-              {parameterGroups.map(group => {
-                const tabValue = group.title.toLowerCase().replace(/\s+/g, '-');
-                return (
-                  <TabsContent key={tabValue} value={tabValue} className="mt-4 space-y-4">
-                    {group.parameters.length > 0 ? group.parameters.map(renderParameterInput) : <p className="text-sm text-muted-foreground p-4 text-center">No parameters in this section for the current mode.</p>}
-                  </TabsContent>
-                );
-              })}
+              <div className="flex-grow">
+                {parameterGroups.map(group => {
+                  const tabValue = group.title.toLowerCase().replace(/\s+/g, '-');
+                  return (
+                    <TabsContent key={tabValue} value={tabValue} className="mt-0 space-y-4">
+                      {group.parameters.length > 0 ? group.parameters.map(renderParameterInput) : <p className="text-sm text-muted-foreground p-4 text-center">No parameters in this section for the current mode.</p>}
+                    </TabsContent>
+                  );
+                })}
+              </div>
             </Tabs>
-          ) : (
-             selectedTemplate.parameters
-            .filter(param => isAdvancedMode || !param.advancedOnly) 
-            .map(renderParameterInput)
           )}
 
 
@@ -428,3 +437,4 @@ export function ContractConfigForm({
     </div>
   );
 }
+

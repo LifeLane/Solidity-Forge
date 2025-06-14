@@ -14,7 +14,7 @@ import { suggestErrorPrevention } from '@/ai/flows/suggest-error-prevention';
 import { estimateGasCost } from '@/ai/flows/estimate-gas-cost';
 import { getKnownLiquidityPoolInfo, type GetKnownLiquidityPoolInfoOutput } from '@/ai/flows/get-known-liquidity-pool-info';
 import { generateTestCases } from '@/ai/flows/generate-test-cases';
-import { refineSmartContractCode } from '@/ai/flows/refine-smart-contract-code'; // New import
+import { refineSmartContractCode } from '@/ai/flows/refine-smart-contract-code';
 import { Card, CardContent } from '@/components/ui/card';
 import { CONTRACT_TEMPLATES, type ContractTemplate } from '@/config/contracts';
 
@@ -32,7 +32,7 @@ export default function SolidityForgePage() {
   const [isGettingSuggestions, setIsGettingSuggestions] = useState<boolean>(false);
   const [isEstimatingGas, setIsEstimatingGas] = useState<boolean>(false);
   const [isGeneratingTestCases, setIsGeneratingTestCases] = useState<boolean>(false);
-  const [isRefiningCode, setIsRefiningCode] = useState<boolean>(false); // New loading state
+  const [isRefiningCode, setIsRefiningCode] = useState<boolean>(false);
 
   const [mainContentVisible, setMainContentVisible] = useState(false);
 
@@ -220,7 +220,7 @@ Specific guidance: ${template.aiPromptEnhancement}`;
     }
 
     setIsRefiningCode(true);
-    resetAnalyses(); // Reset dependent analyses as code is changing
+    resetAnalyses(); 
 
     try {
       const result = await refineSmartContractCode({
@@ -287,7 +287,7 @@ Specific guidance: ${template.aiPromptEnhancement}`;
           className="transition-all duration-300 bg-card/80 backdrop-blur-sm animate-fadeInUp animate-multicolor-border-glow w-full max-w-2xl" 
           style={{ animationDelay: '0.3s' }}
         >
-          <CardContent className="p-6">
+          <CardContent className="p-0"> {/* Changed p-6 to p-0 */}
             <ContractConfigForm
               templates={CONTRACT_TEMPLATES}
               onGenerateCode={handleGenerateCode}
@@ -298,7 +298,7 @@ Specific guidance: ${template.aiPromptEnhancement}`;
               isGettingSuggestions={isGettingSuggestions}
               isEstimatingGas={isEstimatingGas}
               isGeneratingTestCases={isGeneratingTestCases}
-              isRefiningCode={isRefiningCode} // Pass new loading state
+              isRefiningCode={isRefiningCode}
               generatedCode={generatedCode}
               selectedTemplateProp={selectedTemplate}
             />
@@ -318,10 +318,10 @@ Specific guidance: ${template.aiPromptEnhancement}`;
             isLoadingSuggestions={isGettingSuggestions}
             isLoadingGasEstimation={isEstimatingGas}
             isLoadingTestCases={isGeneratingTestCases}
-            isRefiningCode={isRefiningCode} // Pass new loading state
-            onRefineCode={handleRefineCode} // Pass handler
-            selectedTemplateName={selectedTemplate?.name} // Pass template name for context
-            anySubActionLoading={anySubActionLoading} // Pass combined loading state
+            isRefiningCode={isRefiningCode}
+            onRefineCode={handleRefineCode}
+            selectedTemplateName={selectedTemplate?.name}
+            anySubActionLoading={anySubActionLoading}
           />
         </Card>
         
@@ -344,4 +344,3 @@ Specific guidance: ${template.aiPromptEnhancement}`;
     </div>
   );
 }
-
