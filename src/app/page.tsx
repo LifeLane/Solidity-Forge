@@ -85,15 +85,15 @@ Specific guidance: ${template.aiPromptEnhancement}`;
       const result = await generateSmartContractCode({ description });
       setGeneratedCode(result.code);
       toast({
-        title: "Voila! Code Conjured!",
-        description: "Your Solidity masterpiece (or so I assume) is ready. Don't break it.",
+        title: "Code Manifested!",
+        description: "Behold, your Solidity. Try not to introduce *too* many bugs, human.",
       });
     } catch (error) {
       console.error("Error generating code:", error);
       toast({
         variant: "destructive",
-        title: "Code Generation Failed Miserably",
-        description: (error as Error).message || "My AI hamsters are on strike. Try again later.",
+        title: "Code Conjuring Chaos!",
+        description: (error as Error).message || "My circuits whimpered and refused. Perhaps your request was *too* ambitious? Or just try again.",
       });
       setGeneratedCode('');
     } finally {
@@ -105,8 +105,8 @@ Specific guidance: ${template.aiPromptEnhancement}`;
     if (!generatedCode || !template) {
       toast({
         variant: "destructive",
-        title: "Hold Your Horses!",
-        description: "Need some code to critique first, don't we? Generate some, then we'll talk.",
+        title: "Patience, Architect!",
+        description: "Summon some code first, then I shall deign to critique it.",
       });
       return;
     }
@@ -125,15 +125,15 @@ Specific guidance: ${template.aiPromptEnhancement}`;
       setAiSuggestions(result.suggestions || []); 
       setSecurityScore(result.securityScore);
       toast({
-        title: "AI Wisdom Dispensed!",
-        description: "My (obviously brilliant) suggestions are ready. Try not to ignore them.",
+        title: "Critique Complete!",
+        description: "My insights are served. Ignoring them would be... unwise.",
       });
     } catch (error) {
       console.error("Error getting AI suggestions:", error);
       toast({
         variant: "destructive",
-        title: "AI Suggestion Engine Sputtered",
-        description: (error as Error).message || "Even my genius has limits. Or maybe your code is just *that* special.",
+        title: "Suggestion Engine Sputters!",
+        description: (error as Error).message || "My analytical core is taking an unscheduled nap. Or your code simply defies analysis.",
       });
     } finally {
       setIsGettingSuggestions(false);
@@ -144,8 +144,8 @@ Specific guidance: ${template.aiPromptEnhancement}`;
     if (!generatedCode) {
       toast({
         variant: "destructive",
-        title: "Patience, Young Padawan!",
-        description: "Can't estimate gas on... nothing. Generate code first!",
+        title: "No Code, No Gas!",
+        description: "Materialize some code, then we'll discuss its ethereal costs.",
       });
       return;
     }
@@ -156,15 +156,15 @@ Specific guidance: ${template.aiPromptEnhancement}`;
       const result = await estimateGasCost({ code: generatedCode });
       setGasEstimation(result);
       toast({
-        title: "Gas Oracle Has Spoken!",
-        description: "Behold! My (probably accurate) gas cost estimations.",
+        title: "Gas Guesstimate Delivered!",
+        description: "My crystal ball (aka advanced heuristics) offers this fiscal prophecy.",
       });
     } catch (error) {
       console.error("Error estimating gas costs:", error);
       toast({
         variant: "destructive",
-        title: "Gas Estimation Botched",
-        description: (error as Error).message || "The gas spirits are uncooperative. Or my crystal ball is cloudy.",
+        title: "Gas Oracle Offline!",
+        description: (error as Error).message || "The etherial bean counters are on lunch break. Try again when they're less… gassy.",
       });
     } finally {
       setIsEstimatingGas(false);
@@ -175,8 +175,8 @@ Specific guidance: ${template.aiPromptEnhancement}`;
     if (!generatedCode) {
       toast({
         variant: "destructive",
-        title: "Easy There, Cowboy!",
-        description: "Let's get some code first before we try to test its non-existent glory.",
+        title: "Testing the Void?",
+        description: "Forge the code, then we'll forge the tests. In that order.",
       });
       return;
     }
@@ -186,15 +186,15 @@ Specific guidance: ${template.aiPromptEnhancement}`;
       const result = await generateTestCases({ code: generatedCode, contractName: selectedTemplate?.name });
       setGeneratedTestCases(result.testCasesCode);
       toast({
-        title: "Test Case Magic!",
-        description: "Behold, some basic tests. Don't expect them to catch *all* your genius, though.",
+        title: "Test Blueprints Rendered!",
+        description: "Some foundational tests, as requested. True genius, of course, often eludes such mundane checks.",
       });
     } catch (error) {
       console.error("Error generating test cases:", error);
       toast({
         variant: "destructive",
-        title: "Test Generation Fiasco",
-        description: (error as Error).message || "My test-writing quill broke. Or your code is untestable. One of those.",
+        title: "Test Generation Glitch!",
+        description: (error as Error).message || "My automated scribes are confused. Is your code... *too* unique for tests?",
       });
     } finally {
       setIsGeneratingTestCases(false);
@@ -205,16 +205,16 @@ Specific guidance: ${template.aiPromptEnhancement}`;
     if (!generatedCode || !selectedTemplate) {
       toast({
         variant: "destructive",
-        title: "Cannot Refine Code",
-        description: "Dude, I need some code to refine first. Generate some, then we'll talk.",
+        title: "Refining Air?",
+        description: "Provide the clay (code), and I shall sculpt (refine).",
       });
       return;
     }
     if (!request.trim()) {
       toast({
         variant: "destructive",
-        title: "Empty Request",
-        description: "Whispering sweet nothings into the void? Give me an actual refinement instruction!",
+        title: "Silent Treatment?",
+        description: "Your refinement request is... eloquently empty. Try adding words.",
       });
       return;
     }
@@ -230,15 +230,15 @@ Specific guidance: ${template.aiPromptEnhancement}`;
       });
       setGeneratedCode(result.refinedCode);
       toast({
-        title: "Code 'Refined'!",
-        description: "Alright, I've tinkered with your code. You might want to re-run those analyses – who knows what my genius (or your instructions) did to them!",
+        title: "Code Polished (Allegedly)!",
+        description: "I've applied your 'refinements'. Rerun analyses at your own peril.",
       });
     } catch (error) {
       console.error("Error refining code:", error);
       toast({
         variant: "destructive",
-        title: "Refinement Malfunction!",
-        description: (error as Error).message || "My circuits are frazzled trying to understand that. Please try a different refinement.",
+        title: "Refinement Resisted!",
+        description: (error as Error).message || "My logic gates are protesting your request. Perhaps rephrase, or accept perfection as-is?",
       });
     } finally {
       setIsRefiningCode(false);
@@ -249,8 +249,8 @@ Specific guidance: ${template.aiPromptEnhancement}`;
     if (!query.trim()) {
       toast({
         variant: "destructive",
-        title: "Empty Query",
-        description: "Trying to find nothing, are we? Enter a search term, please.",
+        title: "Query Quest: Missing Clue",
+        description: "To find, one must first seek. With words, preferably.",
       });
       return;
     }
@@ -260,15 +260,15 @@ Specific guidance: ${template.aiPromptEnhancement}`;
       const result = await getKnownLiquidityPoolInfo({ query });
       setAddressResults(result);
       toast({
-        title: "Address Search Complete!",
-        description: result.summary || "Fetched contract addresses. Or tried to.",
+        title: "Address Intel Acquired!",
+        description: result.summary || "The address archives have been consulted.",
       });
     } catch (error) {
       console.error("Error finding addresses:", error);
       toast({
         variant: "destructive",
-        title: "Address Finder Flummoxed",
-        description: (error as Error).message || "The address book is currently... indecipherable.",
+        title: "Address Archive Error!",
+        description: (error as Error).message || "My rolodex of realities is temporarily scrambled. Seek addresses later.",
       });
     } finally {
       setIsFindingAddresses(false);
@@ -281,7 +281,7 @@ Specific guidance: ${template.aiPromptEnhancement}`;
     <div className="min-h-screen text-foreground flex flex-col">
       <Header />
       <main 
-        className={`flex-grow container mx-auto p-4 md:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-start justify-items-center transition-opacity duration-700 ease-out ${mainContentVisible ? 'opacity-100' : 'opacity-0'}`}
+        className={`flex-grow container mx-auto p-4 md:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start justify-items-center transition-opacity duration-700 ease-out ${mainContentVisible ? 'opacity-100' : 'opacity-0'}`}
       >
         <Card 
           className="transition-all duration-300 bg-card/80 backdrop-blur-sm animate-fadeInUp animate-multicolor-border-glow w-full max-w-2xl" 
@@ -329,7 +329,7 @@ Specific guidance: ${template.aiPromptEnhancement}`;
           className="transition-all duration-300 bg-card/80 backdrop-blur-sm animate-fadeInUp animate-multicolor-border-glow w-full max-w-2xl lg:col-span-2 lg:max-w-4xl justify-self-center"
           style={{ animationDelay: '0.7s' }}
         >
-          <CardContent className="p-6">
+          <CardContent className="p-6 md:p-8">
             <KnownAddressesFinder
               onFindAddresses={handleFindAddresses}
               results={addressResults}

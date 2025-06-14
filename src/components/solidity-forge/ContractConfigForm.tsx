@@ -292,18 +292,18 @@ export function ContractConfigForm({
   return (
     <div className="space-y-8 p-4 md:p-6"> 
       <div className="text-center mb-10"> 
-        <CardTitle className="text-2xl font-headline mb-4 p-2 rounded-md animate-green-glow">Configure Your Contract</CardTitle>
-        <CardDescription className="max-w-md mx-auto">Define contract parameters. Or don't. See if I care.</CardDescription>
+        <CardTitle className="text-2xl font-headline mb-4 p-2 rounded-md animate-green-glow">Blueprint Your Brilliance</CardTitle>
+        <CardDescription className="max-w-md mx-auto">Sculpt your smart contract's soul. Or, you know, just click randomly. My circuits won't judge. Much.</CardDescription>
       </div>
 
       <div className="space-y-4 mb-10"> 
         <Label 
           htmlFor="contractType" 
           className="text-center block mb-2 text-base"
-        >Contract Type</Label>
+        >Select Your Destiny (Contract Type)</Label>
         <Select onValueChange={handleTemplateChange} defaultValue={selectedTemplate?.id} disabled={anyPrimaryActionLoading}>
           <SelectTrigger id="contractType" className="bg-input/50 focus:bg-input text-center p-2 rounded-md animate-multicolor-border-glow mb-2">
-            <SelectValue placeholder="Select contract type" />
+            <SelectValue placeholder="Choose Your Genesis Blueprint" />
           </SelectTrigger>
           <SelectContent>
             {templates.map(template => (
@@ -325,7 +325,7 @@ export function ContractConfigForm({
             <Label 
               htmlFor="mode-switch" 
               className="cursor-pointer text-base"
-            >Mode:</Label>
+            >Complexity Dial:</Label>
             <span className="text-sm text-muted-foreground">Basic</span>
             <Switch
               id="mode-switch"
@@ -356,7 +356,7 @@ export function ContractConfigForm({
                     "bg-transparent md:bg-background/30 md:p-3 md:rounded-lg" 
                 )}
               >
-                {parameterGroups.map(group => {
+                {parameterGroups.map((group, index) => {
                   const tabValue = group.title.toLowerCase().replace(/\s+/g, '-');
                   return (
                     <TabsTrigger 
@@ -372,6 +372,7 @@ export function ContractConfigForm({
                         "data-[state=active]:text-primary data-[state=active]:font-semibold",
                         "md:w-full"
                       )}
+                      style={{ animationDelay: `${index * 0.5}s` }} 
                     >
                       <span className="tab-running-lines-content px-3 py-2">{group.title}</span>
                     </TabsTrigger>
@@ -403,7 +404,7 @@ export function ContractConfigForm({
               ) : (
                 <Wand2 className="mr-2 h-4 w-4" />
               )}
-              Generate Code
+              Forge Contract
             </Button>
             <Button
               type="button"
@@ -417,7 +418,7 @@ export function ContractConfigForm({
               ) : (
                  <Brain className="mr-2 h-4 w-4" />
               )}
-              AI Suggestions
+              AI Scrutiny
             </Button>
              <Button
               type="button"
@@ -431,7 +432,7 @@ export function ContractConfigForm({
               ) : (
                  <Fuel className="mr-2 h-4 w-4" />
               )}
-              Estimate Gas Costs
+              Gas Oracle Query
             </Button>
             <Button
               type="button"
@@ -445,7 +446,7 @@ export function ContractConfigForm({
               ) : (
                  <Beaker className="mr-2 h-4 w-4" />
               )}
-              Generate Test Cases
+              Conjure Test Suite
             </Button>
           </div>
         </form>

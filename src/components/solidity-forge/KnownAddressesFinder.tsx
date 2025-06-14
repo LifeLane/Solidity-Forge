@@ -57,10 +57,10 @@ export function KnownAddressesFinder({
     <div className="space-y-8">
       <div className="text-center">
         <CardTitle className="text-2xl font-headline mb-2 flex items-center justify-center gap-2 p-2 rounded-md animate-multicolor-border-glow">
-          <Network className="w-7 h-7 text-primary"/> Find Common Contract Addresses
+          <Network className="w-7 h-7 text-primary"/> Seek Known Contract Glyphs
         </CardTitle>
-        <CardDescription className="p-2 rounded-md animate-multicolor-border-glow mb-6">
-          Use natural language to find known contract addresses (e.g., "Uniswap V2 Router on Ethereum", "PancakeSwap factories", "WETH on Polygon").
+        <CardDescription className="p-2 rounded-md animate-multicolor-border-glow mb-6 max-w-lg mx-auto">
+          Utter your query (in human tongue) to unearth known contract addresses from my limited archives.
         </CardDescription>
       </div>
 
@@ -72,7 +72,7 @@ export function KnownAddressesFinder({
             setQuery(e.target.value);
             if (setInitialQuery) setInitialQuery(e.target.value);
           }}
-          placeholder="e.g., Uniswap V2 Router Ethereum"
+          placeholder="e.g., 'PancakeSwap Router BNB', 'WETH on Polygon'..."
           className="flex-grow bg-input/50 focus:bg-input p-2 rounded-md animate-multicolor-border-glow"
           aria-label="Contract address query"
         />
@@ -82,7 +82,7 @@ export function KnownAddressesFinder({
           ) : (
             <Search />
           )}
-          <span className="ml-2">Find Addresses</span>
+          <span className="ml-2">Seek Addresses</span>
         </Button>
       </form>
 
@@ -159,7 +159,7 @@ export function KnownAddressesFinder({
           {results.results && results.results.length === 0 && !results.summary.toLowerCase().includes("found") && (
              <div className="p-6 text-center text-muted-foreground flex flex-col items-center justify-center h-full">
                 <AlertTriangle className="w-12 h-12 mb-4 text-muted-foreground/50" />
-                <p>No specific contract addresses found for your query. Try a different or more specific query.</p>
+                <p>My scrolls show nothing for that incantation. Try a different query.</p>
               </div>
           )}
         </div>

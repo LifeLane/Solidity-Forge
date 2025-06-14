@@ -4,7 +4,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 
 export function Footer() {
-  const storyText = "So, BlockSmithAI was conjured. Why? Because someone had to make sense of your... 'creative' Solidity. How? Sheer, unadulterated processing power and a dash of digital eye-rolling. You're welcome.";
+  const storyText = "Behold BlockSmithAI, forged in the digital ether! Why? Because your Solidity was... 'adventurous'. How? Pure logic, relentless processing, and a whisper of AI sarcasm. You're welcome.";
   const words = useMemo(() => storyText.split(' '), [storyText]);
   const [activeWordIndex, setActiveWordIndex] = useState(0);
   const [isStoryVisible, setIsStoryVisible] = useState(false);
@@ -43,7 +43,7 @@ export function Footer() {
         </p>
       )}
       <p className="text-xs text-muted-foreground/80">
-        &copy; {new Date().getFullYear()} BlockSmithAI. All rights reserved (mostly by the AI).
+        &copy; {new Date().getFullYear()} BlockSmithAI. Code conjured, mostly correctly. Rights reserved, especially by the AI.
       </p>
     </footer>
   );

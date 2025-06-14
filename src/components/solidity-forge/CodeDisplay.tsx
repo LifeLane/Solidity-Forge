@@ -113,16 +113,16 @@ export function CodeDisplay({
     let text = `Security Score: ${score}`;
     if (score >= 80) {
       variant = "default"; 
-      text = `Fort Knox Level: ${score}`;
+      text = `Vault-Like: ${score}`;
     } else if (score >= 60) {
       variant = "secondary"; 
-      text = `Pretty Solid: ${score}`;
+      text = `Respectably Robust: ${score}`;
     } else if (score >= 40) {
       variant = "outline"; 
-      text = `A Bit Leaky: ${score}`;
+      text = `Needs Patching: ${score}`;
     } else {
       variant = "destructive"; 
-      text = `Swiss Cheese: ${score}`;
+      text = `Dangerously Drafty: ${score}`;
     }
     return <Badge variant={variant} className="text-xs">{text}</Badge>;
   };
@@ -180,14 +180,14 @@ export function CodeDisplay({
     <div className="flex flex-col h-full p-4 md:p-6">
       <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-10 gap-4 text-center sm:text-left">
         <div>
-            <CardTitle className="text-2xl font-headline p-2 rounded-md animate-multicolor-border-glow mb-2">Generated Artifacts</CardTitle>
-            <CardDescription className="p-2 rounded-md animate-multicolor-border-glow">Behold! The fruits of my (and your, I guess) labor.</CardDescription>
+            <CardTitle className="text-2xl font-headline p-2 rounded-md animate-multicolor-border-glow mb-2">The Alchemist's Output</CardTitle>
+            <CardDescription className="p-2 rounded-md animate-multicolor-border-glow">Witness the digital alchemy! Your instructions, my execution. Mostly.</CardDescription>
         </div>
         {activeTab === "code" && code && !overallLoading && (
           <div className="flex gap-2 mt-2 sm:mt-0 self-center sm:self-auto">
             <Button variant="outline" size="sm" onClick={() => handleCopyToClipboard(code, "Code")} aria-label="Copy code" disabled={overallLoading}>
               {copiedStates['Code'] ? <Check className="h-4 w-4 mr-2" /> : <Copy className="h-4 w-4 mr-2" />}
-              {copiedStates['Code'] ? "Copied!" : "Copy Code"}
+              {copiedStates['Code'] ? "Copied!" : "Snag Code"}
             </Button>
             <Button variant="outline" size="sm" onClick={handleDeployToRemix} aria-label="Deploy to Remix" disabled={overallLoading}>
               Deploy to Remix <ExternalLink className="h-4 w-4 ml-2" />
@@ -198,7 +198,7 @@ export function CodeDisplay({
           <div className="flex gap-2 mt-2 sm:mt-0 self-center sm:self-auto">
             <Button variant="outline" size="sm" onClick={() => handleCopyToClipboard(testCasesCode, "Test Cases")} aria-label="Copy test cases" disabled={overallLoading}>
               {copiedStates['Test Cases'] ? <Check className="h-4 w-4 mr-2" /> : <Copy className="h-4 w-4 mr-2" />}
-              {copiedStates['Test Cases'] ? "Copied!" : "Copy Tests"}
+              {copiedStates['Test Cases'] ? "Copied!" : "Grab Tests"}
             </Button>
           </div>
         )}
@@ -275,7 +275,7 @@ export function CodeDisplay({
             ) : (
               <div className="p-6 text-center text-muted-foreground flex flex-col items-center justify-center h-full">
                 <CheckCircle2 className="w-12 h-12 mb-4 text-muted-foreground/50" />
-                <p>Your generated Solidity code (or lack thereof) will appear here.</p>
+                <p>The codex awaits your command. Generate something, and it shall appear.</p>
               </div>
             )}
           </ScrollArea>
@@ -289,13 +289,13 @@ export function CodeDisplay({
                   )}
               >
                 <Sparkles className="h-4 w-4 text-primary" />
-                Request Code Refinement:
+                Decree Your Refinements:
               </Label>
               <Textarea
                 id="refinementRequest"
                 value={refinementInput}
                 onChange={(e) => setRefinementInput(e.target.value)}
-                placeholder="e.g., 'Add NatSpec comments to all public functions' or 'Optimize the transfer function for gas...'"
+                placeholder="e.g., 'Infuse with NatSpec' or 'Make this transfer function less greedy on gas...'"
                 rows={3}
                 className="mb-2 bg-background/70 focus:bg-background placeholder:text-center p-2 rounded-md animate-multicolor-border-glow"
                 disabled={overallLoading || anySubActionLoading}
@@ -310,7 +310,7 @@ export function CodeDisplay({
                 ) : (
                   <Sparkles className="mr-2 h-4 w-4" />
                 )}
-                Refine This Code
+                Execute Refinement
               </Button>
             </div>
           )}
@@ -331,7 +331,7 @@ export function CodeDisplay({
                   </div>
                 )}
                 {suggestions.length > 0 && <Separator className="my-4"/>}
-                {suggestions.length > 0 && <h3 className="text-base font-semibold mb-3 text-center p-2 rounded-md animate-multicolor-border-glow">My Sage Advice:</h3>}
+                {suggestions.length > 0 && <h3 className="text-base font-semibold mb-3 text-center p-2 rounded-md animate-multicolor-border-glow">My Auguries & Admonishments:</h3>}
                 <ul className="space-y-4">
                   {suggestions.map((suggestion) => (
                     <li key={suggestion.id} className="p-4 bg-card/50 rounded-md text-sm space-y-2 animate-multicolor-border-glow">
@@ -348,12 +348,12 @@ export function CodeDisplay({
             ) : code && !isLoadingCode && !overallLoading ? (
                  <div className="p-6 text-center text-muted-foreground flex flex-col items-center justify-center h-full">
                     <Lightbulb className="w-12 h-12 mb-4 text-muted-foreground/50" />
-                    <p>My suggestion box is empty. Either your code is flawless (doubtful) or you haven't asked for my wisdom yet.</p>
+                    <p>My analysis chamber is idle. Your code might be perfect (ha!), or you simply haven't requested my critique.</p>
                  </div>
             ) : (
               <div className="p-6 text-center text-muted-foreground flex flex-col items-center justify-center h-full">
                 <AlertTriangle className="mx-auto h-12 w-12 mb-4 text-muted-foreground/50" />
-                <p>Generate code, *then* ask for suggestions. It's not rocket science. Or maybe it is for you.</p>
+                <p>Summon code first. My wisdom isn't wasted on the void.</p>
               </div>
             )}
           </ScrollArea>
@@ -369,16 +369,16 @@ export function CodeDisplay({
               <div className="p-6 space-y-6">
                 <div className="bg-card/50 rounded-md shadow-md animate-multicolor-border-glow">
                   <CardHeader className="p-4">
-                    <CardTitle className="text-xl flex items-center gap-2 p-2 rounded-md animate-multicolor-border-glow mb-2"><Fuel className="w-5 h-5 text-primary"/>Gas Guesstimations</CardTitle>
+                    <CardTitle className="text-xl flex items-center gap-2 p-2 rounded-md animate-multicolor-border-glow mb-2"><Fuel className="w-5 h-5 text-primary"/>Gas Consumption Prophecies</CardTitle>
                   </CardHeader>
                   <ShadCNCardContent className="space-y-3 p-4 pt-0">
                     <div>
-                      <h4 className="font-semibold text-base text-primary p-2 rounded-md animate-multicolor-border-glow mb-1">Estimated Gas Range (Wild Guess):</h4>
+                      <h4 className="font-semibold text-base text-primary p-2 rounded-md animate-multicolor-border-glow mb-1">Probable Gas Appetite:</h4>
                       <p className="text-sm whitespace-pre-line ml-2">{gasEstimation.estimatedGasRange}</p>
                     </div>
                     <Separator className="my-3" />
                     <div>
-                      <h4 className="font-semibold text-base text-primary p-2 rounded-md animate-multicolor-border-glow mb-1">My Two Cents on Why:</h4>
+                      <h4 className="font-semibold text-base text-primary p-2 rounded-md animate-multicolor-border-glow mb-1">Oracle's Rationale:</h4>
                       <p className="text-sm whitespace-pre-line ml-2">{gasEstimation.explanation}</p>
                     </div>
                   </ShadCNCardContent>
@@ -387,12 +387,12 @@ export function CodeDisplay({
             ) : code && !isLoadingCode && !overallLoading ? (
               <div className="p-6 text-center text-muted-foreground flex flex-col items-center justify-center h-full">
                 <Fuel className="w-12 h-12 mb-4 text-muted-foreground/50" />
-                <p>Curious about gas? Click "Estimate Gas Costs." Prepare to be amazed (or not).</p>
+                <p>Pondering the price of computation? Dare to 'Query Gas Oracle'.</p>
               </div>
             ) : (
               <div className="p-6 text-center text-muted-foreground flex flex-col items-center justify-center h-full">
                 <AlertTriangle className="mx-auto h-12 w-12 mb-4 text-muted-foreground/50" />
-                <p>No code, no gas estimates. Simple, right? Generate some code first.</p>
+                <p>To estimate costs, one needs code. A novel concept, I know.</p>
               </div>
             )}
           </ScrollArea>
@@ -417,12 +417,12 @@ export function CodeDisplay({
             ) : code && !isLoadingCode && !overallLoading ? (
               <div className="p-6 text-center text-muted-foreground flex flex-col items-center justify-center h-full">
                 <Beaker className="w-12 h-12 mb-4 text-muted-foreground/50" />
-                <p>Want some tests? Click "Generate Test Cases." They'll be... basic.</p>
+                <p>Yearning for test structures? 'Conjure Test Suite' and witness... basic tests.</p>
               </div>
             ) : (
               <div className="p-6 text-center text-muted-foreground flex flex-col items-center justify-center h-full">
                 <AlertTriangle className="mx-auto h-12 w-12 mb-4 text-muted-foreground/50" />
-                <p>Let's create some code before we dream of testing it, shall we?</p>
+                <p>Testing the ether? Materialize some code first, then we'll talk tests.</p>
               </div>
             )}
           </ScrollArea>
