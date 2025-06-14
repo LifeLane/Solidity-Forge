@@ -213,14 +213,14 @@ export function ContractConfigForm({
     };
 
     return (
-      <div key={param.name} className="space-y-3">
+      <div key={param.name} className="space-y-3 mb-6"> 
         <TooltipProvider>
           <Tooltip delayDuration={300}>
             <TooltipTrigger asChild>
               <Label 
                 htmlFor={param.name} 
                 className={cn(
-                  "flex items-center justify-center gap-1.5 mb-2",
+                  "flex items-center justify-center gap-1.5 mb-2 text-base",
                   "animate-multicolor-border-glow p-2 rounded-md"
                 )}
               >
@@ -291,17 +291,17 @@ export function ContractConfigForm({
   const parameterGroups = selectedTemplate ? getParameterGroups(selectedTemplate, isAdvancedMode) : [];
 
   return (
-    <div className="space-y-8 p-6"> 
-      <div className="text-center">
-        <CardTitle className="text-2xl font-headline mb-2 p-2 rounded-md animate-multicolor-border-glow">Configure Your Contract</CardTitle>
-        <CardDescription className="p-2 rounded-md animate-multicolor-border-glow mb-4">Define contract parameters. Or don't. See if I care.</CardDescription>
+    <div className="space-y-6 p-4 md:p-6"> 
+      <div className="text-center mb-8"> 
+        <CardTitle className="text-2xl font-headline mb-3 p-2 rounded-md animate-multicolor-border-glow">Configure Your Contract</CardTitle>
+        <CardDescription className="p-2 rounded-md animate-multicolor-border-glow mb-6">Define contract parameters. Or don't. See if I care.</CardDescription>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-3 mb-8"> 
         <Label 
           htmlFor="contractType" 
           className={cn(
-            "text-center block mb-2",
+            "text-center block mb-2 text-base", 
             "animate-multicolor-border-glow p-2 rounded-md"
             )}
         >Contract Type</Label>
@@ -324,12 +324,12 @@ export function ContractConfigForm({
       </div>
 
       {selectedTemplate && (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <div className="flex items-center justify-center space-x-2 my-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+          <div className="flex items-center justify-center space-x-2 my-8">
             <Label 
               htmlFor="mode-switch" 
               className={cn(
-                "cursor-pointer",
+                "cursor-pointer text-base", 
                 "animate-multicolor-border-glow p-2 rounded-md" 
               )}
             >Mode:</Label>
@@ -354,13 +354,14 @@ export function ContractConfigForm({
             <Tabs 
               value={activeTabValue} 
               onValueChange={setActiveTabValue} 
-              className="flex flex-col md:flex-row gap-6 md:gap-8" // Increased gap
+              className="flex flex-col md:flex-row gap-6 md:gap-8"
             >
               <TabsList 
-                className="
-                  flex flex-row overflow-x-auto pb-2 gap-3 
-                  md:pb-0 md:overflow-x-visible md:flex-col md:space-y-2 md:w-48 lg:w-56 shrink-0 
-                  bg-transparent md:bg-background/30 md:p-3 rounded-lg"
+                className={cn(
+                    "flex flex-row overflow-x-auto pb-2 gap-3", 
+                    "md:pb-0 md:overflow-x-visible md:flex-col md:space-y-2 md:w-48 lg:w-56 shrink-0",
+                    "bg-transparent md:bg-background/30 md:p-3 md:rounded-lg" 
+                )}
               >
                 {parameterGroups.map(group => {
                   const tabValue = group.title.toLowerCase().replace(/\s+/g, '-');
@@ -369,19 +370,22 @@ export function ContractConfigForm({
                       key={tabValue} 
                       value={tabValue}
                       disabled={anyPrimaryActionLoading && activeTabValue !== tabValue}
-                      className="
-                        whitespace-nowrap px-3 py-2 text-base font-medium rounded-md transition-all
-                        hover:bg-muted/60 hover:text-accent-foreground 
-                        focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
-                        data-[state=active]:bg-muted data-[state=active]:text-primary data-[state=active]:font-semibold data-[state=active]:shadow-inner
-                        md:w-full animate-multicolor-border-glow text-center" 
+                      className={cn(
+                        "tab-running-lines-border", 
+                        "whitespace-nowrap text-base font-medium transition-all",
+                        "text-center", 
+                        "hover:text-accent-foreground", 
+                        "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                        "data-[state=active]:text-primary data-[state=active]:font-semibold", 
+                        "md:w-full"
+                      )}
                     >
-                      {group.title}
+                      <span className="tab-running-lines-content px-3 py-2">{group.title}</span>
                     </TabsTrigger>
                   );
                 })}
               </TabsList>
-              <div className="flex-grow">
+              <div className="flex-grow min-w-0"> 
                 {parameterGroups.map(group => {
                   const tabValue = group.title.toLowerCase().replace(/\s+/g, '-');
                   return (
@@ -395,7 +399,7 @@ export function ContractConfigForm({
           )}
 
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-8">
             <Button 
               type="submit" 
               disabled={anyPrimaryActionLoading} 

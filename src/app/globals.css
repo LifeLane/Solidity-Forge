@@ -97,7 +97,68 @@
     z-index: 0; /* Ensure it's behind other content */
     background-color: hsl(var(--background)); /* Match body background initially - this is the base for the canvas */
   }
+
+  /* New Running Lines Border for Tabs */
+  .tab-running-lines-border {
+    position: relative;
+    overflow: hidden !important; /* Crucial for clipping the ::before gradient */
+    padding: 2px !important; /* This makes space for the 2px visual border. Overrides other padding. */
+    border-radius: calc(var(--radius) - 2px); /* Matches 'rounded-md' */
+    border: none !important; /* Ensure no other border is applied */
+    background-color: transparent !important; /* Parent itself is transparent */
+    box-shadow: none !important; /* Remove existing glow */
+  }
+
+  .tab-running-lines-border::before { /* The spinning gradient */
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 300%; /* Needs to be large enough to cover corners when rotating */
+    height: 300%;
+    background-image: conic-gradient(
+      from 90deg, /* Start angle can be adjusted for different initial look */
+      hsl(180, 70%, 50%), /* Cyan */
+      hsl(240, 70%, 65%), /* Blue */
+      hsl(300, 70%, 60%), /* Magenta */
+      hsl(0, 70%, 60%),   /* Red */
+      hsl(60, 70%, 50%),  /* Yellow */
+      hsl(120, 70%, 50%), /* Green */
+      hsl(180, 70%, 50%)  /* Loop back to Cyan for smooth animation */
+    );
+    animation: runningLinesSpin 6s linear infinite; /* Slower, smoother spin */
+    transform-origin: center center;
+    transform: translate(-50%, -50%); /* Center the gradient */
+    z-index: 1; /* Sit behind the ::after mask */
+  }
+
+  .tab-running-lines-border::after { /* The mask creating the inner background and "border" effect */
+    content: '';
+    position: absolute;
+    inset: 2px; /* This IS the border thickness, matches padding on parent */
+    background-color: hsl(var(--background)); /* Default inner background (for inactive tabs, matches page background) */
+    border-radius: calc(var(--radius) - 4px);
+    z-index: 2; /* Sits on top of the gradient, behind the text content */
+    transition: background-color 0.2s ease-out; /* Smooth background transition for hover/active */
+  }
+
+  /* Inner content wrapper for tab text/icons */
+  .tab-running-lines-content {
+    position: relative;
+    z-index: 3; /* Ensures content is on top of everything */
+    display: block; /* Or inline-block, flex, etc., as needed for layout */
+  }
+
+  /* Specific overrides for ::after background on hover and active states */
+  .tab-running-lines-border:hover::after {
+    background-color: hsl(var(--secondary)); /* Subtle background for hover, like bg-secondary */
+  }
+
+  .tab-running-lines-border[data-state="active"]::after {
+    background-color: hsl(var(--muted)); /* Background for active tabs, like bg-muted */
+  }
 }
+
 
 @keyframes fadeInUp {
   from {
@@ -120,7 +181,7 @@
 }
 
 
-/* New Multi-color Border Glow Animation */
+/* Multi-color Border Glow Animation (existing) */
 @keyframes multiColorBorderGlow {
   0%   { box-shadow: 0 0 3px hsl(0, 90%, 65%), 0 0 6px hsl(0, 90%, 65%), 0 0 9px hsl(0, 90%, 65%); } /* Red */
   16%  { box-shadow: 0 0 3px hsl(60, 90%, 55%), 0 0 6px hsl(60, 90%, 55%), 0 0 9px hsl(60, 90%, 55%); } /* Yellow */
@@ -133,9 +194,11 @@
 
 .animate-multicolor-border-glow {
   animation: multiColorBorderGlow 8s linear infinite;
-  /* This class provides the box-shadow for the glow. */
-  /* Ensure elements have border-radius for rounded glow. */
 }
 
-/* Removed .tab-trigger-glow and @keyframes activeTabPulse as it's replaced by animate-multicolor-border-glow on tabs */
+/* New Keyframe for Tab Running Lines Border */
+@keyframes runningLinesSpin {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
 
