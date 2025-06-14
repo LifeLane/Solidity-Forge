@@ -145,7 +145,7 @@ Specific guidance: ${template.aiPromptEnhancement}`;
           </CardContent>
         </Card>
         <Card 
-          className="shadow-xl hover:shadow-primary/20 transition-all duration-300 bg-card/80 backdrop-blur-sm lg:sticky top-24 animate-fadeInUp animated-border-glow"  // Adjusted sticky position
+          className="shadow-xl hover:shadow-primary/20 transition-all duration-300 bg-card/80 backdrop-blur-sm lg:sticky top-24 animate-fadeInUp animated-border-glow"
           style={{ animationDelay: '0.5s' }}
         >
           {/* CardContent padding is handled by CodeDisplay for better ScrollArea control */}

@@ -108,7 +108,7 @@ export function CodeDisplay({
         )}
       </div>
       
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-grow flex flex-col tabs-container-glow">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-grow flex flex-col">
         <TabsList className="mb-4 grid w-full grid-cols-2">
           <TabsTrigger value="code" className="hover:bg-accent/10 data-[state=active]:bg-accent/20 data-[state=active]:text-accent-foreground tab-trigger-glow">
             <CheckCircle2 className="mr-2 h-4 w-4" /> Generated Code
