@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -133,7 +134,8 @@ export function CodeDisplay({
             ) : code ? (
               <pre className="p-4 text-sm font-code whitespace-pre-wrap break-all">{code}</pre>
             ) : (
-              <div className="p-6 text-center text-muted-foreground">
+              <div className="p-6 text-center text-muted-foreground flex flex-col items-center justify-center h-full">
+                <CheckCircle2 className="w-12 h-12 mb-4 text-muted-foreground/50" />
                 <p>Your generated Solidity code will appear here.</p>
               </div>
             )}
@@ -157,7 +159,7 @@ export function CodeDisplay({
                   </div>
                 )}
                 <Separator className="my-3"/>
-                <h3 className="text-base font-semibold mb-2">AI Suggestions:</h3>
+                <h3 className="text-base font-semibold mb-2 text-center sm:text-left">AI Suggestions:</h3>
                 <ul className="space-y-3">
                   {suggestions.map((suggestion) => (
                     <li key={suggestion.id} className="flex items-start gap-2 p-3 bg-card/50 rounded-md text-sm">
@@ -168,12 +170,13 @@ export function CodeDisplay({
                 </ul>
               </div>
             ) : code && !isLoadingCode ? (
-                 <div className="p-6 text-center text-muted-foreground">
+                 <div className="p-6 text-center text-muted-foreground flex flex-col items-center justify-center h-full">
+                    <Lightbulb className="w-12 h-12 mb-4 text-muted-foreground/50" />
                     <p>No specific suggestions at this time, or click "Get AI Suggestions" after generating code.</p>
                  </div>
             ) : (
-              <div className="p-6 text-center text-muted-foreground">
-                <AlertTriangle className="mx-auto h-8 w-8 mb-2" />
+              <div className="p-6 text-center text-muted-foreground flex flex-col items-center justify-center h-full">
+                <AlertTriangle className="mx-auto h-12 w-12 mb-4 text-muted-foreground/50" />
                 <p>Generate code first, then click "Get AI Suggestions" to see analysis here.</p>
               </div>
             )}
@@ -183,3 +186,4 @@ export function CodeDisplay({
     </div>
   );
 }
+
