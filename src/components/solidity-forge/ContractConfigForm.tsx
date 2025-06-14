@@ -156,7 +156,7 @@ export function ContractConfigForm({
 
   return (
     <div className="space-y-6">
-      <div>
+      <div className="text-center">
         <CardTitle className="text-2xl font-headline mb-1">Configure Your Contract</CardTitle>
         <CardDescription>Define contract parameters.</CardDescription>
       </div>
@@ -197,7 +197,7 @@ export function ContractConfigForm({
 
           {/* Filter parameters based on mode */}
           {selectedTemplate.parameters
-            .filter(param => isAdvancedMode || param.basicModeOnly) // Filter logic
+            .filter(param => isAdvancedMode || !param.basicModeOnly) 
             .map(renderParameterInput)}
 
           <div className="flex flex-col sm:flex-row gap-3 pt-4">

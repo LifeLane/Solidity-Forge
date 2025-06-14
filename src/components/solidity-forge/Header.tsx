@@ -22,14 +22,14 @@ const SolidityForgeIcon = () => (
 export function Header() {
   return (
     <header className="py-4 px-4 md:px-8 border-b border-border/50 shadow-lg bg-background/70 backdrop-blur-md sticky top-0 z-50 animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
-      <div className="container mx-auto flex items-center justify-between flex-wrap">
-        <div className="flex items-center gap-3 group cursor-default">
+      <div className="container mx-auto flex flex-col items-center gap-3 md:flex-row md:justify-between">
+        <div className="flex items-center gap-3 group cursor-default text-center md:text-left">
           <SolidityForgeIcon />
           <h1 className="text-3xl font-headline font-bold text-primary group-hover:text-accent transition-colors duration-300">
             SolidityForge
           </h1>
         </div>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground text-center md:text-right">
             <Sparkles className="w-5 h-5 text-accent" />
             <span>AI-Powered Smart Contracts</span>
         </div>

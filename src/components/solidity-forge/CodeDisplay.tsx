@@ -91,12 +91,12 @@ export function CodeDisplay({
   return (
     <div className="flex flex-col h-full p-4 md:p-6">
       <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-4 gap-2">
-        <div>
+        <div className="text-center sm:text-left">
             <CardTitle className="text-2xl font-headline">Generated Code</CardTitle>
             <CardDescription>Review your code and AI insights.</CardDescription>
         </div>
         {activeTab === "code" && code && !isLoadingCode && (
-          <div className="flex gap-2 mt-2 sm:mt-0">
+          <div className="flex gap-2 mt-2 sm:mt-0 self-center sm:self-auto">
             <Button variant="outline" size="sm" onClick={handleCopyToClipboard} aria-label="Copy code">
               {copied ? <Check className="h-4 w-4 mr-2" /> : <Copy className="h-4 w-4 mr-2" />}
               {copied ? "Copied!" : "Copy"}
