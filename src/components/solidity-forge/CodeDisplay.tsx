@@ -6,15 +6,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AlertTriangle, CheckCircle2, ExternalLink, Lightbulb, Copy, Check } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, ExternalLink, Lightbulb, Copy, Check, ShieldAlert, Zap, Wrench, Info } from 'lucide-react';
 import { CardTitle, CardDescription } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Badge, type BadgeProps } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from "@/hooks/use-toast";
 
+export type AISuggestionType = 'security' | 'optimization' | 'gas_saving' | 'best_practice' | 'informational';
+export type AISuggestionSeverity = 'critical' | 'high' | 'medium' | 'low' | 'info';
+
 export interface AISuggestion {
   id: string;
-  text: string;
+  type: AISuggestionType;
+  severity: AISuggestionSeverity;
+  description: string;
 }
 
 interface CodeDisplayProps {
@@ -51,13 +56,11 @@ export function CodeDisplay({
   const handleDeployToRemix = () => {
     if (!code) return;
     try {
-      // For UTF-8 compatibility with btoa
       const base64Code = btoa(unescape(encodeURIComponent(code)));
       const remixURL = `https://remix.ethereum.org/?#code=${base64Code}&lang=sol`;
       window.open(remixURL, '_blank');
     } catch (error) {
         console.error("Error preparing Remix URL:", error);
-        // Fallback for potential btoa issues with complex characters, though rare for code
         const base64Code = btoa(code); 
         const remixURL = `https://remix.ethereum.org/?#code=${base64Code}&lang=sol`;
         window.open(remixURL, '_blank');
@@ -71,23 +74,56 @@ export function CodeDisplay({
 
   const getSecurityScoreBadge = (score: number | null) => {
     if (score === null) return null;
-    let variant: "default" | "secondary" | "destructive" | "outline" = "default";
+    let variant: BadgeProps["variant"] = "default";
     let text = `Security Score: ${score}`;
     if (score >= 80) {
-      variant = "default"; // Greenish in dark theme primary
+      variant = "default"; 
       text = `Excellent: ${score}`;
     } else if (score >= 60) {
-      variant = "secondary"; // Bluish/Yellowish
+      variant = "secondary"; 
       text = `Good: ${score}`;
     } else if (score >= 40) {
-      variant = "outline"; // Orangish
+      variant = "outline"; 
       text = `Fair: ${score}`;
     } else {
-      variant = "destructive"; // Reddish
+      variant = "destructive"; 
       text = `Needs Improvement: ${score}`;
     }
     return <Badge variant={variant} className="text-xs">{text}</Badge>;
   };
+
+  const getSeverityBadgeVariant = (severity: AISuggestionSeverity): BadgeProps["variant"] => {
+    switch (severity) {
+      case 'critical':
+      case 'high':
+        return 'destructive';
+      case 'medium':
+        return 'outline'; // Often styled as warning/orange
+      case 'low':
+        return 'default'; // Often styled as success/green or primary
+      case 'info':
+      default:
+        return 'secondary';
+    }
+  };
+  
+  const getTypeIcon = (type: AISuggestionType) => {
+    switch (type) {
+      case 'security':
+        return <ShieldAlert className="h-4 w-4 text-destructive shrink-0 mt-1" />;
+      case 'optimization':
+        return <Zap className="h-4 w-4 text-blue-500 shrink-0 mt-1" />;
+      case 'gas_saving':
+        return <Coins className="h-4 w-4 text-yellow-500 shrink-0 mt-1" />;
+      case 'best_practice':
+        return <Wrench className="h-4 w-4 text-green-500 shrink-0 mt-1" />;
+      case 'informational':
+        return <Info className="h-4 w-4 text-gray-500 shrink-0 mt-1" />;
+      default:
+        return <Lightbulb className="h-4 w-4 text-accent shrink-0 mt-1" />;
+    }
+  };
+
 
   return (
     <div className="flex flex-col h-full p-4 md:p-6">
@@ -127,7 +163,7 @@ export function CodeDisplay({
         </TabsList>
 
         <TabsContent value="code" className="flex-grow overflow-hidden rounded-md border border-border/50 bg-muted/20 animate-multicolor-border-glow">
-          <ScrollArea className="h-[calc(100vh-18rem)] lg:h-[calc(100vh-24rem)] max-h-[600px] p-1"> {/* Adjusted height */}
+          <ScrollArea className="h-[calc(100vh-18rem)] lg:h-[calc(100vh-24rem)] max-h-[600px] p-1">
             {isLoadingCode ? (
               <div className="p-4 space-y-3">
                 <Skeleton className="h-5 w-3/4" />
@@ -150,7 +186,7 @@ export function CodeDisplay({
         </TabsContent>
 
         <TabsContent value="suggestions" className="flex-grow overflow-hidden rounded-md border border-border/50 bg-muted/20 animate-multicolor-border-glow">
-          <ScrollArea className="h-[calc(100vh-18rem)] lg:h-[calc(100vh-24rem)] max-h-[600px] p-1"> {/* Adjusted height */}
+          <ScrollArea className="h-[calc(100vh-18rem)] lg:h-[calc(100vh-24rem)] max-h-[600px] p-1">
             {isLoadingSuggestions ? (
                <div className="p-4 space-y-3">
                 <Skeleton className="h-5 w-3/4" />
@@ -160,18 +196,22 @@ export function CodeDisplay({
             ) : suggestions.length > 0 || securityScore !== null ? (
               <div className="p-4 space-y-4">
                 {securityScore !== null && (
-                  <div className="flex items-center justify-between p-3 bg-card rounded-md shadow">
+                  <div className="flex items-center justify-between p-3 bg-card rounded-md shadow mb-3">
                     <h3 className="text-base font-semibold">Security Score</h3>
                     {getSecurityScoreBadge(securityScore)}
                   </div>
                 )}
-                <Separator className="my-3"/>
-                <h3 className="text-base font-semibold mb-2 text-center">AI Suggestions:</h3>
+                {suggestions.length > 0 && <Separator className="my-3"/>}
+                {suggestions.length > 0 && <h3 className="text-base font-semibold mb-2 text-center">AI Suggestions:</h3>}
                 <ul className="space-y-3">
                   {suggestions.map((suggestion) => (
-                    <li key={suggestion.id} className="flex items-start gap-2 p-3 bg-card/50 rounded-md text-sm">
-                      <Lightbulb className="h-4 w-4 text-accent shrink-0 mt-1" />
-                      <span>{suggestion.text}</span>
+                    <li key={suggestion.id} className="p-3 bg-card/50 rounded-md text-sm space-y-2">
+                      <div className="flex items-center gap-2">
+                        {getTypeIcon(suggestion.type)}
+                        <Badge variant={getSeverityBadgeVariant(suggestion.severity)} className="capitalize">{suggestion.severity}</Badge>
+                        <Badge variant="outline" className="capitalize">{suggestion.type.replace('_', ' ')}</Badge>
+                      </div>
+                      <p>{suggestion.description}</p>
                     </li>
                   ))}
                 </ul>

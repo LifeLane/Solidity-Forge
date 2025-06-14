@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -18,8 +19,16 @@ const SuggestErrorPreventionInputSchema = z.object({
 });
 export type SuggestErrorPreventionInput = z.infer<typeof SuggestErrorPreventionInputSchema>;
 
+const SuggestionItemSchema = z.object({
+  id: z.string().describe("A unique string identifier for the suggestion (e.g., \"sec-001\", \"opt-001\")."),
+  type: z.enum(['security', 'optimization', 'gas_saving', 'best_practice', 'informational']).describe("The category of the suggestion."),
+  severity: z.enum(['critical', 'high', 'medium', 'low', 'info']).describe("The severity level of the suggestion."),
+  description: z.string().describe("A detailed explanation of the suggestion, including the potential impact and how to address it."),
+});
+export type SuggestionItem = z.infer<typeof SuggestionItemSchema>;
+
 const SuggestErrorPreventionOutputSchema = z.object({
-  suggestions: z.array(z.string()).describe('An array of suggestions for error prevention and code optimization.'),
+  suggestions: z.array(SuggestionItemSchema).describe('An array of structured suggestions for error prevention and code optimization.'),
   securityScore: z.number().describe('A score indicating the overall security level of the contract (0-100).'),
 });
 export type SuggestErrorPreventionOutput = z.infer<typeof SuggestErrorPreventionOutputSchema>;
@@ -32,7 +41,7 @@ const suggestErrorPreventionPrompt = ai.definePrompt({
   name: 'suggestErrorPreventionPrompt',
   input: {schema: SuggestErrorPreventionInputSchema},
   output: {schema: SuggestErrorPreventionOutputSchema},
-  prompt: `You are a smart contract security expert. Analyze the following smart contract code and parameters, and provide suggestions for error prevention and code optimization.
+  prompt: `You are a smart contract security expert. Analyze the following smart contract code and parameters.
 
 Contract Type: {{{contractType}}}
 Parameters: {{json parameters}}
@@ -40,9 +49,14 @@ Code: \`\`\`solidity
 {{{code}}}
 \`\`\`
 
-Provide an array of specific, actionable suggestions to improve the contract's security and efficiency.  Also provide an overall securityScore for the contract.
+Analyze the provided smart contract. For each identified issue or improvement area, provide a suggestion object with the following fields:
+- 'id': A unique string identifier for the suggestion (e.g., "sec-001", "opt-001", "gas-001").
+- 'type': The category of the suggestion. Choose from: 'security', 'optimization', 'gas_saving', 'best_practice', 'informational'.
+- 'severity': The severity level. Choose from: 'critical', 'high', 'medium', 'low', 'info'.
+- 'description': A detailed explanation of the suggestion, including the potential impact and how to address it.
 
-Suggestions:`,
+Return these as an array in the 'suggestions' field of the output.
+Also, provide an overall 'securityScore' for the contract (0-100). Ensure the output strictly adheres to the defined schema.`,
 });
 
 const suggestErrorPreventionFlow = ai.defineFlow(
@@ -56,3 +70,4 @@ const suggestErrorPreventionFlow = ai.defineFlow(
     return output!;
   }
 );
+

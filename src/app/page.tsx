@@ -92,7 +92,6 @@ Specific guidance: ${template.aiPromptEnhancement}`;
     setAiSuggestions([]);
     setSecurityScore(null);
 
-    // Use relevant parameters for AI suggestion
     const paramsForAI = template.id === 'custom' ? { customDescription: formData.customDescription } : formData;
 
     try {
@@ -101,9 +100,10 @@ Specific guidance: ${template.aiPromptEnhancement}`;
         parameters: paramsForAI,
         code: generatedCode,
       });
-      // Ensure suggestions is an array, even if the AI returns a single string by mistake
-      const suggestionsArray = Array.isArray(result.suggestions) ? result.suggestions : (result.suggestions ? [String(result.suggestions)] : []);
-      setAiSuggestions(suggestionsArray.map((s, index) => ({ id: `suggestion-${index}-${Date.now()}`, text: s })));
+      
+      // The flow now returns structured suggestions.
+      // AISuggestion type in CodeDisplay is compatible with SuggestionItem from the flow.
+      setAiSuggestions(result.suggestions || []); 
       setSecurityScore(result.securityScore);
       toast({
         title: "AI Analysis Complete",
@@ -124,7 +124,7 @@ Specific guidance: ${template.aiPromptEnhancement}`;
   
 
   return (
-    <div className="min-h-screen text-foreground flex flex-col"> {/* Removed bg-background */}
+    <div className="min-h-screen text-foreground flex flex-col">
       <Header />
       <main 
         className={`flex-grow container mx-auto p-4 md:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-start justify-items-center transition-opacity duration-700 ease-out ${mainContentVisible ? 'opacity-100' : 'opacity-0'}`}
@@ -149,7 +149,6 @@ Specific guidance: ${template.aiPromptEnhancement}`;
           className="transition-all duration-300 bg-card/80 backdrop-blur-sm lg:sticky top-24 animate-fadeInUp animate-multicolor-border-glow w-full max-w-2xl"
           style={{ animationDelay: '0.5s' }}
         >
-          {/* CardContent padding is handled by CodeDisplay for better ScrollArea control */}
           <CodeDisplay
             code={generatedCode}
             suggestions={aiSuggestions}
