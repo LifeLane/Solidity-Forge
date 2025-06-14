@@ -1,6 +1,8 @@
+
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
+import GalaxyBackground from '@/components/solidity-forge/GalaxyBackground'; // Import the new component
 
 export const metadata: Metadata = {
   title: 'SolidityForge',
@@ -21,7 +23,10 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;500;600&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased">
-        {children}
+        <GalaxyBackground /> {/* Add the GalaxyBackground component here */}
+        <div className="relative z-10"> {/* Ensure content is above the background */}
+          {children}
+        </div>
         <Toaster />
       </body>
     </html>
