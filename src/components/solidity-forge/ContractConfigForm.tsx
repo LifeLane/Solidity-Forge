@@ -220,8 +220,7 @@ export function ContractConfigForm({
               <Label 
                 htmlFor={param.name} 
                 className={cn(
-                  "flex items-center justify-center gap-1.5 mb-2 text-base",
-                  "animate-multicolor-border-glow p-2 rounded-md"
+                  "flex items-center justify-center gap-1.5 mb-2 text-base p-2 rounded-md font-bold word-glow-active"
                 )}
               >
                 {param.label}
@@ -291,19 +290,16 @@ export function ContractConfigForm({
   const parameterGroups = selectedTemplate ? getParameterGroups(selectedTemplate, isAdvancedMode) : [];
 
   return (
-    <div className="space-y-6 p-4 md:p-6"> 
-      <div className="text-center mb-8"> 
-        <CardTitle className="text-2xl font-headline mb-3 p-2 rounded-md animate-multicolor-border-glow">Configure Your Contract</CardTitle>
-        <CardDescription className="p-2 rounded-md animate-multicolor-border-glow mb-6">Define contract parameters. Or don't. See if I care.</CardDescription>
+    <div className="space-y-8 p-4 md:p-6"> 
+      <div className="text-center mb-10"> 
+        <CardTitle className="text-2xl font-headline mb-4 p-2 rounded-md animate-green-glow">Configure Your Contract</CardTitle>
+        <CardDescription className="max-w-md mx-auto">Define contract parameters. Or don't. See if I care.</CardDescription>
       </div>
 
-      <div className="space-y-3 mb-8"> 
+      <div className="space-y-4 mb-10"> 
         <Label 
           htmlFor="contractType" 
-          className={cn(
-            "text-center block mb-2 text-base", 
-            "animate-multicolor-border-glow p-2 rounded-md"
-            )}
+          className="text-center block mb-2 text-base"
         >Contract Type</Label>
         <Select onValueChange={handleTemplateChange} defaultValue={selectedTemplate?.id} disabled={anyPrimaryActionLoading}>
           <SelectTrigger id="contractType" className="bg-input/50 focus:bg-input text-center p-2 rounded-md animate-multicolor-border-glow mb-2">
@@ -320,18 +316,15 @@ export function ContractConfigForm({
             ))}
           </SelectContent>
         </Select>
-        {selectedTemplate && <p className="text-sm text-muted-foreground mt-1 text-center p-2 rounded-md animate-multicolor-border-glow mb-4">{selectedTemplate.description}</p>}
+        {selectedTemplate && <p className="text-sm text-muted-foreground mt-1 text-center max-w-md mx-auto">{selectedTemplate.description}</p>}
       </div>
 
       {selectedTemplate && (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-          <div className="flex items-center justify-center space-x-2 my-8">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
+          <div className="flex items-center justify-center space-x-2 my-10">
             <Label 
               htmlFor="mode-switch" 
-              className={cn(
-                "cursor-pointer text-base", 
-                "animate-multicolor-border-glow p-2 rounded-md" 
-              )}
+              className="cursor-pointer text-base"
             >Mode:</Label>
             <span className="text-sm text-muted-foreground">Basic</span>
             <Switch
@@ -345,7 +338,7 @@ export function ContractConfigForm({
           </div>
 
           {selectedTemplate.id === 'custom' || parameterGroups.length <= 1 ? ( 
-            <div className="space-y-4">
+            <div className="space-y-6">
               {selectedTemplate.parameters
                 .filter(param => isAdvancedMode || !param.advancedOnly) 
                 .map(renderParameterInput)}
@@ -370,13 +363,13 @@ export function ContractConfigForm({
                       key={tabValue} 
                       value={tabValue}
                       disabled={anyPrimaryActionLoading && activeTabValue !== tabValue}
-                      className={cn(
-                        "tab-running-lines-border", 
+                       className={cn(
+                        "tab-running-lines-border",
                         "whitespace-nowrap text-base font-medium transition-all",
-                        "text-center", 
-                        "hover:text-accent-foreground", 
+                        "text-center",
+                        "hover:text-accent-foreground",
                         "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                        "data-[state=active]:text-primary data-[state=active]:font-semibold", 
+                        "data-[state=active]:text-primary data-[state=active]:font-semibold",
                         "md:w-full"
                       )}
                     >
@@ -389,7 +382,7 @@ export function ContractConfigForm({
                 {parameterGroups.map(group => {
                   const tabValue = group.title.toLowerCase().replace(/\s+/g, '-');
                   return (
-                    <TabsContent key={tabValue} value={tabValue} className="mt-0 space-y-4">
+                    <TabsContent key={tabValue} value={tabValue} className="mt-0 space-y-6">
                       {group.parameters.length > 0 ? group.parameters.map(renderParameterInput) : <p className="text-sm text-muted-foreground p-4 text-center">No parameters in this section for the current mode.</p>}
                     </TabsContent>
                   );

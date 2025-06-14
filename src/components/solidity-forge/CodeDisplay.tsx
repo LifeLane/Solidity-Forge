@@ -178,7 +178,7 @@ export function CodeDisplay({
 
   return (
     <div className="flex flex-col h-full p-4 md:p-6">
-      <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-2 text-center sm:text-left">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-10 gap-4 text-center sm:text-left">
         <div>
             <CardTitle className="text-2xl font-headline p-2 rounded-md animate-multicolor-border-glow mb-2">Generated Artifacts</CardTitle>
             <CardDescription className="p-2 rounded-md animate-multicolor-border-glow">Behold! The fruits of my (and your, I guess) labor.</CardDescription>
@@ -205,34 +205,54 @@ export function CodeDisplay({
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-grow flex flex-col">
-        <TabsList className="mb-6 grid w-full grid-cols-2 sm:grid-cols-4 animate-multicolor-border-glow gap-1 p-1">
+        <TabsList className="mb-8 grid w-full grid-cols-2 sm:grid-cols-4 animate-multicolor-border-glow gap-1 p-1">
           <TabsTrigger 
             value="code" 
-            className="hover:bg-accent/10 data-[state=active]:bg-accent/20 data-[state=active]:text-accent-foreground animate-multicolor-border-glow rounded-sm"
+            className={cn(
+              "data-[state=active]:text-accent-foreground tab-running-lines-border rounded-sm",
+              {"data-[state=active]:bg-accent/20": false} 
+            )}
             disabled={overallLoading && activeTab !== "code"}
           >
-            <CheckCircle2 className="mr-2 h-4 w-4" /> Code
+            <span className="tab-running-lines-content flex items-center justify-center px-3 py-1.5">
+              <CheckCircle2 className="mr-2 h-4 w-4" /> Code
+            </span>
           </TabsTrigger>
           <TabsTrigger 
             value="suggestions" 
-            className="hover:bg-accent/10 data-[state=active]:bg-accent/20 data-[state=active]:text-accent-foreground animate-multicolor-border-glow rounded-sm" 
+            className={cn(
+              "data-[state=active]:text-accent-foreground tab-running-lines-border rounded-sm",
+              {"data-[state=active]:bg-accent/20": false} 
+            )} 
             disabled={(!code && !isLoadingSuggestions) || overallLoading}
           >
-             <Lightbulb className="mr-2 h-4 w-4" /> AI Suggestions
+            <span className="tab-running-lines-content flex items-center justify-center px-3 py-1.5">
+              <Lightbulb className="mr-2 h-4 w-4" /> AI Suggestions
+            </span>
           </TabsTrigger>
           <TabsTrigger 
             value="gas" 
-            className="hover:bg-accent/10 data-[state=active]:bg-accent/20 data-[state=active]:text-accent-foreground animate-multicolor-border-glow rounded-sm" 
+            className={cn(
+              "data-[state=active]:text-accent-foreground tab-running-lines-border rounded-sm",
+              {"data-[state=active]:bg-accent/20": false} 
+            )}
             disabled={(!code && !isLoadingGasEstimation) || overallLoading}
           >
-             <Fuel className="mr-2 h-4 w-4" /> Gas
+            <span className="tab-running-lines-content flex items-center justify-center px-3 py-1.5">
+              <Fuel className="mr-2 h-4 w-4" /> Gas
+            </span>
           </TabsTrigger>
           <TabsTrigger 
             value="tests" 
-            className="hover:bg-accent/10 data-[state=active]:bg-accent/20 data-[state=active]:text-accent-foreground animate-multicolor-border-glow rounded-sm" 
+            className={cn(
+              "data-[state=active]:text-accent-foreground tab-running-lines-border rounded-sm",
+              {"data-[state=active]:bg-accent/20": false} 
+            )}
             disabled={(!code && !isLoadingTestCases) || overallLoading}
           >
+            <span className="tab-running-lines-content flex items-center justify-center px-3 py-1.5">
              <Beaker className="mr-2 h-4 w-4" /> Tests
+            </span>
           </TabsTrigger>
         </TabsList>
 
@@ -265,7 +285,7 @@ export function CodeDisplay({
                 htmlFor="refinementRequest" 
                 className={cn(
                   "text-sm font-medium flex items-center justify-center gap-1.5 mb-2",
-                  "animate-multicolor-border-glow p-2 rounded-md"
+                  "p-2 rounded-md word-glow-active font-bold"
                   )}
               >
                 <Sparkles className="h-4 w-4 text-primary" />
@@ -303,7 +323,7 @@ export function CodeDisplay({
                 {[...Array(3)].map((_, i) => <Skeleton key={i} className={`h-5 ${i % 2 === 0 ? 'w-3/4' : 'w-full'}`} />)}
               </div>
             ) : suggestions.length > 0 || securityScore !== null ? (
-              <div className="p-4 space-y-4">
+              <div className="p-6 space-y-6">
                 {securityScore !== null && (
                   <div className="flex items-center justify-between p-3 bg-card rounded-md shadow mb-4 animate-multicolor-border-glow">
                     <h3 className="text-base font-semibold p-2 rounded-md animate-multicolor-border-glow">Overall Audit Readiness</h3>
@@ -314,8 +334,8 @@ export function CodeDisplay({
                 {suggestions.length > 0 && <h3 className="text-base font-semibold mb-3 text-center p-2 rounded-md animate-multicolor-border-glow">My Sage Advice:</h3>}
                 <ul className="space-y-4">
                   {suggestions.map((suggestion) => (
-                    <li key={suggestion.id} className="p-3 bg-card/50 rounded-md text-sm space-y-2 animate-multicolor-border-glow">
-                      <div className="flex items-center gap-2">
+                    <li key={suggestion.id} className="p-4 bg-card/50 rounded-md text-sm space-y-2 animate-multicolor-border-glow">
+                      <div className="flex items-center gap-2 mb-1">
                         {getTypeIcon(suggestion.type)}
                         <Badge variant={getSeverityBadgeVariant(suggestion.severity)} className="capitalize">{suggestion.severity}</Badge>
                         <Badge variant="outline" className="capitalize">{suggestion.type.replace('_', ' ')}</Badge>
@@ -346,20 +366,20 @@ export function CodeDisplay({
                 {[...Array(4)].map((_, i) => <Skeleton key={i} className={`h-5 ${i % 2 === 0 ? 'w-3/4' : 'w-full'}`} />)}
               </div>
             ) : gasEstimation ? (
-              <div className="p-4 space-y-4">
+              <div className="p-6 space-y-6">
                 <div className="bg-card/50 rounded-md shadow-md animate-multicolor-border-glow">
-                  <CardHeader>
+                  <CardHeader className="p-4">
                     <CardTitle className="text-xl flex items-center gap-2 p-2 rounded-md animate-multicolor-border-glow mb-2"><Fuel className="w-5 h-5 text-primary"/>Gas Guesstimations</CardTitle>
                   </CardHeader>
-                  <ShadCNCardContent className="space-y-3">
+                  <ShadCNCardContent className="space-y-3 p-4 pt-0">
                     <div>
                       <h4 className="font-semibold text-base text-primary p-2 rounded-md animate-multicolor-border-glow mb-1">Estimated Gas Range (Wild Guess):</h4>
-                      <p className="text-sm whitespace-pre-line">{gasEstimation.estimatedGasRange}</p>
+                      <p className="text-sm whitespace-pre-line ml-2">{gasEstimation.estimatedGasRange}</p>
                     </div>
                     <Separator className="my-3" />
                     <div>
                       <h4 className="font-semibold text-base text-primary p-2 rounded-md animate-multicolor-border-glow mb-1">My Two Cents on Why:</h4>
-                      <p className="text-sm whitespace-pre-line">{gasEstimation.explanation}</p>
+                      <p className="text-sm whitespace-pre-line ml-2">{gasEstimation.explanation}</p>
                     </div>
                   </ShadCNCardContent>
                 </div>
