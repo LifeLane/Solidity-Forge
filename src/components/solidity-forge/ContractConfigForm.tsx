@@ -216,7 +216,7 @@ export function ContractConfigForm({
         <TooltipProvider>
           <Tooltip delayDuration={300}>
             <TooltipTrigger asChild>
-              <Label htmlFor={param.name} className="flex items-center gap-1.5">
+              <Label htmlFor={param.name} className="flex items-center justify-center gap-1.5">
                 {param.label}
                 {param.description && <AlertCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />}
               </Label>
@@ -273,7 +273,7 @@ export function ContractConfigForm({
             )}
           />
         )}
-        {errors[param.name] && <p className="text-sm text-destructive">{(errors[param.name] as any).message}</p>}
+        {errors[param.name] && <p className="text-sm text-destructive text-center">{(errors[param.name] as any).message}</p>}
       </div>
     );
   };
@@ -291,7 +291,7 @@ export function ContractConfigForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="contractType">Contract Type</Label>
+        <Label htmlFor="contractType" className="text-center block">Contract Type</Label>
         <Select onValueChange={handleTemplateChange} defaultValue={selectedTemplate?.id} disabled={anyPrimaryActionLoading}>
           <SelectTrigger id="contractType" className="bg-input/50 focus:bg-input">
             <SelectValue placeholder="Select contract type" />
@@ -307,12 +307,12 @@ export function ContractConfigForm({
             ))}
           </SelectContent>
         </Select>
-        {selectedTemplate && <p className="text-sm text-muted-foreground mt-1">{selectedTemplate.description}</p>}
+        {selectedTemplate && <p className="text-sm text-muted-foreground mt-1 text-center">{selectedTemplate.description}</p>}
       </div>
 
       {selectedTemplate && (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="flex items-center space-x-2 my-4">
+          <div className="flex items-center justify-center space-x-2 my-4">
             <Label htmlFor="mode-switch" className="cursor-pointer">Mode:</Label>
             <span className="text-sm text-muted-foreground">Basic</span>
             <Switch
@@ -355,7 +355,7 @@ export function ContractConfigForm({
                         hover:bg-muted/60 hover:text-accent-foreground 
                         focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
                         data-[state=active]:bg-muted data-[state=active]:text-primary data-[state=active]:font-semibold data-[state=active]:shadow-inner
-                        md:w-full md:justify-start animate-multicolor-border-glow"
+                        md:w-full animate-multicolor-border-glow"
                     >
                       {group.title}
                     </TabsTrigger>
@@ -437,4 +437,3 @@ export function ContractConfigForm({
     </div>
   );
 }
-
