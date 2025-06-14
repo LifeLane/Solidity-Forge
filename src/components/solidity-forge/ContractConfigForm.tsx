@@ -95,6 +95,21 @@ const getParameterGroups = (template: ContractTemplate, isAdvancedMode: boolean)
   return groups.filter(group => group.parameters.length > 0);
 };
 
+interface ContractConfigFormProps {
+  templates: ContractTemplate[];
+  onGenerateCode: (template: ContractTemplate, formData: FormData) => Promise<void>;
+  onGetAISuggestions: (template: ContractTemplate, formData: FormData) => Promise<void>;
+  onEstimateGasCosts: () => Promise<void>;
+  onGenerateTestCases: () => Promise<void>;
+  isGeneratingCode: boolean;
+  isGettingSuggestions: boolean;
+  isEstimatingGas: boolean;
+  isGeneratingTestCases: boolean;
+  isRefiningCode: boolean;
+  generatedCode: string;
+  selectedTemplateProp?: ContractTemplate;
+}
+
 
 export function ContractConfigForm({
   templates,
@@ -204,7 +219,9 @@ export function ContractConfigForm({
             <TooltipTrigger asChild>
               <Label 
                 htmlFor={param.name} 
-                className="flex items-center text-glow-primary font-bold" 
+                className={cn(
+                  "flex items-center text-base font-bold animate-text-multicolor-glow"
+                )} 
               >
                 {param.label}
                 {param.description && <AlertCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help ml-1.5" />}
@@ -258,7 +275,7 @@ export function ContractConfigForm({
                   onCheckedChange={field.onChange}
                   disabled={anyPrimaryActionLoading}
                 />
-                <Label htmlFor={param.name} className="text-sm text-muted-foreground">
+                <Label htmlFor={param.name} className="text-sm text-muted-foreground"> {/* No glow for switch sub-label */}
                   {field.value ? 'Enabled' : 'Disabled'}
                 </Label>
               </div>
@@ -300,7 +317,12 @@ export function ContractConfigForm({
       </div>
 
       <div className="space-y-4 mb-8"> 
-        <Label htmlFor="contractType" className="text-center block font-bold text-xl text-glow-primary">
+        <Label 
+          htmlFor="contractType" 
+          className={cn(
+            "text-center block font-bold text-xl animate-text-multicolor-glow"
+          )}
+        >
           Select Your Destiny (Contract Type)
         </Label>
         <Select onValueChange={handleTemplateChange} defaultValue={selectedTemplate?.id} disabled={anyPrimaryActionLoading}>
@@ -326,7 +348,14 @@ export function ContractConfigForm({
       {selectedTemplate && (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
           <div className="flex items-center justify-center space-x-4 my-8">
-            <Label htmlFor="mode-switch" className="text-base font-bold text-glow-primary">Complexity Dial:</Label>
+            <Label 
+              htmlFor="mode-switch" 
+              className={cn(
+                "text-base font-bold animate-text-multicolor-glow"
+              )}
+            >
+              Complexity Dial:
+            </Label>
             <span className="text-sm text-muted-foreground">Basic</span>
             <Switch
               id="mode-switch"
@@ -352,7 +381,7 @@ export function ContractConfigForm({
               className="flex flex-col md:flex-row gap-6 md:gap-8 min-h-[300px]" 
             >
               <TabsList className="flex flex-row md:flex-col md:space-y-2 md:w-60 shrink-0 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 bg-transparent p-0">
-                {parameterGroups.map((group) => {
+                {parameterGroups.map((group, groupIndex) => {
                   const tabValue = group.title.toLowerCase().replace(/\s+/g, '-');
                   return (
                     <TabsTrigger 
@@ -361,12 +390,12 @@ export function ContractConfigForm({
                       disabled={anyPrimaryActionLoading && activeTabValue !== tabValue}
                       className={cn(
                         "tab-running-lines-border param-tab-trigger w-full justify-start whitespace-nowrap",
-                        "data-[state=active]:text-primary-foreground",
+                        "data-[state=active]:text-primary-foreground", // Text color for active tab content
                         "data-[state=inactive]:text-muted-foreground hover:text-foreground"
                       )}
-                      style={{ animationDelay: '0s' }} // Let individual ::before handle unique start if needed
+                       style={{ animationDelay: `${groupIndex * 1}s` }} 
                     >
-                       <span className="tab-running-lines-content px-4 py-3 text-sm md:text-base">
+                       <span className="tab-running-lines-content"> {/* Padding handled by .param-tab-trigger .tab-running-lines-content */}
                          {group.title}
                        </span>
                     </TabsTrigger>
@@ -448,7 +477,3 @@ export function ContractConfigForm({
     </div>
   );
 }
-
-    
-
-    
