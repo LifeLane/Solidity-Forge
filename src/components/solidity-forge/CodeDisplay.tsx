@@ -7,11 +7,11 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertTriangle, CheckCircle2, ExternalLink, Lightbulb, Copy, Check, ShieldAlert, Zap, Wrench, Info, Fuel, Coins, Beaker, Sparkles, Loader2 } from 'lucide-react';
-import { CardTitle, CardDescription } from '@/components/ui/card';
+import { CardTitle, CardDescription, CardHeader, CardContent as ShadCNCardContent } from '@/components/ui/card'; // Renamed to avoid conflict
 import { Badge, type BadgeProps } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Textarea } from '@/components/ui/textarea'; // New import
-import { Label } from '@/components/ui/label'; // New import
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { useToast } from "@/hooks/use-toast";
 import type { EstimateGasCostOutput } from '@/ai/flows/estimate-gas-cost';
 
@@ -36,10 +36,10 @@ interface CodeDisplayProps {
   isLoadingSuggestions: boolean;
   isLoadingGasEstimation: boolean;
   isLoadingTestCases: boolean;
-  isRefiningCode: boolean; // New prop
-  onRefineCode: (request: string) => Promise<void>; // New prop
-  selectedTemplateName?: string; // New prop
-  anySubActionLoading: boolean; // New prop
+  isRefiningCode: boolean;
+  onRefineCode: (request: string) => Promise<void>;
+  selectedTemplateName?: string;
+  anySubActionLoading: boolean;
 }
 
 export function CodeDisplay({
@@ -52,10 +52,10 @@ export function CodeDisplay({
   isLoadingSuggestions,
   isLoadingGasEstimation,
   isLoadingTestCases,
-  isRefiningCode, // New prop
-  onRefineCode, // New prop
-  selectedTemplateName, // New prop
-  anySubActionLoading, // New prop
+  isRefiningCode,
+  onRefineCode,
+  selectedTemplateName,
+  anySubActionLoading,
 }: CodeDisplayProps) {
   const [activeTab, setActiveTab] = useState("code");
   const [copiedStates, setCopiedStates] = useState<{ [key: string]: boolean }>({});
@@ -84,7 +84,6 @@ export function CodeDisplay({
       window.open(remixURL, '_blank');
     } catch (error) {
         console.error("Error preparing Remix URL:", error);
-        // Fallback for potential unescape/encodeURIComponent issues with very complex characters
         const base64Code = btoa(code); 
         const remixURL = `https://remix.ethereum.org/?#code=${base64Code}&lang=sol`;
         window.open(remixURL, '_blank');
@@ -102,7 +101,7 @@ export function CodeDisplay({
       return;
     }
     await onRefineCode(refinementInput);
-    setRefinementInput(''); // Clear input after submission
+    setRefinementInput('');
   };
 
   const getSecurityScoreBadge = (score: number | null) => {
@@ -315,11 +314,11 @@ export function CodeDisplay({
               </div>
             ) : gasEstimation ? (
               <div className="p-4 space-y-4">
-                <Card className="bg-card/50">
+                <div className="bg-card/50 rounded-md shadow-md">
                   <CardHeader>
                     <CardTitle className="text-xl flex items-center gap-2"><Fuel className="w-5 h-5 text-primary"/>Gas Guesstimations</CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-3">
+                  <ShadCNCardContent className="space-y-3">
                     <div>
                       <h4 className="font-semibold text-base text-primary">Estimated Gas Range (Wild Guess):</h4>
                       <p className="text-sm whitespace-pre-line">{gasEstimation.estimatedGasRange}</p>
@@ -329,8 +328,8 @@ export function CodeDisplay({
                       <h4 className="font-semibold text-base text-primary">My Two Cents on Why:</h4>
                       <p className="text-sm whitespace-pre-line">{gasEstimation.explanation}</p>
                     </div>
-                  </CardContent>
-                </Card>
+                  </ShadCNCardContent>
+                </div>
               </div>
             ) : code && !isLoadingCode && !overallLoading ? (
               <div className="p-6 text-center text-muted-foreground flex flex-col items-center justify-center h-full">
@@ -371,4 +370,9 @@ export function CodeDisplay({
     </div>
   );
 }
+
+// Make sure to import CardHeader and CardContent from ShadCN if not already.
+// For example, at the top:
+// import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+// I've aliased CardContent to ShadCNCardContent in the GasEstimation section to avoid naming conflict.
 
