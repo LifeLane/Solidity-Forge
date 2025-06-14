@@ -6,9 +6,11 @@ import { Header } from '@/components/solidity-forge/Header';
 import { Footer } from '@/components/solidity-forge/Footer';
 import { ContractConfigForm, type FormData } from '@/components/solidity-forge/ContractConfigForm';
 import { CodeDisplay, type AISuggestion } from '@/components/solidity-forge/CodeDisplay';
+import type { EstimateGasCostOutput } from '@/ai/flows/estimate-gas-cost';
 import { useToast } from "@/hooks/use-toast";
 import { generateSmartContractCode } from '@/ai/flows/generate-smart-contract-code';
 import { suggestErrorPrevention } from '@/ai/flows/suggest-error-prevention';
+import { estimateGasCost } from '@/ai/flows/estimate-gas-cost';
 import { Card, CardContent } from '@/components/ui/card';
 import { CONTRACT_TEMPLATES, type ContractTemplate } from '@/config/contracts';
 
@@ -19,15 +21,16 @@ export default function SolidityForgePage() {
   const [generatedCode, setGeneratedCode] = useState<string>('');
   const [aiSuggestions, setAiSuggestions] = useState<AISuggestion[]>([]);
   const [securityScore, setSecurityScore] = useState<number | null>(null);
+  const [gasEstimation, setGasEstimation] = useState<EstimateGasCostOutput | null>(null);
   const [isGeneratingCode, setIsGeneratingCode] = useState<boolean>(false);
   const [isGettingSuggestions, setIsGettingSuggestions] = useState<boolean>(false);
+  const [isEstimatingGas, setIsEstimatingGas] = useState<boolean>(false);
   const [mainContentVisible, setMainContentVisible] = useState(false);
 
   const { toast } = useToast();
 
   useEffect(() => {
-    // For page load animation
-    const timer = setTimeout(() => setMainContentVisible(true), 100); // Short delay before fade-in
+    const timer = setTimeout(() => setMainContentVisible(true), 100); 
     return () => clearTimeout(timer);
   }, []);
 
@@ -37,6 +40,7 @@ export default function SolidityForgePage() {
     setGeneratedCode('');
     setAiSuggestions([]);
     setSecurityScore(null);
+    setGasEstimation(null); // Reset gas estimation
 
     let description = `Generate a Solidity smart contract for ${template.name}.`;
     if (template.id === 'custom' && formData.customDescription) {
@@ -57,7 +61,6 @@ Parameters:`;
 
 Specific guidance: ${template.aiPromptEnhancement}`;
     }
-
 
     try {
       const result = await generateSmartContractCode({ description });
@@ -100,17 +103,13 @@ Specific guidance: ${template.aiPromptEnhancement}`;
         parameters: paramsForAI,
         code: generatedCode,
       });
-      
-      // The flow now returns structured suggestions.
-      // AISuggestion type in CodeDisplay is compatible with SuggestionItem from the flow.
       setAiSuggestions(result.suggestions || []); 
       setSecurityScore(result.securityScore);
       toast({
         title: "AI Analysis Complete",
         description: "Error prevention and optimization suggestions are now available.",
       });
-    } catch (error)
-     {
+    } catch (error) {
       console.error("Error getting AI suggestions:", error);
       toast({
         variant: "destructive",
@@ -121,7 +120,37 @@ Specific guidance: ${template.aiPromptEnhancement}`;
       setIsGettingSuggestions(false);
     }
   };
-  
+
+  const handleEstimateGasCosts = async () => {
+    if (!generatedCode) {
+      toast({
+        variant: "destructive",
+        title: "Cannot Estimate Gas",
+        description: "Please generate code first.",
+      });
+      return;
+    }
+    setIsEstimatingGas(true);
+    setGasEstimation(null);
+
+    try {
+      const result = await estimateGasCost({ code: generatedCode });
+      setGasEstimation(result);
+      toast({
+        title: "Gas Estimation Complete",
+        description: "AI-powered gas cost analysis is ready.",
+      });
+    } catch (error) {
+      console.error("Error estimating gas costs:", error);
+      toast({
+        variant: "destructive",
+        title: "Error Estimating Gas",
+        description: (error as Error).message || "An unexpected error occurred. Please try again.",
+      });
+    } finally {
+      setIsEstimatingGas(false);
+    }
+  };
 
   return (
     <div className="min-h-screen text-foreground flex flex-col">
@@ -138,8 +167,10 @@ Specific guidance: ${template.aiPromptEnhancement}`;
               templates={CONTRACT_TEMPLATES}
               onGenerateCode={handleGenerateCode}
               onGetAISuggestions={handleGetAISuggestions}
+              onEstimateGasCosts={handleEstimateGasCosts}
               isGeneratingCode={isGeneratingCode}
               isGettingSuggestions={isGettingSuggestions}
+              isEstimatingGas={isEstimatingGas}
               generatedCode={generatedCode}
               selectedTemplateProp={selectedTemplate}
             />
@@ -153,8 +184,10 @@ Specific guidance: ${template.aiPromptEnhancement}`;
             code={generatedCode}
             suggestions={aiSuggestions}
             securityScore={securityScore}
+            gasEstimation={gasEstimation}
             isLoadingCode={isGeneratingCode}
             isLoadingSuggestions={isGettingSuggestions}
+            isLoadingGasEstimation={isEstimatingGas}
           />
         </Card>
       </main>
@@ -162,4 +195,3 @@ Specific guidance: ${template.aiPromptEnhancement}`;
     </div>
   );
 }
-

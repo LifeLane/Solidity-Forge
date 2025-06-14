@@ -6,11 +6,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AlertTriangle, CheckCircle2, ExternalLink, Lightbulb, Copy, Check, ShieldAlert, Zap, Wrench, Info } from 'lucide-react';
-import { CardTitle, CardDescription } from '@/components/ui/card';
+import { AlertTriangle, CheckCircle2, ExternalLink, Lightbulb, Copy, Check, ShieldAlert, Zap, Wrench, Info, Fuel, Coins } from 'lucide-react';
+import { CardTitle, CardDescription, CardHeader, CardContent, Card } from '@/components/ui/card';
 import { Badge, type BadgeProps } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from "@/hooks/use-toast";
+import type { EstimateGasCostOutput } from '@/ai/flows/estimate-gas-cost';
+
 
 export type AISuggestionType = 'security' | 'optimization' | 'gas_saving' | 'best_practice' | 'informational';
 export type AISuggestionSeverity = 'critical' | 'high' | 'medium' | 'low' | 'info';
@@ -26,16 +28,20 @@ interface CodeDisplayProps {
   code: string;
   suggestions: AISuggestion[];
   securityScore: number | null;
+  gasEstimation: EstimateGasCostOutput | null;
   isLoadingCode: boolean;
   isLoadingSuggestions: boolean;
+  isLoadingGasEstimation: boolean;
 }
 
 export function CodeDisplay({
   code,
   suggestions,
   securityScore,
+  gasEstimation,
   isLoadingCode,
   isLoadingSuggestions,
+  isLoadingGasEstimation,
 }: CodeDisplayProps) {
   const [activeTab, setActiveTab] = useState("code");
   const [copied, setCopied] = useState(false);
@@ -98,9 +104,9 @@ export function CodeDisplay({
       case 'high':
         return 'destructive';
       case 'medium':
-        return 'outline'; // Often styled as warning/orange
+        return 'outline'; 
       case 'low':
-        return 'default'; // Often styled as success/green or primary
+        return 'default'; 
       case 'info':
       default:
         return 'secondary';
@@ -146,12 +152,12 @@ export function CodeDisplay({
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-grow flex flex-col">
-        <TabsList className="mb-4 grid w-full grid-cols-2 animate-multicolor-border-glow">
+        <TabsList className="mb-4 grid w-full grid-cols-3 animate-multicolor-border-glow">
           <TabsTrigger 
             value="code" 
             className="hover:bg-accent/10 data-[state=active]:bg-accent/20 data-[state=active]:text-accent-foreground animate-multicolor-border-glow rounded-sm"
           >
-            <CheckCircle2 className="mr-2 h-4 w-4" /> Generated Code
+            <CheckCircle2 className="mr-2 h-4 w-4" /> Code
           </TabsTrigger>
           <TabsTrigger 
             value="suggestions" 
@@ -159,6 +165,13 @@ export function CodeDisplay({
             disabled={!code && !isLoadingSuggestions}
           >
              <Lightbulb className="mr-2 h-4 w-4" /> AI Suggestions
+          </TabsTrigger>
+          <TabsTrigger 
+            value="gas" 
+            className="hover:bg-accent/10 data-[state=active]:bg-accent/20 data-[state=active]:text-accent-foreground animate-multicolor-border-glow rounded-sm" 
+            disabled={!code && !isLoadingGasEstimation}
+          >
+             <Fuel className="mr-2 h-4 w-4" /> Gas Estimation
           </TabsTrigger>
         </TabsList>
 
@@ -229,8 +242,49 @@ export function CodeDisplay({
             )}
           </ScrollArea>
         </TabsContent>
+
+         <TabsContent value="gas" className="flex-grow overflow-hidden rounded-md border border-border/50 bg-muted/20 animate-multicolor-border-glow">
+          <ScrollArea className="h-[calc(100vh-18rem)] lg:h-[calc(100vh-24rem)] max-h-[600px] p-1">
+            {isLoadingGasEstimation ? (
+              <div className="p-4 space-y-3">
+                <Skeleton className="h-5 w-3/4" />
+                <Skeleton className="h-5 w-full" />
+                <Skeleton className="h-5 w-5/6" />
+                <Skeleton className="h-5 w-full" />
+              </div>
+            ) : gasEstimation ? (
+              <div className="p-4 space-y-4">
+                <Card className="bg-card/50">
+                  <CardHeader>
+                    <CardTitle className="text-xl flex items-center gap-2"><Fuel className="w-5 h-5 text-primary"/>Gas Estimation Overview</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div>
+                      <h4 className="font-semibold text-base text-primary">Estimated Gas Range:</h4>
+                      <p className="text-sm whitespace-pre-line">{gasEstimation.estimatedGasRange}</p>
+                    </div>
+                    <Separator />
+                    <div>
+                      <h4 className="font-semibold text-base text-primary">Explanation & Factors:</h4>
+                      <p className="text-sm whitespace-pre-line">{gasEstimation.explanation}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            ) : code && !isLoadingCode ? (
+              <div className="p-6 text-center text-muted-foreground flex flex-col items-center justify-center h-full">
+                <Fuel className="w-12 h-12 mb-4 text-muted-foreground/50" />
+                <p>Click "Estimate Gas Costs" to get an AI-powered analysis of potential gas usage.</p>
+              </div>
+            ) : (
+              <div className="p-6 text-center text-muted-foreground flex flex-col items-center justify-center h-full">
+                <AlertTriangle className="mx-auto h-12 w-12 mb-4 text-muted-foreground/50" />
+                <p>Generate code first, then click "Estimate Gas Costs" to see analysis here.</p>
+              </div>
+            )}
+          </ScrollArea>
+        </TabsContent>
       </Tabs>
     </div>
   );
 }
-

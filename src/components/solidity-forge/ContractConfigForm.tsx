@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { CardTitle, CardDescription } from '@/components/ui/card';
-import { AlertCircle, Loader2, Wand2, Brain } from 'lucide-react';
+import { AlertCircle, Loader2, Wand2, Brain, Fuel } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Switch } from "@/components/ui/switch"; 
 
@@ -20,8 +20,10 @@ interface ContractConfigFormProps {
   templates: ContractTemplate[];
   onGenerateCode: (template: ContractTemplate, formData: FormData) => Promise<void>;
   onGetAISuggestions: (template: ContractTemplate, formData: FormData) => Promise<void>;
+  onEstimateGasCosts: () => Promise<void>;
   isGeneratingCode: boolean;
   isGettingSuggestions: boolean;
+  isEstimatingGas: boolean;
   generatedCode: string;
   selectedTemplateProp?: ContractTemplate;
 }
@@ -30,8 +32,10 @@ export function ContractConfigForm({
   templates,
   onGenerateCode,
   onGetAISuggestions,
+  onEstimateGasCosts,
   isGeneratingCode,
   isGettingSuggestions,
+  isEstimatingGas,
   generatedCode,
   selectedTemplateProp,
 }: ContractConfigFormProps) {
@@ -57,6 +61,9 @@ export function ContractConfigForm({
         acc[param.name] = param.defaultValue ?? '';
         return acc;
       }, {} as FormData);
+      if (selectedTemplate.id === 'custom' && !defaultValues.customDescription) {
+        defaultValues.customDescription = ''; // Ensure customDescription is initialized for custom template
+      }
       reset(defaultValues);
     }
   }, [selectedTemplate, reset]);
@@ -78,6 +85,10 @@ export function ContractConfigForm({
     if (selectedTemplate) {
       await onGetAISuggestions(selectedTemplate, currentFormData);
     }
+  };
+
+  const handleEstimateGasClick = async () => {
+    await onEstimateGasCosts();
   };
 
   const renderParameterInput = (param: ContractParameter) => {
@@ -106,7 +117,7 @@ export function ContractConfigForm({
             {...commonProps}
             defaultValue={param.defaultValue || param.options[0]?.value}
             render={({ field }) => (
-              <Select onValueChange={field.onChange} defaultValue={field.value as string}>
+              <Select onValueChange={field.onChange} value={field.value as string} defaultValue={field.value as string || undefined}>
                 <SelectTrigger id={param.name}>
                   <SelectValue placeholder={param.placeholder || `Select ${param.label}`} />
                 </SelectTrigger>
@@ -197,8 +208,12 @@ export function ContractConfigForm({
             .filter(param => isAdvancedMode || !param.advancedOnly) 
             .map(renderParameterInput)}
 
-          <div className="flex flex-col sm:flex-row gap-3 pt-4">
-            <Button type="submit" disabled={isGeneratingCode || isGettingSuggestions} className="w-full sm:w-auto flex-grow hover:shadow-lg hover:scale-105 transition-transform">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4">
+            <Button 
+              type="submit" 
+              disabled={isGeneratingCode || isGettingSuggestions || isEstimatingGas} 
+              className="w-full hover:shadow-lg hover:scale-105 transition-transform"
+            >
               {isGeneratingCode ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
@@ -210,15 +225,29 @@ export function ContractConfigForm({
               type="button"
               variant="outline"
               onClick={handleAISuggestionsClick}
-              disabled={!generatedCode || isGettingSuggestions || isGeneratingCode}
-              className="w-full sm:w-auto flex-grow hover:shadow-lg hover:scale-105 transition-transform"
+              disabled={!generatedCode || isGettingSuggestions || isGeneratingCode || isEstimatingGas}
+              className="w-full hover:shadow-lg hover:scale-105 transition-transform"
             >
               {isGettingSuggestions ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
                  <Brain className="mr-2 h-4 w-4" />
               )}
-              Get AI Suggestions
+              AI Suggestions
+            </Button>
+             <Button
+              type="button"
+              variant="outline"
+              onClick={handleEstimateGasClick}
+              disabled={!generatedCode || isEstimatingGas || isGeneratingCode || isGettingSuggestions}
+              className="w-full sm:col-span-2 hover:shadow-lg hover:scale-105 transition-transform"
+            >
+              {isEstimatingGas ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                 <Fuel className="mr-2 h-4 w-4" />
+              )}
+              Estimate Gas Costs
             </Button>
           </div>
         </form>
