@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react'; // Import useState here
 import { useForm, Controller } from 'react-hook-form';
 import type { ContractTemplate, ContractParameter } from '@/config/contracts';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { CardTitle, CardDescription } from '@/components/ui/card';
 import { AlertCircle, Loader2, Wand2, Brain } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Switch } from "@/components/ui/switch"; // Import Switch component
 
 export type FormData = Record<string, any>;
 
@@ -34,6 +35,7 @@ export function ContractConfigForm({
   selectedTemplateProp,
 }: ContractConfigFormProps) {
   const [selectedTemplate, setSelectedTemplate] = React.useState<ContractTemplate | undefined>(selectedTemplateProp || templates[0]);
+  const [isAdvancedMode, setIsAdvancedMode] = useState(false); // State for Basic/Advanced mode
 
   const { control, handleSubmit, reset, watch, formState: { errors } } = useForm<FormData>({
     defaultValues: selectedTemplate?.parameters.reduce((acc, param) => {
@@ -84,6 +86,7 @@ export function ContractConfigForm({
       rules: { required: `${param.label} is required.` },
     };
 
+    // Assuming param.description contains the hint text
     return (
       <div key={param.name} className="space-y-2">
         <TooltipProvider>
@@ -91,9 +94,11 @@ export function ContractConfigForm({
             <TooltipTrigger asChild>
               <Label htmlFor={param.name} className="flex items-center gap-1.5">
                 {param.label}
+                {/* Hint icon logic based on param.description */}
                 {param.description && <AlertCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />}
               </Label>
             </TooltipTrigger>
+            {/* Tooltip content */}
             {param.description && <TooltipContent side="right"><p className="max-w-xs">{param.description}</p></TooltipContent>}
           </Tooltip>
         </TooltipProvider>
@@ -152,8 +157,8 @@ export function ContractConfigForm({
   return (
     <div className="space-y-6">
       <div>
-        <CardTitle className="text-2xl font-headline mb-1">Configure Your Smart Contract</CardTitle>
-        <CardDescription>Select a template and fill in the parameters to generate Solidity code.</CardDescription>
+        <CardTitle className="text-2xl font-headline mb-1">Configure Your Contract</CardTitle>
+        <CardDescription>Define contract parameters.</CardDescription>
       </div>
 
       <div className="space-y-2">
@@ -178,7 +183,23 @@ export function ContractConfigForm({
 
       {selectedTemplate && (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {selectedTemplate.parameters.map(renderParameterInput)}
+          {/* Basic/Advanced Mode Toggle */}
+          <div className="flex items-center space-x-2 mb-4">
+            <Label htmlFor="mode-switch">Mode:</Label>
+            <span>Basic</span>
+            <Switch
+              id="mode-switch"
+              checked={isAdvancedMode}
+              onCheckedChange={setIsAdvancedMode}
+            />
+            <span>Advanced</span>
+          </div>
+
+          {/* Filter parameters based on mode */}
+          {selectedTemplate.parameters
+            .filter(param => isAdvancedMode || param.basicModeOnly) // Filter logic
+            .map(renderParameterInput)}
+
           <div className="flex flex-col sm:flex-row gap-3 pt-4">
             <Button type="submit" disabled={isGeneratingCode || isGettingSuggestions} className="w-full sm:w-auto flex-grow hover:shadow-lg hover:scale-105 transition-transform">
               {isGeneratingCode ? (

@@ -92,8 +92,8 @@ export function CodeDisplay({
     <div className="flex flex-col h-full p-4 md:p-6">
       <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-4 gap-2">
         <div>
-            <CardTitle className="text-2xl font-headline">Code & Analysis</CardTitle>
-            <CardDescription>Review generated code and AI-powered suggestions.</CardDescription>
+            <CardTitle className="text-2xl font-headline">Generated Code</CardTitle>
+            <CardDescription>Review your code and AI insights.</CardDescription>
         </div>
         {activeTab === "code" && code && !isLoadingCode && (
           <div className="flex gap-2 mt-2 sm:mt-0">
@@ -108,12 +108,12 @@ export function CodeDisplay({
         )}
       </div>
       
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-grow flex flex-col">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-grow flex flex-col tabs-container-glow">
         <TabsList className="mb-4 grid w-full grid-cols-2">
-          <TabsTrigger value="code" className="hover:bg-accent/10 data-[state=active]:bg-accent/20 data-[state=active]:text-accent-foreground">
+          <TabsTrigger value="code" className="hover:bg-accent/10 data-[state=active]:bg-accent/20 data-[state=active]:text-accent-foreground tab-trigger-glow">
             <CheckCircle2 className="mr-2 h-4 w-4" /> Generated Code
           </TabsTrigger>
-          <TabsTrigger value="suggestions" className="hover:bg-accent/10 data-[state=active]:bg-accent/20 data-[state=active]:text-accent-foreground" disabled={!code && !isLoadingSuggestions}>
+          <TabsTrigger value="suggestions" className="hover:bg-accent/10 data-[state=active]:bg-accent/20 data-[state=active]:text-accent-foreground tab-trigger-glow" disabled={!code && !isLoadingSuggestions}>
              <Lightbulb className="mr-2 h-4 w-4" /> AI Suggestions
           </TabsTrigger>
         </TabsList>
@@ -152,12 +152,12 @@ export function CodeDisplay({
               <div className="p-4 space-y-4">
                 {securityScore !== null && (
                   <div className="flex items-center justify-between p-3 bg-card rounded-md shadow">
-                    <h3 className="text-base font-semibold">Overall Security Assessment</h3>
+                    <h3 className="text-base font-semibold">Security Score</h3>
                     {getSecurityScoreBadge(securityScore)}
                   </div>
                 )}
                 <Separator className="my-3"/>
-                <h3 className="text-base font-semibold mb-2">Suggestions for Improvement:</h3>
+                <h3 className="text-base font-semibold mb-2">AI Suggestions:</h3>
                 <ul className="space-y-3">
                   {suggestions.map((suggestion) => (
                     <li key={suggestion.id} className="flex items-start gap-2 p-3 bg-card/50 rounded-md text-sm">

@@ -102,3 +102,8 @@
 .animate-fadeInUp {
   animation: fadeInUp 0.5s ease-out forwards;
 }
+
+.highlighted-term {
+  color: hsl(var(--primary)); /* Example highlighting color */
+  font-weight: bold;
+}

@@ -1,5 +1,3 @@
-
-// src/ai/flows/suggest-error-prevention.ts
 'use server';
 
 /**
@@ -37,7 +35,7 @@ const suggestErrorPreventionPrompt = ai.definePrompt({
   prompt: `You are a smart contract security expert. Analyze the following smart contract code and parameters, and provide suggestions for error prevention and code optimization.
 
 Contract Type: {{{contractType}}}
-Parameters: {{JSON.stringify parameters}}
+Parameters: {{json parameters}}
 Code: \`\`\`solidity
 {{{code}}}
 \`\`\`

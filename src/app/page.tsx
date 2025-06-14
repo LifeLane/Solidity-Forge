@@ -41,16 +41,20 @@ export default function SolidityForgePage() {
     if (template.id === 'custom' && formData.customDescription) {
         description = formData.customDescription as string;
     } else {
-        description += `\nParameters:`;
+        description += `
+Parameters:`;
         for (const key in formData) {
           if (Object.prototype.hasOwnProperty.call(formData, key) && formData[key] !== undefined && formData[key] !== '') {
             const paramConfig = template.parameters.find(p => p.name === key);
-            description += `\n- ${paramConfig?.label || key}: ${formData[key]}`;
+            description += `
+- ${paramConfig?.label || key}: ${formData[key]}`;
           }
         }
     }
     if(template.aiPromptEnhancement) {
-        description += `\n\nSpecific guidance: ${template.aiPromptEnhancement}`;
+        description += `
+
+Specific guidance: ${template.aiPromptEnhancement}`;
     }
 
 
@@ -125,7 +129,7 @@ export default function SolidityForgePage() {
         className={`flex-grow container mx-auto p-4 md:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-start transition-opacity duration-700 ease-out ${mainContentVisible ? 'opacity-100' : 'opacity-0'}`}
       >
         <Card 
-          className="shadow-xl hover:shadow-primary/20 transition-all duration-300 bg-card/80 backdrop-blur-sm animate-fadeInUp"
+          className="shadow-xl hover:shadow-primary/20 transition-all duration-300 bg-card/80 backdrop-blur-sm animate-fadeInUp animated-border-glow"
           style={{ animationDelay: '0.3s' }}
         >
           <CardContent className="p-6">
@@ -141,7 +145,7 @@ export default function SolidityForgePage() {
           </CardContent>
         </Card>
         <Card 
-          className="shadow-xl hover:shadow-primary/20 transition-all duration-300 bg-card/80 backdrop-blur-sm lg:sticky top-24 animate-fadeInUp"  // Adjusted sticky position
+          className="shadow-xl hover:shadow-primary/20 transition-all duration-300 bg-card/80 backdrop-blur-sm lg:sticky top-24 animate-fadeInUp animated-border-glow"  // Adjusted sticky position
           style={{ animationDelay: '0.5s' }}
         >
           {/* CardContent padding is handled by CodeDisplay for better ScrollArea control */}
