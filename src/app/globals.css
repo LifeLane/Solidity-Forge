@@ -119,7 +119,7 @@
   font-weight: bold;
 }
 
-/* Pulsating glow for Cards */
+/* Pulsating glow for Cards - Kept if needed for other elements, but replaced for main cards */
 @keyframes cardPulsatingGlow {
   0% {
     box-shadow: 0 0 8px 2px hsla(var(--primary), 0.15), 0 0 2px 0px hsla(var(--primary), 0.1);
@@ -133,9 +133,26 @@
 }
 
 .animated-border-glow {
-  /* This will combine with existing shadow-xl from Tailwind and hover effects */
   animation: cardPulsatingGlow 3s ease-in-out infinite;
 }
+
+/* New Multi-color Border Glow Animation */
+@keyframes multiColorBorderGlow {
+  0%   { box-shadow: 0 0 3px hsl(0, 90%, 65%), 0 0 6px hsl(0, 90%, 65%), 0 0 9px hsl(0, 90%, 65%); } /* Red */
+  16%  { box-shadow: 0 0 3px hsl(60, 90%, 55%), 0 0 6px hsl(60, 90%, 55%), 0 0 9px hsl(60, 90%, 55%); } /* Yellow */
+  33%  { box-shadow: 0 0 3px hsl(120, 90%, 55%), 0 0 6px hsl(120, 90%, 55%), 0 0 9px hsl(120, 90%, 55%); } /* Green */
+  50%  { box-shadow: 0 0 3px hsl(180, 90%, 55%), 0 0 6px hsl(180, 90%, 55%), 0 0 9px hsl(180, 90%, 55%); } /* Cyan */
+  66%  { box-shadow: 0 0 3px hsl(240, 90%, 65%), 0 0 6px hsl(240, 90%, 65%), 0 0 9px hsl(240, 90%, 65%); } /* Blue */
+  83%  { box-shadow: 0 0 3px hsl(300, 90%, 65%), 0 0 6px hsl(300, 90%, 65%), 0 0 9px hsl(300, 90%, 65%); } /* Magenta */
+  100% { box-shadow: 0 0 3px hsl(0, 90%, 65%), 0 0 6px hsl(0, 90%, 65%), 0 0 9px hsl(0, 90%, 65%); } /* Red */
+}
+
+.animate-multicolor-border-glow {
+  animation: multiColorBorderGlow 8s linear infinite;
+  /* This class provides the box-shadow for the glow. */
+  /* Ensure elements have border-radius for rounded glow. */
+}
+
 
 /* Glow for active tab trigger */
 .tab-trigger-glow[data-state=active] {

@@ -110,7 +110,7 @@ export function CodeDisplay({
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-grow flex flex-col">
-        <TabsList className="mb-4 grid w-full grid-cols-2">
+        <TabsList className="mb-4 grid w-full grid-cols-2 animate-multicolor-border-glow">
           <TabsTrigger value="code" className="hover:bg-accent/10 data-[state=active]:bg-accent/20 data-[state=active]:text-accent-foreground tab-trigger-glow">
             <CheckCircle2 className="mr-2 h-4 w-4" /> Generated Code
           </TabsTrigger>
@@ -119,7 +119,7 @@ export function CodeDisplay({
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="code" className="flex-grow overflow-hidden rounded-md border border-border/50 bg-muted/20">
+        <TabsContent value="code" className="flex-grow overflow-hidden rounded-md border border-border/50 bg-muted/20 animate-multicolor-border-glow">
           <ScrollArea className="h-[calc(100vh-18rem)] lg:h-[calc(100vh-24rem)] max-h-[600px] p-1"> {/* Adjusted height */}
             {isLoadingCode ? (
               <div className="p-4 space-y-3">
@@ -142,7 +142,7 @@ export function CodeDisplay({
           </ScrollArea>
         </TabsContent>
 
-        <TabsContent value="suggestions" className="flex-grow overflow-hidden rounded-md border border-border/50 bg-muted/20">
+        <TabsContent value="suggestions" className="flex-grow overflow-hidden rounded-md border border-border/50 bg-muted/20 animate-multicolor-border-glow">
           <ScrollArea className="h-[calc(100vh-18rem)] lg:h-[calc(100vh-24rem)] max-h-[600px] p-1"> {/* Adjusted height */}
             {isLoadingSuggestions ? (
                <div className="p-4 space-y-3">

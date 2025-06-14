@@ -130,7 +130,7 @@ Specific guidance: ${template.aiPromptEnhancement}`;
         className={`flex-grow container mx-auto p-4 md:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-start justify-items-center transition-opacity duration-700 ease-out ${mainContentVisible ? 'opacity-100' : 'opacity-0'}`}
       >
         <Card 
-          className="shadow-xl hover:shadow-primary/20 transition-all duration-300 bg-card/80 backdrop-blur-sm animate-fadeInUp animated-border-glow w-full max-w-2xl" 
+          className="transition-all duration-300 bg-card/80 backdrop-blur-sm animate-fadeInUp animate-multicolor-border-glow w-full max-w-2xl" 
           style={{ animationDelay: '0.3s' }}
         >
           <CardContent className="p-6">
@@ -146,7 +146,7 @@ Specific guidance: ${template.aiPromptEnhancement}`;
           </CardContent>
         </Card>
         <Card 
-          className="shadow-xl hover:shadow-primary/20 transition-all duration-300 bg-card/80 backdrop-blur-sm lg:sticky top-24 animate-fadeInUp animated-border-glow w-full max-w-2xl"
+          className="transition-all duration-300 bg-card/80 backdrop-blur-sm lg:sticky top-24 animate-fadeInUp animate-multicolor-border-glow w-full max-w-2xl"
           style={{ animationDelay: '0.5s' }}
         >
           {/* CardContent padding is handled by CodeDisplay for better ScrollArea control */}
