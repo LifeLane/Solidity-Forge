@@ -1,12 +1,13 @@
 
 import { Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { ThemeToggle } from '@/components/solidity-forge/ThemeToggle'; // Import ThemeToggle
+import { ThemeToggle } from '@/components/solidity-forge/ThemeToggle';
+import { ScrambledText } from '@/components/effects/ScrambledText'; // Import ScrambledText
 
 // SolidityForge Icon - a simple geometric representation
 const SolidityForgeIcon = () => (
   <svg
-    width="32" 
+    width="32"
     height="32"
     viewBox="0 0 100 100"
     fill="none"
@@ -23,28 +24,37 @@ const SolidityForgeIcon = () => (
 export function Header() {
   return (
     <div
-      className="sticky top-0 z-50 p-2"
+      className="sticky top-0 z-50 p-2" // For floating effect and reduced margin
       style={{ transform: 'translateZ(0)' }} 
     >
       <header
         className={cn(
-          "py-3 px-4 md:px-6 bg-card/90 backdrop-blur-md border rounded-lg animate-fadeInUp glow-border-accent"
+          "py-3 px-4 md:px-6 bg-card/90 backdrop-blur-md border-transparent rounded-lg shadow-lg tab-running-lines-border" // Added tab-running-lines-border, shadow-lg
         )}
-        style={{ animationDelay: '0.1s' }} 
       >
         <div className="container mx-auto flex flex-col items-center gap-2 sm:flex-row sm:justify-between">
           <div className="flex items-center gap-3 group cursor-default">
             <SolidityForgeIcon />
-            <h1 className="text-2xl font-headline font-bold text-glow-primary">
-              SolidityForge
-            </h1>
+            <ScrambledText 
+              text="SolidityForge" 
+              className="text-2xl font-headline font-bold text-glow-primary" 
+              revealSpeed={1}
+              scrambleInterval={40}
+              revealDelay={200}
+            />
           </div>
-          <div className="flex items-center gap-4"> {/* Added gap-4 for spacing */}
+          <div className="flex items-center gap-4">
             <div className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground">
                 <Sparkles className="w-4 h-4 text-accent" />
-                <span>AI-Powered Smart Contracts</span>
+                <ScrambledText 
+                  text="AI-Powered Smart Contracts" 
+                  className="text-xs sm:text-sm text-muted-foreground"
+                  revealSpeed={1}
+                  scrambleInterval={50}
+                  revealDelay={700}
+                />
             </div>
-            <ThemeToggle /> {/* Add ThemeToggle here */}
+            <ThemeToggle />
           </div>
         </div>
       </header>

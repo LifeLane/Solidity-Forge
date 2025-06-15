@@ -209,6 +209,7 @@
     align-items: center;
     justify-content: center;
     z-index: 1;
+    border: none !important; /* Ensure no base border from * selector */
   }
 
   .tab-running-lines-border::before {
@@ -323,3 +324,4 @@
   transition: opacity 0.3s ease-in-out, color 0.3s ease-in-out;
   display: inline-block; 
 }
+
