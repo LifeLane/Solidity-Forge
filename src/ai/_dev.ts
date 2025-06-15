@@ -10,3 +10,4 @@ import '@/ai/flows/generate-test-cases.ts';
 import '@/ai/flows/refine-smart-contract-code.ts';
 import '@/ai/flows/generate-documentation-flow.ts';
 import '@/ai/flows/save-lead-flow.ts';
+import '@/ai/flows/explain-contract-parameter.ts';

@@ -10,12 +10,15 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { CardTitle, CardDescription } from '@/components/ui/card';
-import { AlertCircle, Loader2, Wand2, Brain, Fuel, Beaker, FileText, AlertTriangle, ArrowDownCircle } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { AlertCircle, Loader2, Wand2, Brain, Fuel, Beaker, FileText, AlertTriangle, ArrowDownCircle, Lightbulb, Info } from 'lucide-react';
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { cn } from '@/lib/utils';
 import { ScrambledText } from '@/components/effects/ScrambledText';
+import { explainContractParameter } from '@/ai/flows/explain-contract-parameter';
+import { useToast } from "@/hooks/use-toast";
+
 
 export type FormData = Record<string, any>;
 
@@ -138,6 +141,13 @@ export function ContractConfigForm({
   const [isAdvancedMode, setIsAdvancedMode] = useState(false);
   const [activeTabValue, setActiveTabValue] = useState<string | undefined>(undefined);
 
+  const [isExplanationModalOpen, setIsExplanationModalOpen] = useState(false);
+  const [parameterForExplanation, setParameterForExplanation] = useState<ContractParameter | null>(null);
+  const [explanationText, setExplanationText] = useState<string | null>(null);
+  const [isFetchingExplanation, setIsFetchingExplanation] = useState(false);
+
+  const { toast } = useToast();
+
   const subtitleText = "Sculpt your smart contract's soul. Or, you know, just click randomly. My circuits won't judge. Much.";
   const subtitleWords = useMemo(() => subtitleText.split(' '), [subtitleText]);
   const [activeSubtitleWordIndex, setActiveSubtitleWordIndex] = useState(0);
@@ -226,6 +236,38 @@ export function ContractConfigForm({
     await onGenerateTestCases();
   };
 
+  const fetchParameterExplanation = async (param: ContractParameter) => {
+    if (!selectedTemplate) return;
+    setIsFetchingExplanation(true);
+    setExplanationText(null);
+    try {
+      const result = await explainContractParameter({
+        parameterName: param.name,
+        parameterLabel: param.label,
+        contractTypeName: selectedTemplate.name,
+        parameterContextDescription: param.description,
+      });
+      setExplanationText(result.explanation);
+    } catch (error) {
+      console.error("Error fetching parameter explanation:", error);
+      const errorMessage = (error as Error).message || "BlockSmithAI had trouble explaining that. Please try again.";
+      setExplanationText(`Error: ${errorMessage}`);
+      toast({
+        variant: "destructive",
+        title: "Explanation Error",
+        description: errorMessage,
+      });
+    } finally {
+      setIsFetchingExplanation(false);
+    }
+  };
+  
+  const handleShowExplanation = (param: ContractParameter) => {
+    setParameterForExplanation(param);
+    setIsExplanationModalOpen(true);
+    fetchParameterExplanation(param);
+  };
+
   const renderParameterInput = (param: ContractParameter) => {
     let showBasedOnDependency = true;
     if (param.dependsOn) {
@@ -247,23 +289,29 @@ export function ContractConfigForm({
 
     return (
       <div key={param.name} className="space-y-2 mb-6">
-        <TooltipProvider>
-          <Tooltip delayDuration={300}>
-            <TooltipTrigger asChild>
-              <Label
+        <div className="flex items-center justify-between">
+            <Label
                 htmlFor={param.name}
                 className={cn(
-                  "flex items-center text-base font-bold",
-                  "animate-text-multicolor-glow"
+                "flex items-center text-base font-bold",
+                "animate-text-multicolor-glow" 
                 )}
-              >
+            >
                 {param.label}
-                {param.description && <AlertCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help ml-1.5" />}
-              </Label>
-            </TooltipTrigger>
-            {param.description && <TooltipContent side="top" align="start"><p className="max-w-xs">{param.description}</p></TooltipContent>}
-          </Tooltip>
-        </TooltipProvider>
+            </Label>
+            <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 text-muted-foreground hover:text-primary"
+                onClick={() => handleShowExplanation(param)}
+                aria-label={`Get explanation for ${param.label}`}
+                disabled={anyPrimaryActionLoading || isFetchingExplanation || isExplanationModalOpen}
+            >
+                <Lightbulb className="h-4 w-4" />
+            </Button>
+        </div>
+
 
         {param.type === 'select' && param.options ? (
           <Controller
@@ -589,7 +637,45 @@ export function ContractConfigForm({
           )}
         </form>
       )}
+
+      <Dialog open={isExplanationModalOpen} onOpenChange={setIsExplanationModalOpen}>
+        <DialogContent className="sm:max-w-md bg-card/90 backdrop-blur-sm glow-border-cyan">
+          <DialogHeader>
+            <DialogTitle className="text-xl text-glow-primary flex items-center gap-2">
+              <Lightbulb className="h-5 w-5"/>
+              {parameterForExplanation?.label}
+            </DialogTitle>
+            {parameterForExplanation?.description && (
+              <DialogDescription className="italic text-xs pt-1 text-muted-foreground">
+                Original Hint: {parameterForExplanation.description}
+              </DialogDescription>
+            )}
+          </DialogHeader>
+          <div className="py-4 min-h-[80px] flex items-center justify-center">
+            {isFetchingExplanation ? (
+              <div className="flex flex-col items-center justify-center space-y-2">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <span className="text-muted-foreground">BlockSmithAI is conjuring wisdom...</span>
+              </div>
+            ) : explanationText ? (
+              <p className="text-base leading-relaxed text-foreground">{explanationText}</p>
+            ) : (
+              <div className="flex flex-col items-center justify-center space-y-2">
+                <Info className="h-8 w-8 text-destructive" />
+                <p className="text-base text-muted-foreground text-center">Oops! No explanation available. Perhaps the AI is on a coffee break?</p>
+              </div>
+            )}
+          </div>
+          <DialogFooter className="sm:justify-start">
+            <DialogClose asChild>
+              <Button type="button" variant="outline" className="glow-border-accent">
+                Got it, thanks!
+              </Button>
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 }
-    
