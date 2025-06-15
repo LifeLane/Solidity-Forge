@@ -118,23 +118,18 @@
 @keyframes multiColorTextGlow {
   0%, 100% {
     color: hsl(var(--primary)); 
-    text-shadow: 0 0 7px hsl(var(--primary)), 0 0 10px hsl(var(--primary) / 0.7);
   }
   20% {
     color: hsl(var(--glow-cyan-hsl)); 
-    text-shadow: 0 0 7px hsl(var(--glow-cyan-hsl)), 0 0 10px hsl(var(--glow-cyan-hsl) / 0.7);
   }
   40% {
     color: hsl(var(--glow-purple-hsl)); 
-    text-shadow: 0 0 7px hsl(var(--glow-purple-hsl)), 0 0 10px hsl(var(--glow-purple-hsl) / 0.7);
   }
   60% {
     color: hsl(var(--glow-magenta-hsl)); 
-    text-shadow: 0 0 7px hsl(var(--glow-magenta-hsl)), 0 0 10px hsl(var(--glow-magenta-hsl) / 0.7);
   }
   80% {
     color: hsl(var(--glow-yellow-hsl)); 
-    text-shadow: 0 0 7px hsl(var(--glow-yellow-hsl)), 0 0 10px hsl(var(--glow-yellow-hsl) / 0.7);
   }
 }
 
@@ -144,11 +139,7 @@
   }
 
   .text-glow-primary {
-    color: hsl(var(--accent)); /* Changed from --primary to --accent */
-    text-shadow: 
-      0 0 4px hsl(var(--primary)), /* Innermost glow remains primary (green) */
-      0 0 8px hsl(var(--glow-yellow-hsl)), /* Middle glow yellow */
-      0 0 12px hsl(var(--accent)); /* Outermost glow accent (red) */
+    animation: multiColorTextGlow 10s linear infinite;
   }
   
   .text-glow-yellow {
@@ -328,5 +319,7 @@
   display: inline-block; 
 }
 
+
+    
 
     
