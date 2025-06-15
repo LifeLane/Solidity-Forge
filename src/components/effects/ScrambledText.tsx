@@ -19,15 +19,16 @@ export function ScrambledText({
   text,
   className,
   scrambleChars = DEFAULT_SCRAMBLE_CHARS,
-  revealSpeed = 1, // How many chars revealed per main interval step
-  scrambleInterval = 30, // How fast individual non-revealed chars change
-  revealDelay = 0, // Initial delay before animation starts
+  revealSpeed = 1,
+  scrambleInterval = 30,
+  revealDelay = 0,
 }: ScrambledTextProps) {
   const [displayedText, setDisplayedText] = useState('');
+  const [revealedCharacterCount, setRevealedCharacterCount] = useState(0);
   const [isMounted, setIsMounted] = useState(false);
 
   const animateText = useCallback(() => {
-    let revealedCount = 0;
+    let currentRevealedCount = 0;
     let animationFrame = 0;
 
     const intervalId = setInterval(() => {
@@ -36,7 +37,7 @@ export function ScrambledText({
       let fullyRevealed = true;
 
       for (let i = 0; i < text.length; i++) {
-        if (i < revealedCount) {
+        if (i < currentRevealedCount) {
           newDisplayText += text[i];
         } else {
           newDisplayText += scrambleChars[Math.floor(Math.random() * scrambleChars.length)];
@@ -45,38 +46,35 @@ export function ScrambledText({
       }
       
       setDisplayedText(newDisplayText);
+      setRevealedCharacterCount(currentRevealedCount); // Update shared state
 
-      // Determine how many characters should be revealed in this step
-      // This attempts to reveal 'revealSpeed' characters per ~100ms (scrambleInterval * ~3-4 frames)
-      // Adjust logic based on desired reveal smoothness vs. speed
       if (animationFrame % Math.max(1, Math.floor(100 / scrambleInterval / revealSpeed)) === 0) {
-         if (revealedCount < text.length) {
-            revealedCount+=revealSpeed;
-            revealedCount = Math.min(revealedCount, text.length); // Cap at text length
+         if (currentRevealedCount < text.length) {
+            currentRevealedCount += revealSpeed;
+            currentRevealedCount = Math.min(currentRevealedCount, text.length);
          }
       }
 
-
-      if (fullyRevealed && revealedCount >= text.length) {
+      if (fullyRevealed && currentRevealedCount >= text.length) {
         clearInterval(intervalId);
-        setDisplayedText(text); // Ensure final text is correct
+        setDisplayedText(text);
+        setRevealedCharacterCount(text.length); // Ensure all are marked revealed
       }
     }, scrambleInterval);
 
     return () => clearInterval(intervalId);
-  }, [text, scrambleChars, revealSpeed, scrambleInterval]);
+  }, [text, scrambleChars, revealSpeed, scrambleInterval, setRevealedCharacterCount]);
 
   useEffect(() => {
     setIsMounted(true);
-    // Initialize with empty or placeholder to make effect more pronounced
+    setRevealedCharacterCount(0); // Reset on text change or mount
     setDisplayedText(
         Array(text.length)
         .fill(null)
         .map(() => scrambleChars[Math.floor(Math.random() * scrambleChars.length)])
         .join('')
     );
-  }, [text.length, scrambleChars]);
-
+  }, [text, scrambleChars]); // text.length removed as text implies length, added scrambleChars
 
   useEffect(() => {
     if (!isMounted || !text) return;
@@ -97,12 +95,16 @@ export function ScrambledText({
     }
   }, [isMounted, text, animateText, revealDelay]);
 
-  // Ensure the container can shrink and grow with the text if needed, or set fixed size.
-  // Using a span for inline behavior by default.
   return (
     <span className={cn(className)} aria-label={text} role="text">
       {displayedText.split("").map((char, index) => (
-        <span key={index} style={{ display: 'inline-block', minWidth: '0.5ch' }}>
+        <span
+          key={index}
+          className={cn({
+            'animate-text-multicolor-glow': index < revealedCharacterCount,
+          })}
+          style={{ display: 'inline-block', minWidth: '0.5ch' }}
+        >
           {char}
         </span>
       ))}
