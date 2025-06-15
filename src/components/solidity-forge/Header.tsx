@@ -25,8 +25,7 @@ export function Header() {
   return (
     <div
       className={cn(
-        "sticky top-0 z-50", // Base sticky positioning
-        "py-3 px-4 md:px-6", // Padding inside the card
+        "sticky top-0 z-50 p-2", // Sticky positioning, reduced padding
         "bg-card/90 backdrop-blur-md rounded-lg shadow-lg tab-running-lines-border" // Card styles and animated border
       )}
       style={{ transform: 'translateZ(0)' }} // For stacking context with backdrop-blur
@@ -44,7 +43,7 @@ export function Header() {
             revealDelay={200}
           />
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2"> {/* Reduced gap here */}
           <div className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground">
               <Sparkles className="w-4 h-4 text-accent" />
               <ScrambledText 
@@ -61,3 +60,4 @@ export function Header() {
     </div>
   );
 }
+
