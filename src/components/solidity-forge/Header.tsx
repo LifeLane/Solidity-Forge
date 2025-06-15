@@ -25,14 +25,14 @@ export function Header() {
   return (
     <div
       className={cn(
-        "sticky top-0 z-50 p-2",
+        "sticky top-0 z-50 p-2", 
         "bg-card/90 backdrop-blur-md rounded-lg shadow-lg tab-running-lines-border",
         "relative" 
       )}
       style={{ transform: 'translateZ(0)' }} 
     >
       <header 
-        className="container mx-auto flex flex-col items-center gap-2 sm:flex-row sm:items-center sm:justify-between"
+        className="container mx-auto flex flex-col items-center gap-2 sm:flex-row sm:justify-between"
       >
         <div className="flex items-center gap-3 group cursor-default">
           <SolidityForgeIcon />
@@ -44,7 +44,7 @@ export function Header() {
             revealDelay={200}
           />
         </div>
-        <div className="flex flex-col items-center gap-1 sm:flex-row sm:items-center sm:gap-2">
+        <div className="flex flex-col items-center gap-1 sm:flex-row sm:items-center"> {/* Tagline and ThemeToggle group */}
           <div className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground">
               <Sparkles className="w-4 h-4 text-accent" />
               <ScrambledText 
@@ -55,10 +55,11 @@ export function Header() {
                 revealDelay={700}
               />
           </div>
-          <ThemeToggle />
+          {/* ThemeToggle is removed from here as it will be positioned fixed by its own component */}
         </div>
       </header>
+      {/* ThemeToggle is rendered here but positions itself via its own fixed classes */}
+      <ThemeToggle /> 
     </div>
   );
 }
-
