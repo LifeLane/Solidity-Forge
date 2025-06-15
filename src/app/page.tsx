@@ -112,7 +112,7 @@ export default function SolidityForgePage() {
       toast({
         variant: "destructive",
         title: "Forge Limit Hit! Don't Miss Out!",
-        description: "You're crafting like a pro! Snag FREE Developer Access for UNLIMITED forging & lock in your 40Bill8on Token AirDrop. Your next masterpiece awaits!",
+        description: "You're crafting like a pro! Snag FREE Developer Access for UNLIMITED forging & lock in your 40 Billion Token AirDrop. Your next masterpiece awaits!",
       });
       developerAccessFormRef.current?.scrollIntoView({ behavior: 'smooth' });
       return;
@@ -381,7 +381,7 @@ Specific guidance: ${template.aiPromptEnhancement}`;
     localStorage.setItem(LOCAL_STORAGE_DEV_ACCESS_KEY, 'true');
     toast({
       title: "ACCESS GRANTED! You're an Insider Now!",
-      description: "Welcome to the elite, Developer! Unlimited forging power is yours. The 40Bill8on AirDrop is calling your name... and remember, BSAI token holders get the keys to the entire BlockSmithAI kingdom – free!",
+      description: "Welcome to the elite, Developer! Unlimited forging power is yours. The 40 Billion AirDrop is calling your name... and remember, BSAI token holders get the keys to the entire BlockSmithAI kingdom – free!",
       duration: 7000, 
     });
   };
@@ -479,3 +479,4 @@ Specific guidance: ${template.aiPromptEnhancement}`;
   );
 }
     
+

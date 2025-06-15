@@ -57,7 +57,7 @@ export function DeveloperAccessForm({ onSignupSuccess }: DeveloperAccessFormProp
           🚀 UNLOCK ELITE DEVELOPER STATUS!
         </CardTitle>
         <CardDescription className="text-base text-muted-foreground">
-          The Forge is calling your name! Obliterate your limits, seize UNLIMITED contract generations, AND secure your exclusive spot for the monumental 40Bill8on Token AirDrop. Entry is FREE – claim your future now!
+          The Forge is calling your name! Obliterate your limits, seize UNLIMITED contract generations, AND secure your exclusive spot for the monumental 40 Billion Token AirDrop. Entry is FREE – claim your future now!
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -96,7 +96,7 @@ export function DeveloperAccessForm({ onSignupSuccess }: DeveloperAccessFormProp
                 <FormItem>
                   <FormLabel className="text-base animate-text-multicolor-glow">Solana Wallet Address (for AirDrop)</FormLabel>
                   <FormControl>
-                    <Input placeholder="Your Solana (SOL) address for the 40Bill8on Drop" {...field} className="glow-border-purple bg-background/70 focus:bg-background" />
+                    <Input placeholder="Your Solana (SOL) address for the 40 Billion Drop" {...field} className="glow-border-purple bg-background/70 focus:bg-background" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -122,3 +122,4 @@ export function DeveloperAccessForm({ onSignupSuccess }: DeveloperAccessFormProp
   );
 }
     
+
