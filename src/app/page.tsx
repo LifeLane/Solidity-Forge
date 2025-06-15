@@ -324,7 +324,7 @@ Specific guidance: ${template.aiPromptEnhancement}`;
             )}
           style={{ animationDelay: '0.3s' }}
         >
-          <CardContent className="p-0"> 
+          <CardContent className="p-0"> {/* Removed padding here */}
             <ContractConfigForm
               templates={CONTRACT_TEMPLATES}
               onGenerateCode={handleGenerateCode}

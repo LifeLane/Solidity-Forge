@@ -266,22 +266,25 @@
     color: hsl(var(--foreground));
   }
 
-
+  /* Styles for Vertical Parameter Tabs */
   .param-tab-trigger { 
-    border-right: none;
-    margin-bottom: 0.5rem;
-    text-align: left;
-    font-weight: 500; 
+    /* Inherits .tab-running-lines-border for the border effect */
+    /* Specific adjustments for vertical layout */
+    border-right: none; /* Remove right border if any from base tab trigger */
+    margin-bottom: 0.5rem; /* Space between vertical tabs */
+    text-align: left; /* Align text to the left */
+    font-weight: 500; /* Medium font weight */
     transition: all 0.2s ease-in-out;
-    border-radius: var(--radius) 0 0 var(--radius); 
-    width: 100%;
+    border-radius: var(--radius) 0 0 var(--radius); /* Rounded corners on left side */
+    width: 100%; /* Take full width of the TabsList column */
   }
   
   .param-tab-trigger .tab-running-lines-content {
-    justify-content: flex-start; 
-    padding: 0.75rem 1rem;
+    justify-content: flex-start; /* Align content (text) to the left */
+    padding: 0.75rem 1rem; /* Inner padding for text */
   }
   
+  /* Opacity for inactive tabs to de-emphasize */
   .param-tab-trigger:not([data-state="active"]) .tab-running-lines-content {
     opacity: 0.8;
   }
