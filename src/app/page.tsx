@@ -1,13 +1,14 @@
 
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Header } from '@/components/solidity-forge/Header';
 import { Footer } from '@/components/solidity-forge/Footer';
 import { ContractConfigForm, type FormData } from '@/components/solidity-forge/ContractConfigForm';
 import { CodeDisplay, type AISuggestion } from '@/components/solidity-forge/CodeDisplay';
 import type { EstimateGasCostOutput } from '@/ai/flows/estimate-gas-cost';
 import { KnownAddressesFinder } from '@/components/solidity-forge/KnownAddressesFinder';
+import { DeveloperAccessForm } from '@/components/solidity-forge/DeveloperAccessForm';
 import { useToast } from "@/hooks/use-toast";
 import { generateSmartContractCode } from '@/ai/flows/generate-smart-contract-code';
 import { suggestErrorPrevention } from '@/ai/flows/suggest-error-prevention';
@@ -19,6 +20,16 @@ import { generateDocumentation } from '@/ai/flows/generate-documentation-flow';
 import { Card, CardContent } from '@/components/ui/card';
 import { CONTRACT_TEMPLATES, type ContractTemplate } from '@/config/contracts';
 import { cn } from '@/lib/utils';
+import { Gift } from 'lucide-react';
+
+const MAX_FORGES_PER_DAY = 3;
+const LOCAL_STORAGE_USAGE_KEY = 'solidityForgeUsage';
+const LOCAL_STORAGE_DEV_ACCESS_KEY = 'solidityForgeDevAccess';
+
+interface UsageData {
+  count: number;
+  date: string; // YYYY-MM-DD
+}
 
 export default function SolidityForgePage() {
   const [selectedTemplate, setSelectedTemplate] = useState<ContractTemplate | undefined>(
@@ -43,13 +54,51 @@ export default function SolidityForgePage() {
   const [addressResults, setAddressResults] = useState<GetKnownLiquidityPoolInfoOutput | null>(null);
   const [isFindingAddresses, setIsFindingAddresses] = useState<boolean>(false);
 
+  const [usageData, setUsageData] = useState<UsageData>({ count: 0, date: new Date().toISOString().split('T')[0] });
+  const [hasDeveloperAccess, setHasDeveloperAccess] = useState<boolean>(false);
+  
+  const developerAccessFormRef = React.useRef<HTMLDivElement>(null);
+
 
   const { toast } = useToast();
+
+  const getTodayDateString = useCallback(() => new Date().toISOString().split('T')[0], []);
 
   useEffect(() => {
     const timer = setTimeout(() => setMainContentVisible(true), 100); 
     return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    // Load usage data from localStorage
+    const storedUsage = localStorage.getItem(LOCAL_STORAGE_USAGE_KEY);
+    const today = getTodayDateString();
+    if (storedUsage) {
+      const parsedUsage: UsageData = JSON.parse(storedUsage);
+      if (parsedUsage.date === today) {
+        setUsageData(parsedUsage);
+      } else {
+        // Reset count for new day
+        const newUsageData = { count: 0, date: today };
+        setUsageData(newUsageData);
+        localStorage.setItem(LOCAL_STORAGE_USAGE_KEY, JSON.stringify(newUsageData));
+      }
+    } else {
+       const initialUsage = { count: 0, date: today };
+       setUsageData(initialUsage);
+       localStorage.setItem(LOCAL_STORAGE_USAGE_KEY, JSON.stringify(initialUsage));
+    }
+
+    // Load developer access status
+    const storedDevAccess = localStorage.getItem(LOCAL_STORAGE_DEV_ACCESS_KEY);
+    if (storedDevAccess === 'true') {
+      setHasDeveloperAccess(true);
+    }
+  }, [getTodayDateString]);
+
+  const isForgeDisabledByLimit = usageData.count >= MAX_FORGES_PER_DAY && !hasDeveloperAccess;
+  const showDeveloperAccessCTA = isForgeDisabledByLimit && !hasDeveloperAccess;
+
 
   const resetAnalyses = () => {
     setAiSuggestions([]);
@@ -59,10 +108,28 @@ export default function SolidityForgePage() {
   };
 
   const handleGenerateCode = async (template: ContractTemplate, formData: FormData) => {
+    if (isForgeDisabledByLimit) {
+      toast({
+        variant: "destructive",
+        title: "Daily Limit Reached!",
+        description: "Sign up for Developer Access for unlimited forging & airdrop eligibility!",
+      });
+      developerAccessFormRef.current?.scrollIntoView({ behavior: 'smooth' });
+      return;
+    }
+
     setSelectedTemplate(template);
     setIsGeneratingCode(true);
     setGeneratedCode('');
     resetAnalyses();
+
+    // Increment usage count if not developer
+    if (!hasDeveloperAccess) {
+      const newCount = usageData.count + 1;
+      const newUsageData = { ...usageData, count: newCount };
+      setUsageData(newUsageData);
+      localStorage.setItem(LOCAL_STORAGE_USAGE_KEY, JSON.stringify(newUsageData));
+    }
 
     let description = `Generate a Solidity smart contract for ${template.name}.`;
     if (template.id === 'custom' && formData.customDescription) {
@@ -309,6 +376,23 @@ Specific guidance: ${template.aiPromptEnhancement}`;
     }
   };
 
+  const handleDeveloperAccessSignupSuccess = () => {
+    setHasDeveloperAccess(true);
+    localStorage.setItem(LOCAL_STORAGE_DEV_ACCESS_KEY, 'true');
+    // Optionally reset usage count here if desired, or just let the check bypass it
+    // setUsageData(prev => ({ ...prev, count: 0 })); 
+    // localStorage.setItem(LOCAL_STORAGE_USAGE_KEY, JSON.stringify({ ...usageData, count: 0 }));
+    toast({
+      title: "Welcome, Developer!",
+      description: "You now have unlimited access. Prepare for the 40Bill8on AirDrop! BSAI token holders explore the BlockSmithAI ecosystem for free.",
+      duration: 7000, 
+    });
+  };
+
+  const handleNavigateToDevAccess = () => {
+    developerAccessFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
   const anySubActionLoading = isGettingSuggestions || isEstimatingGas || isGeneratingTestCases || isRefiningCode || isGeneratingDocumentation;
 
   return (
@@ -324,7 +408,7 @@ Specific guidance: ${template.aiPromptEnhancement}`;
             )}
           style={{ animationDelay: '0.3s' }}
         >
-          <CardContent className="p-0"> {/* Removed padding here */}
+          <CardContent className="p-0">
             <ContractConfigForm
               templates={CONTRACT_TEMPLATES}
               onGenerateCode={handleGenerateCode}
@@ -340,6 +424,8 @@ Specific guidance: ${template.aiPromptEnhancement}`;
               isGeneratingDocumentation={isGeneratingDocumentation}
               generatedCode={generatedCode}
               selectedTemplateProp={selectedTemplate}
+              isForgeDisabledByLimit={isForgeDisabledByLimit}
+              onNavigateToDevAccess={handleNavigateToDevAccess}
             />
           </CardContent>
         </Card>
@@ -384,8 +470,16 @@ Specific guidance: ${template.aiPromptEnhancement}`;
             />
           </CardContent>
         </Card>
+
+        {showDeveloperAccessCTA && (
+          <div ref={developerAccessFormRef} className="lg:col-span-2 w-full max-w-2xl justify-self-center animate-fadeInUp" style={{ animationDelay: '0.9s' }}>
+             <DeveloperAccessForm onSignupSuccess={handleDeveloperAccessSignupSuccess} />
+          </div>
+        )}
       </main>
       <Footer />
     </div>
   );
 }
+
+    

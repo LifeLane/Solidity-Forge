@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { CardTitle, CardDescription } from '@/components/ui/card';
-import { AlertCircle, Loader2, Wand2, Brain, Fuel, Beaker, FileText } from 'lucide-react';
+import { AlertCircle, Loader2, Wand2, Brain, Fuel, Beaker, FileText, AlertTriangle, ArrowDownCircle } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -89,11 +89,11 @@ const getParameterGroups = (template: ContractTemplate, isAdvancedMode: boolean)
         parameters: visibleParams.filter(p => ['upgradable'].includes(p.name)),
       }
     ];
-  } else { // Default for custom and other templates
+  } else { 
      groups = [{ title: 'Parameters', parameters: visibleParams, defaultActive: true }];
   }
 
-  return groups.filter(group => group.parameters.length > 0); // Remove groups that become empty after filtering
+  return groups.filter(group => group.parameters.length > 0); 
 };
 
 interface ContractConfigFormProps {
@@ -111,6 +111,8 @@ interface ContractConfigFormProps {
   isGeneratingDocumentation: boolean;
   generatedCode: string;
   selectedTemplateProp?: ContractTemplate;
+  isForgeDisabledByLimit: boolean;
+  onNavigateToDevAccess: () => void;
 }
 
 
@@ -129,6 +131,8 @@ export function ContractConfigForm({
   isGeneratingDocumentation,
   generatedCode,
   selectedTemplateProp,
+  isForgeDisabledByLimit,
+  onNavigateToDevAccess,
 }: ContractConfigFormProps) {
   const [selectedTemplate, setSelectedTemplate] = React.useState<ContractTemplate | undefined>(selectedTemplateProp || templates[0]);
   const [isAdvancedMode, setIsAdvancedMode] = useState(false);
@@ -182,7 +186,6 @@ export function ContractConfigForm({
       }
       reset(defaultValues);
 
-      // Set active tab based on new template and advanced mode
       const groups = getParameterGroups(selectedTemplate, isAdvancedMode);
       const defaultActiveGroup = groups.find(g => g.defaultActive) || groups[0];
       if (defaultActiveGroup) {
@@ -191,7 +194,7 @@ export function ContractConfigForm({
         setActiveTabValue(groups[0].title.toLowerCase().replace(/\s+/g, '-'));
       }
        else {
-        setActiveTabValue(undefined); // No groups, no active tab
+        setActiveTabValue(undefined); 
       }
     }
   }, [selectedTemplate, reset, isAdvancedMode]);
@@ -201,7 +204,6 @@ export function ContractConfigForm({
   const handleTemplateChange = (templateId: string) => {
     const newTemplate = templates.find(t => t.id === templateId);
     setSelectedTemplate(newTemplate);
-    // Active tab will be updated by the useEffect above
   };
 
   const onSubmit = async (data: FormData) => {
@@ -225,8 +227,6 @@ export function ContractConfigForm({
   };
 
   const renderParameterInput = (param: ContractParameter) => {
-    // Check for dependencies:
-    // This condition needs to evaluate if the parameter should be shown based on `isAdvancedMode` AND `dependsOn` logic.
     let showBasedOnDependency = true;
     if (param.dependsOn) {
         const dependentValue = currentFormData[param.dependsOn];
@@ -236,7 +236,6 @@ export function ContractConfigForm({
             showBasedOnDependency = dependentValue === param.dependsOnValue;
         }
     }
-    // If it shouldn't be shown due to dependency, return null. `isAdvancedMode` is handled by `getParameterGroups`.
     if (!showBasedOnDependency) return null;
 
 
@@ -255,7 +254,7 @@ export function ContractConfigForm({
                 htmlFor={param.name}
                 className={cn(
                   "flex items-center text-base font-bold",
-                  "text-glow-primary" // Reverted to use the animated primary glow as per previous step
+                  "animate-text-multicolor-glow"
                 )}
               >
                 {param.label}
@@ -344,20 +343,18 @@ export function ContractConfigForm({
   
   const parameterConfigurationSection = selectedTemplate && (
     selectedTemplate.id === 'custom' || parameterGroups.length === 0 ? (
-      // Render custom description or non-grouped params directly
       <div className="space-y-6 pt-6 border-t border-border/20 mt-6">
         {selectedTemplate.parameters
-          .filter(param => isAdvancedMode || !param.advancedOnly) // Filter here for non-grouped
+          .filter(param => isAdvancedMode || !param.advancedOnly) 
           .map(renderParameterInput)}
       </div>
     ) : (
-      // Render tabbed layout for grouped parameters
       <div className="pt-6 border-t border-border/20 mt-6">
         <Tabs
           orientation="vertical"
           value={activeTabValue}
           onValueChange={setActiveTabValue}
-          className="flex flex-col md:flex-row gap-6 md:gap-8 min-h-[300px]" // Ensure min height for vertical tabs layout
+          className="flex flex-col md:flex-row gap-6 md:gap-8 min-h-[300px]" 
         >
           <TabsList className="flex flex-row md:flex-col md:space-y-2 md:w-60 shrink-0 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 bg-transparent p-0">
             {parameterGroups.map((group) => {
@@ -368,25 +365,23 @@ export function ContractConfigForm({
                   value={tabValue}
                   disabled={anyPrimaryActionLoading && activeTabValue !== tabValue}
                   className={cn(
-                    "tab-running-lines-border param-tab-trigger", // Use new CSS class for vertical tabs
-                    "data-[state=active]:text-primary-foreground", // Ensure active text color is contrasty
+                    "tab-running-lines-border param-tab-trigger", 
+                    "data-[state=active]:text-primary-foreground", 
                     "data-[state=inactive]:text-muted-foreground hover:text-foreground"
                   )}
                 >
-                   <span className="tab-running-lines-content"> {/* Ensure content wrapper */}
+                   <span className="tab-running-lines-content">
                      {group.title}
                    </span>
                 </TabsTrigger>
               );
             })}
           </TabsList>
-          {/* Wrapper for TabsContent for consistent styling and potential scroll */}
           <div className="flex-grow min-w-0 p-1 rounded-md border border-border/20 bg-card/30 max-h-[70vh] overflow-y-auto">
             {parameterGroups.map(group => {
               const tabValue = group.title.toLowerCase().replace(/\s+/g, '-');
               return (
                 <TabsContent key={tabValue} value={tabValue} className="mt-0 space-y-6 p-4 md:p-6 rounded-md">
-                  {/* Parameters are already filtered by getParameterGroups, render them directly */}
                   {group.parameters.length > 0 ? group.parameters.map(renderParameterInput) : <p className="text-base text-muted-foreground p-4 text-center">No parameters in this section for the current mode.</p>}
                 </TabsContent>
               );
@@ -399,12 +394,12 @@ export function ContractConfigForm({
 
 
   return (
-    <div className="space-y-8 p-4 md:p-6 lg:p-8"> {/* Main padding for the form card */}
+    <div className="space-y-8 p-4 md:p-6 lg:p-8">
       <div className="text-center">
         <CardTitle className="text-3xl font-headline mb-3">
             <ScrambledText 
                 text="Blueprint Your Brilliance" 
-                className="text-3xl font-headline text-glow-primary" 
+                className="text-3xl font-headline animate-text-multicolor-glow" 
                 revealSpeed={1}
                 scrambleInterval={50}
                 revealDelay={300}
@@ -436,7 +431,7 @@ export function ContractConfigForm({
             htmlFor="contractType"
             className={cn(
               "text-center block font-bold text-xl",
-              "text-glow-primary"
+              "animate-text-multicolor-glow"
             )}
           >
             Select Your Destiny<br />(Contract Type)
@@ -461,13 +456,12 @@ export function ContractConfigForm({
           }
         </div>
 
-        {/* Advanced Mode Switch only if not 'custom' and there are parameters */}
         {selectedTemplate && selectedTemplate.id !== 'custom' && selectedTemplate.parameters.length > 0 && (
           <div className="mt-6 flex flex-col items-center space-y-2">
             <Label
               htmlFor="mode-switch"
               className={cn(
-                "text-base font-bold text-glow-primary text-center"
+                "text-base font-bold animate-text-multicolor-glow text-center"
               )}
             >
               Complexity Dial:
@@ -496,7 +490,7 @@ export function ContractConfigForm({
           <div className="pt-8 border-t border-border/20">
             <Button
               type="submit"
-              disabled={anyPrimaryActionLoading}
+              disabled={anyPrimaryActionLoading || isForgeDisabledByLimit}
               className="w-full glow-border-primary bg-primary text-primary-foreground hover:bg-primary/90 text-lg py-6"
             >
               {isGeneratingCode ? (
@@ -506,12 +500,31 @@ export function ContractConfigForm({
               )}
               {isGeneratingCode ? 'Forging...' : 'Forge Contract'}
             </Button>
+            {isForgeDisabledByLimit && (
+              <div className="mt-4 p-3 bg-destructive/10 border border-destructive/30 rounded-md text-center">
+                <p className="text-sm text-destructive-foreground flex items-center justify-center gap-2">
+                  <AlertTriangle className="h-5 w-5 text-destructive" />
+                  Daily free forging limit reached.
+                </p>
+                <Button 
+                  variant="link" 
+                  className="text-sm text-accent hover:text-accent/80 mt-1"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onNavigateToDevAccess();
+                  }}
+                >
+                  Sign up for Developer Access for unlimited use & airdrop!
+                  <ArrowDownCircle className="ml-2 h-4 w-4"/>
+                </Button>
+              </div>
+            )}
           </div>
 
           
           {generatedCode && (
             <div className="pt-6 space-y-4 border-t border-border/20">
-              <h3 className="text-center text-lg font-semibold text-glow-primary mb-2">
+              <h3 className="text-center text-lg font-semibold animate-text-multicolor-glow mb-2">
                 Post-Forge Analysis & Augmentation
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -579,3 +592,5 @@ export function ContractConfigForm({
     </div>
   );
 }
+
+    
