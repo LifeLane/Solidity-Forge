@@ -78,10 +78,11 @@ const suggestErrorPreventionFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await suggestErrorPreventionPrompt(input);
-    // Ensure score is within 0-100 if LLM doesn't perfectly adhere
-    if (output && output.securityScore) {
-        output.securityScore = Math.max(0, Math.min(100, output.securityScore));
+    if (!output || !Array.isArray(output.suggestions) || typeof output.securityScore !== 'number') {
+        throw new Error('AI failed to provide valid error prevention suggestions. The output structure was unexpected.');
     }
-    return output!;
+    // Ensure score is within 0-100 if LLM doesn't perfectly adhere
+    output.securityScore = Math.max(0, Math.min(100, output.securityScore));
+    return output;
   }
 );

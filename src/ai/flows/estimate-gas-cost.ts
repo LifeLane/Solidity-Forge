@@ -62,6 +62,9 @@ const estimateGasCostFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    return output!;
+    if (!output || typeof output.estimatedGasRange === 'undefined' || typeof output.explanation === 'undefined') {
+      throw new Error('AI failed to provide a valid gas cost estimation. The output structure was unexpected.');
+    }
+    return output;
   }
 );

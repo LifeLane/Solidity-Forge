@@ -54,6 +54,9 @@ const generateSmartContractCodeFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    return output!;
+    if (!output || typeof output.code === 'undefined') {
+      throw new Error('AI failed to generate valid smart contract code. The output structure was unexpected.');
+    }
+    return output;
   }
 );
