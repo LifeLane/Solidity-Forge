@@ -2,24 +2,26 @@
 "use client";
 
 import React from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Gift, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { saveLead, type SaveLeadInput } from '@/ai/flows/save-lead-flow'; // SaveLeadInput type is fine to import
+import { useToast } from "@/hooks/use-toast";
 
-const developerAccessSchema = z.object({
+// Schema definition can live here in the client component or be imported if not from a 'use server' file
+const developerAccessFormSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
   telegramUsername: z.string().min(3, { message: "Telegram username must be at least 3 characters." }).regex(/^[a-zA-Z0-9_]{3,32}$/, { message: "Invalid Telegram username format."}),
   solanaAddress: z.string().min(32, { message: "Solana address must be at least 32 characters." }).max(44, { message: "Solana address must be at most 44 characters." }).regex(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/, { message: "Invalid Solana address format."}),
 });
 
-type DeveloperAccessFormData = z.infer<typeof developerAccessSchema>;
+type DeveloperAccessFormData = z.infer<typeof developerAccessFormSchema>;
 
 interface DeveloperAccessFormProps {
   onSignupSuccess: () => void;
@@ -27,9 +29,10 @@ interface DeveloperAccessFormProps {
 
 export function DeveloperAccessForm({ onSignupSuccess }: DeveloperAccessFormProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const { toast } = useToast();
 
   const form = useForm<DeveloperAccessFormData>({
-    resolver: zodResolver(developerAccessSchema),
+    resolver: zodResolver(developerAccessFormSchema),
     defaultValues: {
       email: "",
       telegramUsername: "",
@@ -39,12 +42,29 @@ export function DeveloperAccessForm({ onSignupSuccess }: DeveloperAccessFormProp
 
   const onSubmit = async (data: DeveloperAccessFormData) => {
     setIsSubmitting(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    console.log("Developer Access Signup Data:", data);
-    onSignupSuccess();
-    setIsSubmitting(false);
-    form.reset(); 
+    try {
+      // Attempt to save the lead to the "server" (Genkit flow)
+      const result = await saveLead(data as SaveLeadInput); // Cast to SaveLeadInput if necessary, or ensure schemas match
+      if (!result.success) {
+        toast({
+          variant: "destructive",
+          title: "Server-Side Hiccup!",
+          description: result.message || "Could not save your details to the server. Please try again.",
+        });
+      }
+      // Proceed with local success regardless of server outcome for this example
+      onSignupSuccess(); 
+    } catch (error) {
+      console.error("Error submitting developer access form:", error);
+      toast({
+        variant: "destructive",
+        title: "Submission Error!",
+        description: (error instanceof Error ? error.message : "An unexpected error occurred while submitting your details. Please try again later."),
+      });
+    } finally {
+      setIsSubmitting(false);
+      form.reset(); 
+    }
   };
 
   return (
@@ -122,4 +142,3 @@ export function DeveloperAccessForm({ onSignupSuccess }: DeveloperAccessFormProp
   );
 }
     
-
