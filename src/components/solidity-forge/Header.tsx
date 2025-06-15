@@ -36,13 +36,15 @@ export function Header() {
           <span className="inline-block animate-text-multicolor-glow">
             <SolidityForgeIcon />
           </span>
-          <ScrambledText 
-            text="SolidityForge" 
-            className="text-2xl font-headline font-bold" 
-            revealSpeed={1}
-            scrambleInterval={40}
-            revealDelay={200}
-          />
+          <h1 className="text-2xl font-headline font-bold m-0 p-0">
+            <ScrambledText 
+              text="SolidityForge" 
+              className="" 
+              revealSpeed={1}
+              scrambleInterval={40}
+              revealDelay={200}
+            />
+          </h1>
         </div>
         <div className="flex flex-col items-center gap-1 sm:flex-row sm:items-center">
           <div className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground">

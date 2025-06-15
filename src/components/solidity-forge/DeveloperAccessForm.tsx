@@ -11,10 +11,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Gift, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { saveLead, type SaveLeadInput } from '@/ai/flows/save-lead-flow'; // SaveLeadInput type is fine to import
+import { saveLead, type SaveLeadInput } from '@/ai/flows/save-lead-flow';
 import { useToast } from "@/hooks/use-toast";
 
-// Schema definition can live here in the client component or be imported if not from a 'use server' file
 const developerAccessFormSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
   telegramUsername: z.string().min(3, { message: "Telegram username must be at least 3 characters." }).regex(/^[a-zA-Z0-9_]{3,32}$/, { message: "Invalid Telegram username format."}),
@@ -43,8 +42,7 @@ export function DeveloperAccessForm({ onSignupSuccess }: DeveloperAccessFormProp
   const onSubmit = async (data: DeveloperAccessFormData) => {
     setIsSubmitting(true);
     try {
-      // Attempt to save the lead to the "server" (Genkit flow)
-      const result = await saveLead(data as SaveLeadInput); // Cast to SaveLeadInput if necessary, or ensure schemas match
+      const result = await saveLead(data as SaveLeadInput); 
       if (!result.success) {
         toast({
           variant: "destructive",
@@ -52,7 +50,6 @@ export function DeveloperAccessForm({ onSignupSuccess }: DeveloperAccessFormProp
           description: result.message || "Could not save your details to the server. Please try again.",
         });
       }
-      // Proceed with local success regardless of server outcome for this example
       onSignupSuccess(); 
     } catch (error) {
       console.error("Error submitting developer access form:", error);
@@ -122,7 +119,7 @@ export function DeveloperAccessForm({ onSignupSuccess }: DeveloperAccessFormProp
                 </FormItem>
               )}
             />
-            <Button type="submit" disabled={isSubmitting} className="w-full glow-border-primary bg-primary text-primary-foreground hover:bg-primary/90 text-lg py-3">
+            <Button type="submit" disabled={isSubmitting} className="w-full glow-border-primary bg-primary text-primary-foreground hover:bg-primary/90 text-lg py-6">
               {isSubmitting ? (
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
               ) : (

@@ -72,4 +72,4 @@ const AnimatedSubtitle: React.FC<AnimatedSubtitleProps> = ({
   );
 };
 
-export default React.memo(AnimatedSubtitle);"
+export default React.memo(AnimatedSubtitle);
