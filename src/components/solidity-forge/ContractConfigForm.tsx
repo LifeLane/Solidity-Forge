@@ -504,7 +504,7 @@ export function ContractConfigForm({
               <div className="mt-4 p-3 bg-destructive/10 border border-destructive/30 rounded-md text-center">
                 <p className="text-sm text-destructive-foreground flex items-center justify-center gap-2">
                   <AlertTriangle className="h-5 w-5 text-destructive" />
-                  Daily free forging limit reached.
+                  Daily Forge Quota Maxed Out! Don't let your brilliance be capped.
                 </p>
                 <Button 
                   variant="link" 
@@ -514,7 +514,7 @@ export function ContractConfigForm({
                     onNavigateToDevAccess();
                   }}
                 >
-                  Sign up for Developer Access for unlimited use & airdrop!
+                  Upgrade to Developer Access (Unlimited Forging & AirDrop!)
                   <ArrowDownCircle className="ml-2 h-4 w-4"/>
                 </Button>
               </div>
@@ -592,5 +592,4 @@ export function ContractConfigForm({
     </div>
   );
 }
-
     

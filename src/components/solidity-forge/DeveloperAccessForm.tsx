@@ -54,11 +54,10 @@ export function DeveloperAccessForm({ onSignupSuccess }: DeveloperAccessFormProp
             <Gift className="w-10 h-10 animate-text-multicolor-glow" />
         </div>
         <CardTitle className="text-2xl font-headline animate-text-multicolor-glow">
-          Unlock Developer Access!
+          🚀 UNLOCK ELITE DEVELOPER STATUS!
         </CardTitle>
         <CardDescription className="text-base text-muted-foreground">
-          Gain unlimited forging capabilities and become eligible for our <strong>40Bill8on Token AirDrop</strong>! 
-          Submit your details to join. It's completely free.
+          The Forge is calling your name! Obliterate your limits, seize UNLIMITED contract generations, AND secure your exclusive spot for the monumental 40Bill8on Token AirDrop. Entry is FREE – claim your future now!
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -84,7 +83,7 @@ export function DeveloperAccessForm({ onSignupSuccess }: DeveloperAccessFormProp
                 <FormItem>
                   <FormLabel className="text-base animate-text-multicolor-glow">Telegram Username</FormLabel>
                   <FormControl>
-                    <Input placeholder="@your_telegram" {...field} className="glow-border-purple bg-background/70 focus:bg-background" />
+                    <Input placeholder="@your_telegram_handle" {...field} className="glow-border-purple bg-background/70 focus:bg-background" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -97,7 +96,7 @@ export function DeveloperAccessForm({ onSignupSuccess }: DeveloperAccessFormProp
                 <FormItem>
                   <FormLabel className="text-base animate-text-multicolor-glow">Solana Wallet Address (for AirDrop)</FormLabel>
                   <FormControl>
-                    <Input placeholder="Your Solana (SOL) address" {...field} className="glow-border-purple bg-background/70 focus:bg-background" />
+                    <Input placeholder="Your Solana (SOL) address for the 40Bill8on Drop" {...field} className="glow-border-purple bg-background/70 focus:bg-background" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -109,19 +108,17 @@ export function DeveloperAccessForm({ onSignupSuccess }: DeveloperAccessFormProp
               ) : (
                 <Gift className="mr-2 h-5 w-5" />
               )}
-              Sign Up & Claim Your Access
+              Claim My Elite Access & AirDrop!
             </Button>
           </form>
         </Form>
       </CardContent>
       <CardFooter className="text-center block">
         <p className="text-xs text-muted-foreground">
-            By signing up, you agree to be awesome. No spam, just code and community.
-            BSAI token holders will always have free access to the entire BlockSmithAI ecosystem.
+            Your details pave the way for coding greatness (and epic rewards). We protect your info like it's the last line of code. P.S. BSAI token holders? You're already legends – the BlockSmithAI universe is yours to command, always free.
         </p>
       </CardFooter>
     </Card>
   );
 }
-
     
