@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import type { ContractTemplate, ContractParameter } from '@/config/contracts';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from '@/lib/utils';
+import { ScrambledText } from '@/components/effects/ScrambledText';
 
 export type FormData = Record<string, any>;
 
@@ -128,6 +129,29 @@ export function ContractConfigForm({
   const [selectedTemplate, setSelectedTemplate] = React.useState<ContractTemplate | undefined>(selectedTemplateProp || templates[0]);
   const [isAdvancedMode, setIsAdvancedMode] = useState(false);
   const [activeTabValue, setActiveTabValue] = useState<string | undefined>(undefined);
+
+  const subtitleText = "Sculpt your smart contract's soul. Or, you know, just click randomly. My circuits won't judge. Much.";
+  const subtitleWords = useMemo(() => subtitleText.split(' '), [subtitleText]);
+  const [activeSubtitleWordIndex, setActiveSubtitleWordIndex] = useState(0);
+  const [isSubtitleVisible, setIsSubtitleVisible] = useState(false);
+
+  useEffect(() => {
+    const storyTimer = setTimeout(() => {
+      setIsSubtitleVisible(true);
+    }, 700); 
+
+    return () => clearTimeout(storyTimer);
+  }, []);
+
+  useEffect(() => {
+    if (!isSubtitleVisible || subtitleWords.length === 0) return;
+
+    const intervalId = setInterval(() => {
+      setActiveSubtitleWordIndex((prevIndex) => (prevIndex + 1) % subtitleWords.length);
+    }, 400); 
+
+    return () => clearInterval(intervalId);
+  }, [subtitleWords, isSubtitleVisible]);
 
 
   const { control, handleSubmit, reset, watch, formState: { errors } } = useForm<FormData>({
@@ -362,9 +386,32 @@ export function ContractConfigForm({
   return (
     <div className="space-y-8 p-4 md:p-6 lg:p-8">
       <div className="text-center">
-        <CardTitle className="text-3xl font-headline mb-3 text-glow-primary">Blueprint Your Brilliance</CardTitle>
+        <CardTitle className="text-3xl font-headline mb-3">
+            <ScrambledText 
+                text="Blueprint Your Brilliance" 
+                className="text-3xl font-headline text-glow-primary" 
+                revealSpeed={1}
+                scrambleInterval={50}
+                revealDelay={300}
+            />
+        </CardTitle>
         <CardDescription className="max-w-md mx-auto text-base text-muted-foreground">
-          Sculpt your smart contract's soul. Or, you know, just click randomly. My circuits won't judge. Much.
+          {isSubtitleVisible && (
+            <span className="flex flex-wrap justify-center items-center gap-x-1.5 gap-y-1 min-h-[2.5em]">
+              {subtitleWords.map((word, index) => (
+                <span
+                  key={index}
+                  className={cn(
+                    'inline-block', // Added for potential individual word styling if needed
+                    index === activeSubtitleWordIndex ? 'word-glow-active' : 'word-dimmed'
+                  )}
+                >
+                  {word}
+                </span>
+              ))}
+            </span>
+          )}
+          {!isSubtitleVisible && <span className="opacity-0">{subtitleText}</span>}
         </CardDescription>
       </div>
 
@@ -425,10 +472,10 @@ export function ContractConfigForm({
       
       {selectedTemplate && (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
-          {/* Parameter Configuration Section */}
+          
           {parameterConfigurationSection}
 
-          {/* Primary Action (Forge Contract) */}
+          
           <div className="pt-8 border-t border-border/20">
             <Button
               type="submit"
@@ -444,7 +491,7 @@ export function ContractConfigForm({
             </Button>
           </div>
 
-          {/* Secondary Actions (Analysis Tools) */}
+          
           {generatedCode && (
             <div className="pt-6 space-y-4 border-t border-border/20">
               <h3 className="text-center text-lg font-semibold text-glow-primary mb-2">
