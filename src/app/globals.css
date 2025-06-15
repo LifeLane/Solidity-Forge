@@ -144,11 +144,11 @@
   }
 
   .text-glow-primary {
-    color: hsl(var(--primary));
+    color: hsl(var(--accent)); /* Changed from --primary to --accent */
     text-shadow: 
-      0 0 4px hsl(var(--primary)), 
-      0 0 8px hsl(var(--glow-yellow-hsl)), 
-      0 0 12px hsl(var(--accent));
+      0 0 4px hsl(var(--primary)), /* Innermost glow remains primary (green) */
+      0 0 8px hsl(var(--glow-yellow-hsl)), /* Middle glow yellow */
+      0 0 12px hsl(var(--accent)); /* Outermost glow accent (red) */
   }
   
   .text-glow-yellow {
@@ -327,3 +327,6 @@
   transition: opacity 0.3s ease-in-out, color 0.3s ease-in-out;
   display: inline-block; 
 }
+
+
+    
