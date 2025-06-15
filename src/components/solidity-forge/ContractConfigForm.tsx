@@ -308,6 +308,58 @@ export function ContractConfigForm({
 
   const parameterGroups = selectedTemplate ? getParameterGroups(selectedTemplate, isAdvancedMode) : [];
 
+  const parameterConfigurationSection = selectedTemplate && (
+    selectedTemplate.id === 'custom' || parameterGroups.length === 0 ? (
+      <div className="space-y-6 pt-6 border-t border-border/20 mt-6">
+        {selectedTemplate.parameters
+          .filter(param => isAdvancedMode || !param.advancedOnly)
+          .map(renderParameterInput)}
+      </div>
+    ) : (
+      <div className="pt-6 border-t border-border/20 mt-6">
+        <Tabs
+          orientation="vertical"
+          value={activeTabValue}
+          onValueChange={setActiveTabValue}
+          className="flex flex-col md:flex-row gap-6 md:gap-8 min-h-[300px]"
+        >
+          <TabsList className="flex flex-row md:flex-col md:space-y-2 md:w-60 shrink-0 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 bg-transparent p-0">
+            {parameterGroups.map((group) => {
+              const tabValue = group.title.toLowerCase().replace(/\s+/g, '-');
+              return (
+                <TabsTrigger
+                  key={tabValue}
+                  value={tabValue}
+                  disabled={anyPrimaryActionLoading && activeTabValue !== tabValue}
+                  className={cn(
+                    "tab-running-lines-border param-tab-trigger",
+                    "data-[state=active]:text-primary-foreground",
+                    "data-[state=inactive]:text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                   <span className="tab-running-lines-content">
+                     {group.title}
+                   </span>
+                </TabsTrigger>
+              );
+            })}
+          </TabsList>
+          <div className="flex-grow min-w-0 p-1 rounded-md border border-border/20 bg-card/30">
+            {parameterGroups.map(group => {
+              const tabValue = group.title.toLowerCase().replace(/\s+/g, '-');
+              return (
+                <TabsContent key={tabValue} value={tabValue} className="mt-0 space-y-6 p-4 md:p-6 rounded-md">
+                  {group.parameters.length > 0 ? group.parameters.map(renderParameterInput) : <p className="text-base text-muted-foreground p-4 text-center">No parameters in this section for the current mode.</p>}
+                </TabsContent>
+              );
+            })}
+          </div>
+        </Tabs>
+      </div>
+    )
+  );
+
+
   return (
     <div className="space-y-8 p-4 md:p-6 lg:p-8">
       <div className="text-center">
@@ -374,53 +426,6 @@ export function ContractConfigForm({
 
       {selectedTemplate && (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
-          {selectedTemplate.id === 'custom' || parameterGroups.length === 0 ? (
-            <div className="space-y-6">
-              {selectedTemplate.parameters
-                .filter(param => isAdvancedMode || !param.advancedOnly)
-                .map(renderParameterInput)}
-            </div>
-          ) : (
-            <Tabs
-              orientation="vertical"
-              value={activeTabValue}
-              onValueChange={setActiveTabValue}
-              className="flex flex-col md:flex-row gap-6 md:gap-8 min-h-[300px]"
-            >
-              <TabsList className="flex flex-row md:flex-col md:space-y-2 md:w-60 shrink-0 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 bg-transparent p-0">
-                {parameterGroups.map((group) => {
-                  const tabValue = group.title.toLowerCase().replace(/\s+/g, '-');
-                  return (
-                    <TabsTrigger
-                      key={tabValue}
-                      value={tabValue}
-                      disabled={anyPrimaryActionLoading && activeTabValue !== tabValue}
-                      className={cn(
-                        "tab-running-lines-border param-tab-trigger",
-                        "data-[state=active]:text-primary-foreground",
-                        "data-[state=inactive]:text-muted-foreground hover:text-foreground"
-                      )}
-                    >
-                       <span className="tab-running-lines-content">
-                         {group.title}
-                       </span>
-                    </TabsTrigger>
-                  );
-                })}
-              </TabsList>
-              <div className="flex-grow min-w-0 p-1 rounded-md border border-border/20 bg-card/30">
-                {parameterGroups.map(group => {
-                  const tabValue = group.title.toLowerCase().replace(/\s+/g, '-');
-                  return (
-                    <TabsContent key={tabValue} value={tabValue} className="mt-0 space-y-6 p-4 md:p-6 rounded-md">
-                      {group.parameters.length > 0 ? group.parameters.map(renderParameterInput) : <p className="text-base text-muted-foreground p-4 text-center">No parameters in this section for the current mode.</p>}
-                    </TabsContent>
-                  );
-                })}
-              </div>
-            </Tabs>
-          )}
-
           <div className="pt-8 border-t border-border/20">
             <Button
               type="submit"
@@ -487,6 +492,9 @@ export function ContractConfigForm({
               </div>
             </div>
           )}
+          
+          {/* Parameter Configuration Section is now here, at the end of the form */}
+          {parameterConfigurationSection}
         </form>
       )}
     </div>
