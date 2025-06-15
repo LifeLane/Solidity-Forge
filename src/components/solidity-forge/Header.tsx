@@ -1,11 +1,12 @@
 
 import { Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ThemeToggle } from '@/components/solidity-forge/ThemeToggle'; // Import ThemeToggle
 
 // SolidityForge Icon - a simple geometric representation
 const SolidityForgeIcon = () => (
   <svg
-    width="32" // Slightly smaller to fit better
+    width="32" 
     height="32"
     viewBox="0 0 100 100"
     fill="none"
@@ -38,14 +39,15 @@ export function Header() {
               SolidityForge
             </h1>
           </div>
-          <div className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground">
-              <Sparkles className="w-4 h-4 text-accent" />
-              <span>AI-Powered Smart Contracts</span>
+          <div className="flex items-center gap-4"> {/* Added gap-4 for spacing */}
+            <div className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground">
+                <Sparkles className="w-4 h-4 text-accent" />
+                <span>AI-Powered Smart Contracts</span>
+            </div>
+            <ThemeToggle /> {/* Add ThemeToggle here */}
           </div>
         </div>
       </header>
     </div>
   );
 }
-
-    

@@ -2,7 +2,8 @@
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
-import GalaxyBackground from '@/components/solidity-forge/GalaxyBackground'; // Import the new component
+import GalaxyBackground from '@/components/solidity-forge/GalaxyBackground';
+import { ThemeProvider } from '@/components/solidity-forge/ThemeProvider'; // Import ThemeProvider
 
 export const metadata: Metadata = {
   title: 'SolidityForge',
@@ -15,7 +16,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" suppressHydrationWarning> {/* Remove className="dark", add suppressHydrationWarning */}
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -23,11 +24,16 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;500;600&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased">
-        <GalaxyBackground /> {/* Add the GalaxyBackground component here */}
-        <div className="relative z-10"> {/* Ensure content is above the background */}
-          {children}
-        </div>
-        <Toaster />
+        <ThemeProvider
+          defaultTheme="dark" // You can set your preferred default theme
+          storageKey="solidity-forge-theme"
+        >
+          <GalaxyBackground />
+          <div className="relative z-10">
+            {children}
+          </div>
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );
