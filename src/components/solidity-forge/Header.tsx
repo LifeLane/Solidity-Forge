@@ -12,7 +12,7 @@ const SolidityForgeIcon = () => (
     viewBox="0 0 100 100"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
-    className="text-primary group-hover:text-accent transition-colors duration-300"
+    // className removed here, will be controlled by wrapper
     aria-label="SolidityForge Logo"
   >
     <path d="M50 5L75 20L95 50L75 80L50 95L25 80L5 50L25 20L50 5Z" stroke="currentColor" strokeWidth="10" strokeLinejoin="round"/>
@@ -35,7 +35,9 @@ export function Header() {
         className="container mx-auto flex flex-col items-center gap-2 sm:flex-row sm:justify-between"
       >
         <div className="flex items-center gap-3 group cursor-default">
-          <SolidityForgeIcon />
+          <span className="inline-block animate-text-multicolor-glow">
+            <SolidityForgeIcon />
+          </span>
           <ScrambledText 
             text="SolidityForge" 
             className="text-2xl font-headline font-bold text-glow-primary" 

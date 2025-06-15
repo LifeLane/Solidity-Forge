@@ -145,7 +145,10 @@
 
   .text-glow-primary {
     color: hsl(var(--primary));
-    text-shadow: 0 0 8px hsl(var(--primary)), 0 0 10px hsl(var(--primary));
+    text-shadow: 
+      0 0 4px hsl(var(--primary)), 
+      0 0 8px hsl(var(--glow-yellow-hsl)), 
+      0 0 12px hsl(var(--accent));
   }
   
   .text-glow-yellow {
@@ -324,4 +327,3 @@
   transition: opacity 0.3s ease-in-out, color 0.3s ease-in-out;
   display: inline-block; 
 }
-
