@@ -30,7 +30,7 @@ export function Header() {
       style={{ transform: 'translateZ(0)' }} 
     >
       <header 
-        className="w-full px-4 py-2 flex flex-col items-center gap-2 sm:flex-row sm:justify-between"
+        className="w-full pl-4 pr-16 py-2 flex flex-col items-center gap-2 sm:flex-row sm:justify-between"
       >
         <div className="flex items-center gap-3 group cursor-default">
           <span className="inline-block animate-text-multicolor-glow">
@@ -63,4 +63,3 @@ export function Header() {
     </div>
   );
 }
-
