@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import type { ContractTemplate, ContractParameter } from '@/config/contracts';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { cn } from '@/lib/utils';
 import { ScrambledText } from '@/components/effects/ScrambledText';
+import { AnimatedSubtitle } from '@/components/solidity-forge/AnimatedSubtitle'; // Import the new component
 import { explainContractParameter } from '@/ai/flows/explain-contract-parameter';
 import { useToast } from "@/hooks/use-toast";
 
@@ -92,11 +93,11 @@ const getParameterGroups = (template: ContractTemplate, isAdvancedMode: boolean)
         parameters: visibleParams.filter(p => ['upgradable'].includes(p.name)),
       }
     ];
-  } else { 
+  } else {
      groups = [{ title: 'Parameters', parameters: visibleParams, defaultActive: true }];
   }
 
-  return groups.filter(group => group.parameters.length > 0); 
+  return groups.filter(group => group.parameters.length > 0);
 };
 
 interface ContractConfigFormProps {
@@ -149,27 +150,15 @@ export function ContractConfigForm({
   const { toast } = useToast();
 
   const subtitleText = "Sculpt your smart contract's soul. Or, you know, just click randomly. My circuits won't judge. Much.";
-  const subtitleWords = useMemo(() => subtitleText.split(' '), [subtitleText]);
-  const [activeSubtitleWordIndex, setActiveSubtitleWordIndex] = useState(0);
   const [isSubtitleVisible, setIsSubtitleVisible] = useState(false);
 
   useEffect(() => {
     const storyTimer = setTimeout(() => {
       setIsSubtitleVisible(true);
-    }, 700); 
+    }, 700);
 
     return () => clearTimeout(storyTimer);
   }, []);
-
-  useEffect(() => {
-    if (!isSubtitleVisible || subtitleWords.length === 0) return;
-
-    const intervalId = setInterval(() => {
-      setActiveSubtitleWordIndex((prevIndex) => (prevIndex + 1) % subtitleWords.length);
-    }, 400); 
-
-    return () => clearInterval(intervalId);
-  }, [subtitleWords, isSubtitleVisible]);
 
 
   const { control, handleSubmit, reset, watch, formState: { errors } } = useForm<FormData>({
@@ -204,7 +193,7 @@ export function ContractConfigForm({
         setActiveTabValue(groups[0].title.toLowerCase().replace(/\s+/g, '-'));
       }
        else {
-        setActiveTabValue(undefined); 
+        setActiveTabValue(undefined);
       }
     }
   }, [selectedTemplate, reset, isAdvancedMode]);
@@ -261,7 +250,7 @@ export function ContractConfigForm({
       setIsFetchingExplanation(false);
     }
   };
-  
+
   const handleShowExplanation = (param: ContractParameter) => {
     setParameterForExplanation(param);
     setIsExplanationModalOpen(true);
@@ -292,12 +281,9 @@ export function ContractConfigForm({
         <div className="flex items-center justify-between">
             <Label
                 htmlFor={param.name}
-                className={cn(
-                "flex items-center text-base font-bold",
-                "animate-text-multicolor-glow" 
-                )}
+                className={cn("flex items-center text-base font-bold")}
             >
-                {param.label}
+                <span className="animate-text-multicolor-glow">{param.label}</span>
             </Label>
             <Button
                 type="button"
@@ -388,12 +374,12 @@ export function ContractConfigForm({
   const anySubActionLoading = isGettingSuggestions || isEstimatingGas || isGeneratingTestCases || isRefiningCode || isGeneratingDocumentation;
 
   const parameterGroups = selectedTemplate ? getParameterGroups(selectedTemplate, isAdvancedMode) : [];
-  
+
   const parameterConfigurationSection = selectedTemplate && (
     selectedTemplate.id === 'custom' || parameterGroups.length === 0 ? (
       <div className="space-y-6 pt-6 border-t border-border/20 mt-6">
         {selectedTemplate.parameters
-          .filter(param => isAdvancedMode || !param.advancedOnly) 
+          .filter(param => isAdvancedMode || !param.advancedOnly)
           .map(renderParameterInput)}
       </div>
     ) : (
@@ -402,7 +388,7 @@ export function ContractConfigForm({
           orientation="vertical"
           value={activeTabValue}
           onValueChange={setActiveTabValue}
-          className="flex flex-col md:flex-row gap-6 md:gap-8 min-h-[300px]" 
+          className="flex flex-col md:flex-row gap-6 md:gap-8 min-h-[300px]"
         >
           <TabsList className="flex flex-row md:flex-col md:space-y-2 md:w-60 shrink-0 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 bg-transparent p-0">
             {parameterGroups.map((group) => {
@@ -413,8 +399,8 @@ export function ContractConfigForm({
                   value={tabValue}
                   disabled={anyPrimaryActionLoading && activeTabValue !== tabValue}
                   className={cn(
-                    "tab-running-lines-border param-tab-trigger", 
-                    "data-[state=active]:text-primary-foreground", 
+                    "tab-running-lines-border param-tab-trigger",
+                    "data-[state=active]:text-primary-foreground",
                     "data-[state=inactive]:text-muted-foreground hover:text-foreground"
                   )}
                 >
@@ -445,31 +431,16 @@ export function ContractConfigForm({
     <div className="space-y-8 p-4 md:p-6 lg:p-8">
       <div className="text-center">
         <CardTitle className="text-3xl font-headline mb-3">
-            <ScrambledText 
-                text="Blueprint Your Brilliance" 
-                className="text-3xl font-headline animate-text-multicolor-glow" 
+            <ScrambledText
+                text="Blueprint Your Brilliance"
+                className="text-3xl font-headline animate-text-multicolor-glow"
                 revealSpeed={1}
                 scrambleInterval={50}
                 revealDelay={300}
             />
         </CardTitle>
         <CardDescription className="max-w-md mx-auto text-base text-muted-foreground">
-          {isSubtitleVisible && (
-            <span className="flex flex-wrap justify-center items-center gap-x-1.5 gap-y-1 min-h-[2.5em]">
-              {subtitleWords.map((word, index) => (
-                <span
-                  key={index}
-                  className={cn(
-                    'inline-block', 
-                    index === activeSubtitleWordIndex ? 'word-glow-active' : 'word-dimmed'
-                  )}
-                >
-                  {word}
-                </span>
-              ))}
-            </span>
-          )}
-          {!isSubtitleVisible && <span className="opacity-0">{subtitleText}</span>}
+          <AnimatedSubtitle text={subtitleText} isVisible={isSubtitleVisible} />
         </CardDescription>
       </div>
 
@@ -478,11 +449,12 @@ export function ContractConfigForm({
           <Label
             htmlFor="contractType"
             className={cn(
-              "text-center block font-bold text-xl",
-              "animate-text-multicolor-glow"
+              "text-center block font-bold text-xl"
             )}
           >
-            Select Your Destiny<br />(Contract Type)
+            <span className="animate-text-multicolor-glow">Select Your Destiny</span>
+            <br />
+            <span className="animate-text-multicolor-glow">(Contract Type)</span>
           </Label>
           <Select onValueChange={handleTemplateChange} defaultValue={selectedTemplate?.id} disabled={anyPrimaryActionLoading}>
             <SelectTrigger id="contractType" className="glow-border-purple bg-background/70 focus:bg-background text-base py-6">
@@ -509,10 +481,10 @@ export function ContractConfigForm({
             <Label
               htmlFor="mode-switch"
               className={cn(
-                "text-base font-bold animate-text-multicolor-glow text-center"
+                "text-base font-bold text-center"
               )}
             >
-              Complexity Dial:
+              <span className="animate-text-multicolor-glow">Complexity Dial:</span>
             </Label>
             <div className="flex items-center space-x-2">
               <span className="text-sm text-muted-foreground">Basic</span>
@@ -528,13 +500,13 @@ export function ContractConfigForm({
           </div>
         )}
       </div>
-      
+
       {selectedTemplate && (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
-          
+
           {parameterConfigurationSection}
 
-          
+
           <div className="pt-8 border-t border-border/20">
             <Button
               type="submit"
@@ -554,8 +526,8 @@ export function ContractConfigForm({
                   <AlertTriangle className="h-5 w-5 text-destructive" />
                   Daily Forge Quota Maxed Out! Don't let your brilliance be capped.
                 </p>
-                <Button 
-                  variant="link" 
+                <Button
+                  variant="link"
                   className="text-sm text-accent hover:text-accent/80 mt-1"
                   onClick={(e) => {
                     e.preventDefault();
@@ -569,11 +541,11 @@ export function ContractConfigForm({
             )}
           </div>
 
-          
+
           {generatedCode && (
             <div className="pt-6 space-y-4 border-t border-border/20">
-              <h3 className="text-center text-lg font-semibold animate-text-multicolor-glow mb-2">
-                Post-Forge Analysis & Augmentation
+              <h3 className="text-center text-lg font-semibold mb-2">
+                <span className="animate-text-multicolor-glow">Post-Forge Analysis & Augmentation</span>
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <Button
