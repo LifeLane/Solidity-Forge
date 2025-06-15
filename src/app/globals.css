@@ -5,33 +5,33 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 0 0% 98%; /* Softer than pure white */
     --foreground: 240 10% 3.9%;
 
-    --card: 0 0% 100%;
+    --card: 0 0% 100%; /* Pure white for cards */
     --card-foreground: 240 10% 3.9%;
 
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
 
-    --primary: 145 60% 30%; /* Space Green */
-    --primary-foreground: 145 10% 95%;
+    --primary: 145 60% 40%; /* Brighter Green for light mode */
+    --primary-foreground: 0 0% 100%; /* White text for on-primary elements */
 
-    --secondary: 240 4.8% 95.9%;
+    --secondary: 240 6% 94%; /* Adjusted light gray */
     --secondary-foreground: 240 5.9% 10%;
 
-    --muted: 240 4.8% 95.9%;
+    --muted: 240 6% 94%;
     --muted-foreground: 240 3.8% 46.1%;
 
-    --accent: 0 70% 50%; /* Fire Red */
+    --accent: 0 70% 55%; /* Brighter Red for light mode */
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%; /* Default input border color */
-    --ring: 145 60% 40%; /* Ring color related to primary */
+    --border: 240 5% 88%; /* More defined light gray border */
+    --input: 240 5% 88%; 
+    --ring: 145 60% 45%; /* Adjusted ring for new light primary */
 
     --radius: 0.5rem;
 
@@ -58,8 +58,8 @@
     --popover: 240 10% 5.9%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 145 60% 30%; /* Space Green */
-    --primary-foreground: 145 10% 95%;
+    --primary: 145 60% 30%; /* Original Space Green for dark mode */
+    --primary-foreground: 145 10% 95%; /* Original light green for dark mode */
 
     --secondary: 240 3.7% 15.9%; /* Darker gray for secondary elements */
     --secondary-foreground: 0 0% 98%;
@@ -67,7 +67,7 @@
     --muted: 240 3.7% 15.9%;
     --muted-foreground: 0 0% 63.9%;
 
-    --accent: 0 70% 50%; /* Fire Red */
+    --accent: 0 70% 50%; /* Original Fire Red for dark mode */
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62.8% 30.6%;
@@ -75,7 +75,7 @@
 
     --border: 240 3.7% 15.9%; /* Darker border for dark mode */
     --input: 240 3.7% 10.9%; /* Darker input border for dark mode */
-    --ring: 145 60% 40%; /* Ring color related to primary */
+    --ring: 145 60% 40%; /* Original ring for dark mode */
     
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
@@ -117,23 +117,23 @@
 
 @keyframes multiColorTextGlow {
   0%, 100% {
-    color: hsl(var(--primary)); /* Green */
+    color: hsl(var(--primary)); 
     text-shadow: 0 0 7px hsl(var(--primary)), 0 0 10px hsl(var(--primary) / 0.7);
   }
   20% {
-    color: hsl(var(--glow-cyan-hsl)); /* Cyan */
+    color: hsl(var(--glow-cyan-hsl)); 
     text-shadow: 0 0 7px hsl(var(--glow-cyan-hsl)), 0 0 10px hsl(var(--glow-cyan-hsl) / 0.7);
   }
   40% {
-    color: hsl(var(--glow-purple-hsl)); /* Purple */
+    color: hsl(var(--glow-purple-hsl)); 
     text-shadow: 0 0 7px hsl(var(--glow-purple-hsl)), 0 0 10px hsl(var(--glow-purple-hsl) / 0.7);
   }
   60% {
-    color: hsl(var(--glow-magenta-hsl)); /* Magenta */
+    color: hsl(var(--glow-magenta-hsl)); 
     text-shadow: 0 0 7px hsl(var(--glow-magenta-hsl)), 0 0 10px hsl(var(--glow-magenta-hsl) / 0.7);
   }
   80% {
-    color: hsl(var(--glow-yellow-hsl)); /* Yellow */
+    color: hsl(var(--glow-yellow-hsl)); 
     text-shadow: 0 0 7px hsl(var(--glow-yellow-hsl)), 0 0 10px hsl(var(--glow-yellow-hsl) / 0.7);
   }
 }
@@ -154,7 +154,7 @@
   }
 
   .glow-border-animated {
-    border: 1px solid transparent !important; /* Important to override base * apply rule */
+    border: 1px solid transparent !important; 
     animation: pulsate-glow 3s infinite alternate;
   }
 
@@ -195,7 +195,6 @@
     --current-glow-color-border-alpha: hsl(var(--glow-cyan-hsl) / 0.5);
   }
 
-  /* Running Lines Animation for Tabs */
   @keyframes runningLinesSpin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
@@ -204,9 +203,9 @@
   .tab-running-lines-border {
     position: relative;
     overflow: hidden;
-    padding: 2px; /* Space for the animated border */
-    border-radius: var(--radius); /* Match other rounded elements */
-    display: inline-flex; /* or flex, depending on usage */
+    padding: 2px; 
+    border-radius: var(--radius); 
+    display: inline-flex; 
     align-items: center;
     justify-content: center;
     z-index: 1;
@@ -220,15 +219,15 @@
     background: conic-gradient(
       from 0deg,
       hsl(var(--glow-cyan-hsl)), 
-      hsl(220 70% 50%), /* Blue */
+      hsl(220 70% 50%), 
       hsl(var(--glow-magenta-hsl)),
-      hsl(var(--accent)), /* Red */
+      hsl(var(--accent)), 
       hsl(var(--glow-yellow-hsl)),
-      hsl(145 60% 30%), /* Green */
-      hsl(var(--glow-cyan-hsl)) /* Loop back to cyan */
+      hsl(var(--primary)), 
+      hsl(var(--glow-cyan-hsl)) 
     );
     animation: runningLinesSpin 6s linear infinite;
-    z-index: -2; /* Behind the ::after pseudo-element */
+    z-index: -2; 
   }
 
   .tab-running-lines-border::after {
@@ -236,55 +235,64 @@
     position: absolute;
     top: 2px; left: 2px;
     right: 2px; bottom: 2px;
-    background-color: hsl(var(--card)); /* Inner background of the tab */
+    background-color: hsl(var(--card)); 
     border-radius: calc(var(--radius) - 2px); 
-    z-index: -1; /* Behind the content, above ::before */
+    z-index: -1; 
   }
   
   .tab-running-lines-border[data-state="active"]::after {
-     background-color: hsl(var(--primary) / 0.15);
+     background-color: hsl(var(--primary) / 0.15); /* Subtle primary tint for active tab background */
   }
   .tab-running-lines-border:not([data-state="active"]):hover::after {
-     background-color: hsl(var(--muted) / 0.1);
+     background-color: hsl(var(--muted) / 0.1); /* Subtle muted tint for hover background */
   }
 
   .tab-running-lines-content {
-    position: relative; /* Ensures it's above the pseudo-elements */
+    position: relative; 
     z-index: 2;
     width: 100%;
     height: 100%;
     display: flex;
     align-items: center;
-    justify-content: center; /* Center content by default */
+    justify-content: center; 
   }
+  
+  .tab-running-lines-border[data-state="active"] .tab-running-lines-content {
+    color: hsl(var(--primary)); /* Use primary color for text in light mode */
+  }
+  .dark .tab-running-lines-border[data-state="active"] .tab-running-lines-content {
+    color: hsl(var(--primary-foreground)); /* Use primary-foreground for text in dark mode */
+  }
+
+  .tab-running-lines-border:not([data-state="active"]) .tab-running-lines-content {
+    color: hsl(var(--muted-foreground));
+  }
+   .tab-running-lines-border:not([data-state="active"]):hover .tab-running-lines-content {
+    color: hsl(var(--foreground));
+  }
+
 
   .param-tab-trigger { 
     border-right: none;
     margin-bottom: 0.5rem;
     text-align: left;
-    font-weight: 500; /* medium */
+    font-weight: 500; 
     transition: all 0.2s ease-in-out;
     border-radius: var(--radius) 0 0 var(--radius); 
     width: 100%;
   }
   
   .param-tab-trigger .tab-running-lines-content {
-    justify-content: flex-start; /* Align text to left for vertical tabs */
+    justify-content: flex-start; 
     padding: 0.75rem 1rem;
   }
-
-
-  .param-tab-trigger[data-state="active"] .tab-running-lines-content {
-    color: hsl(var(--primary-foreground)); /* Keep text bright for active state, glow will handle color */
-  }
+  
   .param-tab-trigger:not([data-state="active"]) .tab-running-lines-content {
     opacity: 0.8;
-    /* color is handled by animate-text-multicolor-glow or default foreground if not animated */
   }
   .param-tab-trigger:hover:not([data-state="active"]) .tab-running-lines-content {
     opacity: 1;
   }
-  
 }
 
 
@@ -303,23 +311,10 @@
   animation: fadeInUp 0.5s ease-out forwards;
 }
 
-/* Styles for Footer Story Word Glow & Label Letter Glow */
 .word-glow-active {
-  /* color: hsl(var(--primary)); Use primary color for active word glow */
-  /* text-shadow: 0 0 6px hsl(var(--primary)), 0 0 10px hsl(var(--primary)); */
-  /* opacity: 1; */
-  /* transition: color 0.3s ease-in-out, text-shadow 0.3s ease-in-out, opacity 0.3s ease-in-out; */
-  /* display: inline-block; */
-
-  /* The footer story will use this class for the active word. */
-  /* It will cycle through colors defined in its own animation or logic if different from labels */
-  /* For now, let's assume it uses a specific keyframe animation if it's different from labels, */
-  /* or it can use `animate-text-multicolor-glow` if the effect is intended to be the same. */
-  /* The current JS for footer handles cycling 'activeWordIndex'. */
-  /* We need to ensure this class applies a multi-color glow to the active word. */
-  animation: multiColorTextGlow 10s linear infinite; /* Reuse label animation for now */
+  animation: multiColorTextGlow 10s linear infinite; 
   opacity: 1;
-  display: inline-block; /* Ensure it respects word boundaries */
+  display: inline-block; 
 }
 
 .word-dimmed {
@@ -328,4 +323,3 @@
   transition: opacity 0.3s ease-in-out, color 0.3s ease-in-out;
   display: inline-block; 
 }
-
