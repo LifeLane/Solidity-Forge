@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { CardTitle, CardDescription } from '@/components/ui/card';
-import { AlertCircle, Loader2, Wand2, Brain, Fuel, Beaker } from 'lucide-react';
+import { AlertCircle, Loader2, Wand2, Brain, Fuel, Beaker, FileText } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -102,11 +102,13 @@ interface ContractConfigFormProps {
   onGetAISuggestions: (template: ContractTemplate, formData: FormData) => Promise<void>;
   onEstimateGasCosts: () => Promise<void>;
   onGenerateTestCases: () => Promise<void>;
+  onGenerateDocumentation: () => Promise<void>;
   isGeneratingCode: boolean;
   isGettingSuggestions: boolean;
   isEstimatingGas: boolean;
   isGeneratingTestCases: boolean;
   isRefiningCode: boolean;
+  isGeneratingDocumentation: boolean;
   generatedCode: string;
   selectedTemplateProp?: ContractTemplate;
 }
@@ -118,11 +120,13 @@ export function ContractConfigForm({
   onGetAISuggestions,
   onEstimateGasCosts,
   onGenerateTestCases,
+  onGenerateDocumentation,
   isGeneratingCode,
   isGettingSuggestions,
   isEstimatingGas,
   isGeneratingTestCases,
   isRefiningCode,
+  isGeneratingDocumentation,
   generatedCode,
   selectedTemplateProp,
 }: ContractConfigFormProps) {
@@ -327,7 +331,7 @@ export function ContractConfigForm({
   };
 
   const anyPrimaryActionLoading = isGeneratingCode || isRefiningCode;
-  const anySubActionLoading = isGettingSuggestions || isEstimatingGas || isGeneratingTestCases || isRefiningCode;
+  const anySubActionLoading = isGettingSuggestions || isEstimatingGas || isGeneratingTestCases || isRefiningCode || isGeneratingDocumentation;
 
   const parameterGroups = selectedTemplate ? getParameterGroups(selectedTemplate, isAdvancedMode) : [];
   
@@ -389,7 +393,7 @@ export function ContractConfigForm({
         <CardTitle className="text-3xl font-headline mb-3">
             <ScrambledText 
                 text="Blueprint Your Brilliance" 
-                className="text-3xl font-headline text-glow-primary" 
+                className="text-3xl font-headline animate-text-multicolor-glow" 
                 revealSpeed={1}
                 scrambleInterval={50}
                 revealDelay={300}
@@ -402,7 +406,7 @@ export function ContractConfigForm({
                 <span
                   key={index}
                   className={cn(
-                    'inline-block', // Added for potential individual word styling if needed
+                    'inline-block', 
                     index === activeSubtitleWordIndex ? 'word-glow-active' : 'word-dimmed'
                   )}
                 >
@@ -494,15 +498,15 @@ export function ContractConfigForm({
           
           {generatedCode && (
             <div className="pt-6 space-y-4 border-t border-border/20">
-              <h3 className="text-center text-lg font-semibold text-glow-primary mb-2">
+              <h3 className="text-center text-lg font-semibold animate-text-multicolor-glow mb-2">
                 Post-Forge Analysis & Augmentation
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={handleAISuggestionsClick}
-                  disabled={anySubActionLoading}
+                  disabled={anySubActionLoading || isGeneratingCode || !generatedCode}
                   className="w-full glow-border-purple hover:bg-accent/10 hover:text-accent-foreground text-lg py-6"
                 >
                   {isGettingSuggestions ? (
@@ -516,7 +520,7 @@ export function ContractConfigForm({
                   type="button"
                   variant="outline"
                   onClick={handleEstimateGasClick}
-                  disabled={anySubActionLoading}
+                  disabled={anySubActionLoading || isGeneratingCode || !generatedCode}
                   className="w-full glow-border-purple hover:bg-accent/10 hover:text-accent-foreground text-lg py-6"
                 >
                   {isEstimatingGas ? (
@@ -530,7 +534,7 @@ export function ContractConfigForm({
                   type="button"
                   variant="outline"
                   onClick={handleGenerateTestCasesClick}
-                  disabled={anySubActionLoading}
+                  disabled={anySubActionLoading || isGeneratingCode || !generatedCode}
                   className="w-full glow-border-purple hover:bg-accent/10 hover:text-accent-foreground text-lg py-6"
                 >
                   {isGeneratingTestCases ? (
@@ -540,6 +544,20 @@ export function ContractConfigForm({
                   )}
                   Conjure Test Suite
                 </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onGenerateDocumentation}
+                  disabled={anySubActionLoading || isGeneratingCode || !generatedCode}
+                  className="w-full glow-border-purple hover:bg-accent/10 hover:text-accent-foreground text-lg py-6"
+                >
+                  {isGeneratingDocumentation ? (
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  ) : (
+                     <FileText className="mr-2 h-5 w-5" />
+                  )}
+                  Scribe Docs
+                </Button>
               </div>
             </div>
           )}
@@ -548,4 +566,3 @@ export function ContractConfigForm({
     </div>
   );
 }
-

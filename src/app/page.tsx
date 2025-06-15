@@ -15,6 +15,7 @@ import { estimateGasCost } from '@/ai/flows/estimate-gas-cost';
 import { getKnownLiquidityPoolInfo, type GetKnownLiquidityPoolInfoOutput } from '@/ai/flows/get-known-liquidity-pool-info';
 import { generateTestCases } from '@/ai/flows/generate-test-cases';
 import { refineSmartContractCode } from '@/ai/flows/refine-smart-contract-code';
+import { generateDocumentation } from '@/ai/flows/generate-documentation-flow';
 import { Card, CardContent } from '@/components/ui/card';
 import { CONTRACT_TEMPLATES, type ContractTemplate } from '@/config/contracts';
 import { cn } from '@/lib/utils';
@@ -34,6 +35,7 @@ export default function SolidityForgePage() {
   const [isEstimatingGas, setIsEstimatingGas] = useState<boolean>(false);
   const [isGeneratingTestCases, setIsGeneratingTestCases] = useState<boolean>(false);
   const [isRefiningCode, setIsRefiningCode] = useState<boolean>(false);
+  const [isGeneratingDocumentation, setIsGeneratingDocumentation] = useState<boolean>(false);
 
   const [mainContentVisible, setMainContentVisible] = useState(false);
 
@@ -246,6 +248,37 @@ Specific guidance: ${template.aiPromptEnhancement}`;
     }
   };
 
+  const handleGenerateDocumentation = async () => {
+    if (!generatedCode) {
+      toast({
+        variant: "destructive",
+        title: "Docu-what-now?",
+        description: "I can't document a void. Generate some code first, genius.",
+      });
+      return;
+    }
+    setIsGeneratingDocumentation(true);
+    resetAnalyses();
+
+    try {
+      const result = await generateDocumentation({ code: generatedCode });
+      setGeneratedCode(result.documentedCode);
+      toast({
+        title: "Documentation Scribed!",
+        description: "Your code is now (hopefully) more understandable. Or at least has more words.",
+      });
+    } catch (error) {
+      console.error("Error generating documentation:", error);
+      toast({
+        variant: "destructive",
+        title: "Documentation Drafter Down!",
+        description: (error as Error).message || "My quills are broken. Try again later.",
+      });
+    } finally {
+      setIsGeneratingDocumentation(false);
+    }
+  };
+
   const handleFindAddresses = async (query: string) => {
     if (!query.trim()) {
       toast({
@@ -276,7 +309,7 @@ Specific guidance: ${template.aiPromptEnhancement}`;
     }
   };
 
-  const anySubActionLoading = isGettingSuggestions || isEstimatingGas || isGeneratingTestCases || isRefiningCode;
+  const anySubActionLoading = isGettingSuggestions || isEstimatingGas || isGeneratingTestCases || isRefiningCode || isGeneratingDocumentation;
 
   return (
     <div className="min-h-screen text-foreground flex flex-col bg-background">
@@ -298,11 +331,13 @@ Specific guidance: ${template.aiPromptEnhancement}`;
               onGetAISuggestions={handleGetAISuggestions}
               onEstimateGasCosts={handleEstimateGasCosts}
               onGenerateTestCases={handleGenerateTestCases}
+              onGenerateDocumentation={handleGenerateDocumentation}
               isGeneratingCode={isGeneratingCode}
               isGettingSuggestions={isGettingSuggestions}
               isEstimatingGas={isEstimatingGas}
               isGeneratingTestCases={isGeneratingTestCases}
               isRefiningCode={isRefiningCode}
+              isGeneratingDocumentation={isGeneratingDocumentation}
               generatedCode={generatedCode}
               selectedTemplateProp={selectedTemplate}
             />
@@ -354,7 +389,3 @@ Specific guidance: ${template.aiPromptEnhancement}`;
     </div>
   );
 }
-
-    
-
-    
