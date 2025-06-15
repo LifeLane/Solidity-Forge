@@ -14,7 +14,6 @@ import { AlertCircle, Loader2, Wand2, Brain, Fuel, Beaker } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 
 export type FormData = Record<string, any>;
@@ -307,7 +306,7 @@ export function ContractConfigForm({
   const anySubActionLoading = isGettingSuggestions || isEstimatingGas || isGeneratingTestCases || isRefiningCode;
 
   const parameterGroups = selectedTemplate ? getParameterGroups(selectedTemplate, isAdvancedMode) : [];
-
+  
   const parameterConfigurationSection = selectedTemplate && (
     selectedTemplate.id === 'custom' || parameterGroups.length === 0 ? (
       <div className="space-y-6 pt-6 border-t border-border/20 mt-6">
@@ -344,7 +343,7 @@ export function ContractConfigForm({
               );
             })}
           </TabsList>
-          <div className="flex-grow min-w-0 p-1 rounded-md border border-border/20 bg-card/30">
+          <div className="flex-grow min-w-0 p-1 rounded-md border border-border/20 bg-card/30 max-h-[70vh] overflow-y-auto">
             {parameterGroups.map(group => {
               const tabValue = group.title.toLowerCase().replace(/\s+/g, '-');
               return (
@@ -423,9 +422,13 @@ export function ContractConfigForm({
           </div>
         )}
       </div>
-
+      
       {selectedTemplate && (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
+          {/* Parameter Configuration Section */}
+          {parameterConfigurationSection}
+
+          {/* Primary Action (Forge Contract) */}
           <div className="pt-8 border-t border-border/20">
             <Button
               type="submit"
@@ -441,6 +444,7 @@ export function ContractConfigForm({
             </Button>
           </div>
 
+          {/* Secondary Actions (Analysis Tools) */}
           {generatedCode && (
             <div className="pt-6 space-y-4 border-t border-border/20">
               <h3 className="text-center text-lg font-semibold text-glow-primary mb-2">
@@ -492,11 +496,9 @@ export function ContractConfigForm({
               </div>
             </div>
           )}
-          
-          {/* Parameter Configuration Section is now here, at the end of the form */}
-          {parameterConfigurationSection}
         </form>
       )}
     </div>
   );
 }
+
