@@ -57,8 +57,9 @@ const generateDocumentationFlow = ai.defineFlow(
   async input => {
     const {output} = await prompt(input);
     if (!output || !output.documentedCode) {
-        throw new Error("The AI seemed to forget how to write. No documentation was generated. Try again.");
+        throw new Error("My quills seem to have snapped. The AI failed to conjure any documentation this time. Perhaps a clearer incantation (or just trying again) might work?");
     }
     return output;
   }
 );
+
