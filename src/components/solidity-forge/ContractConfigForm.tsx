@@ -1,24 +1,19 @@
-
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useForm, FormProvider } from 'react-hook-form';
 import type { ContractTemplate, ContractParameter } from '@/config/contracts';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { CardTitle, CardDescription } from '@/components/ui/card';
-import { AlertCircle, Loader2, Wand2, Brain, Fuel, Beaker, FileText, AlertTriangle, ArrowDownCircle, Lightbulb, Info } from 'lucide-react';
+import { AlertTriangle, ArrowDownCircle, Loader2, Wand2, Brain, Fuel, Beaker, FileText } from 'lucide-react';
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { cn } from '@/lib/utils';
 import { ScrambledText } from '@/components/effects/ScrambledText';
-import { AnimatedSubtitle } from '@/components/solidity-forge/AnimatedSubtitle'; // Import the new component
-import { explainContractParameter } from '@/ai/flows/explain-contract-parameter';
-import { useToast } from "@/hooks/use-toast";
+import ParameterInputDisplay from './ParameterInputDisplay'; // Import the new component
+import AnimatedSubtitle from './AnimatedSubtitle'; // Import the new component
 
 
 export type FormData = Record<string, any>;
@@ -120,7 +115,7 @@ interface ContractConfigFormProps {
 }
 
 
-export function ContractConfigForm({
+const ContractConfigForm = React.memo(({
   templates,
   onGenerateCode,
   onGetAISuggestions,
@@ -137,36 +132,21 @@ export function ContractConfigForm({
   selectedTemplateProp,
   isForgeDisabledByLimit,
   onNavigateToDevAccess,
-}: ContractConfigFormProps) {
-  const [selectedTemplate, setSelectedTemplate] = React.useState<ContractTemplate | undefined>(selectedTemplateProp || templates[0]);
+}: ContractConfigFormProps) => {
+  const [selectedTemplate, setSelectedTemplate] = useState<ContractTemplate | undefined>(selectedTemplateProp || templates[0]);
   const [isAdvancedMode, setIsAdvancedMode] = useState(false);
   const [activeTabValue, setActiveTabValue] = useState<string | undefined>(undefined);
 
-  const [isExplanationModalOpen, setIsExplanationModalOpen] = useState(false);
-  const [parameterForExplanation, setParameterForExplanation] = useState<ContractParameter | null>(null);
-  const [explanationText, setExplanationText] = useState<string | null>(null);
-  const [isFetchingExplanation, setIsFetchingExplanation] = useState(false);
-
-  const { toast } = useToast();
-
   const subtitleText = "Sculpt your smart contract's soul. Or, you know, just click randomly. My circuits won't judge. Much.";
-  const [isSubtitleVisible, setIsSubtitleVisible] = useState(false);
 
-  useEffect(() => {
-    const storyTimer = setTimeout(() => {
-      setIsSubtitleVisible(true);
-    }, 700);
-
-    return () => clearTimeout(storyTimer);
-  }, []);
-
-
-  const { control, handleSubmit, reset, watch, formState: { errors } } = useForm<FormData>({
+  const methods = useForm<FormData>({
     defaultValues: selectedTemplate?.parameters.reduce((acc, param) => {
       acc[param.name] = param.defaultValue ?? '';
       return acc;
     }, {} as FormData) || {}
   });
+  const { handleSubmit, reset, getValues } = methods;
+
 
   useEffect(() => {
     if (selectedTemplateProp) {
@@ -198,189 +178,56 @@ export function ContractConfigForm({
     }
   }, [selectedTemplate, reset, isAdvancedMode]);
 
-  const currentFormData = watch();
 
-  const handleTemplateChange = (templateId: string) => {
+  const handleTemplateChange = useCallback((templateId: string) => {
     const newTemplate = templates.find(t => t.id === templateId);
     setSelectedTemplate(newTemplate);
-  };
+  },[templates]);
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = useCallback(async (data: FormData) => {
     if (selectedTemplate) {
       await onGenerateCode(selectedTemplate, data);
     }
-  };
+  }, [selectedTemplate, onGenerateCode]);
 
-  const handleAISuggestionsClick = async () => {
+  const handleAISuggestionsClick = useCallback(async () => {
     if (selectedTemplate) {
-      await onGetAISuggestions(selectedTemplate, currentFormData);
+      const formData = getValues();
+      await onGetAISuggestions(selectedTemplate, formData);
     }
-  };
+  }, [selectedTemplate, onGetAISuggestions, getValues]);
 
-  const handleEstimateGasClick = async () => {
+  const handleEstimateGasClick = useCallback(async () => {
     await onEstimateGasCosts();
-  };
+  }, [onEstimateGasCosts]);
 
-  const handleGenerateTestCasesClick = async () => {
+  const handleGenerateTestCasesClick = useCallback(async () => {
     await onGenerateTestCases();
-  };
+  }, [onGenerateTestCases]);
 
-  const fetchParameterExplanation = async (param: ContractParameter) => {
-    if (!selectedTemplate) return;
-    setIsFetchingExplanation(true);
-    setExplanationText(null);
-    try {
-      const result = await explainContractParameter({
-        parameterName: param.name,
-        parameterLabel: param.label,
-        contractTypeName: selectedTemplate.name,
-        parameterContextDescription: param.description,
-      });
-      setExplanationText(result.explanation);
-    } catch (error) {
-      console.error("Error fetching parameter explanation:", error);
-      const errorMessage = (error as Error).message || "BlockSmithAI had trouble explaining that. Please try again.";
-      setExplanationText(`Error: ${errorMessage}`);
-      toast({
-        variant: "destructive",
-        title: "Explanation Error",
-        description: errorMessage,
-      });
-    } finally {
-      setIsFetchingExplanation(false);
-    }
-  };
+  const handleGenerateDocumentationClick = useCallback(async () => {
+    await onGenerateDocumentation();
+  }, [onGenerateDocumentation]);
 
-  const handleShowExplanation = (param: ContractParameter) => {
-    setParameterForExplanation(param);
-    setIsExplanationModalOpen(true);
-    fetchParameterExplanation(param);
-  };
-
-  const renderParameterInput = (param: ContractParameter) => {
-    let showBasedOnDependency = true;
-    if (param.dependsOn) {
-        const dependentValue = currentFormData[param.dependsOn];
-        if (typeof param.dependsOnValue === 'function') {
-            showBasedOnDependency = param.dependsOnValue(dependentValue);
-        } else {
-            showBasedOnDependency = dependentValue === param.dependsOnValue;
-        }
-    }
-    if (!showBasedOnDependency) return null;
-
-
-    const commonProps = {
-      name: param.name,
-      control: control,
-      rules: { required: param.type !== 'boolean' ? `${param.label} is required.` : false },
-    };
-
-    return (
-      <div key={param.name} className="space-y-2 mb-6">
-        <div className="flex items-center justify-between">
-            <Label
-                htmlFor={param.name}
-                className={cn("flex items-center text-base font-bold")}
-            >
-                <span className="animate-text-multicolor-glow">{param.label}</span>
-            </Label>
-            <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7 text-muted-foreground hover:text-primary"
-                onClick={() => handleShowExplanation(param)}
-                aria-label={`Get explanation for ${param.label}`}
-                disabled={anyPrimaryActionLoading || isFetchingExplanation || isExplanationModalOpen}
-            >
-                <Lightbulb className="h-4 w-4" />
-            </Button>
-        </div>
-
-
-        {param.type === 'select' && param.options ? (
-          <Controller
-            {...commonProps}
-            defaultValue={param.defaultValue || param.options[0]?.value}
-            render={({ field }) => (
-              <Select onValueChange={field.onChange} value={field.value as string} defaultValue={field.value as string || undefined} disabled={anyPrimaryActionLoading}>
-                <SelectTrigger id={param.name} className="glow-border-purple bg-background/70 focus:bg-background">
-                  <SelectValue placeholder={param.placeholder || `Select ${param.label}`} />
-                </SelectTrigger>
-                <SelectContent>
-                  {param.options?.map(option => (
-                    <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-          />
-        ) : param.type === 'textarea' ? (
-           <Controller
-            {...commonProps}
-            defaultValue={param.defaultValue || ''}
-            render={({ field }) => (
-              <Textarea
-                id={param.name}
-                placeholder={param.placeholder}
-                rows={param.rows || 3}
-                {...field}
-                className="glow-border-purple bg-background/70 focus:bg-background"
-                disabled={anyPrimaryActionLoading}
-              />
-            )}
-          />
-        ) : param.type === 'boolean' ? (
-          <Controller
-            {...commonProps}
-            defaultValue={param.defaultValue || false}
-            render={({ field }) => (
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id={param.name}
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                  disabled={anyPrimaryActionLoading}
-                />
-                <Label htmlFor={param.name} className="text-sm text-muted-foreground">
-                  {field.value ? 'Enabled' : 'Disabled'}
-                </Label>
-              </div>
-            )}
-          />
-        ) : (
-          <Controller
-            {...commonProps}
-            defaultValue={param.defaultValue || ''}
-            render={({ field }) => (
-              <Input
-                id={param.name}
-                type={param.type === 'number' ? 'number' : 'text'}
-                placeholder={param.placeholder}
-                {...field}
-                className="glow-border-purple bg-background/70 focus:bg-background"
-                disabled={anyPrimaryActionLoading}
-              />
-            )}
-          />
-        )}
-        {errors[param.name] && <p className="text-xs text-destructive mt-1">{(errors[param.name] as any).message}</p>}
-      </div>
-    );
-  };
 
   const anyPrimaryActionLoading = isGeneratingCode || isRefiningCode;
   const anySubActionLoading = isGettingSuggestions || isEstimatingGas || isGeneratingTestCases || isRefiningCode || isGeneratingDocumentation;
 
-  const parameterGroups = selectedTemplate ? getParameterGroups(selectedTemplate, isAdvancedMode) : [];
+  const parameterGroups = useMemo(() => selectedTemplate ? getParameterGroups(selectedTemplate, isAdvancedMode) : [], [selectedTemplate, isAdvancedMode]);
 
   const parameterConfigurationSection = selectedTemplate && (
     selectedTemplate.id === 'custom' || parameterGroups.length === 0 ? (
       <div className="space-y-6 pt-6 border-t border-border/20 mt-6">
         {selectedTemplate.parameters
           .filter(param => isAdvancedMode || !param.advancedOnly)
-          .map(renderParameterInput)}
+          .map(param => (
+            <ParameterInputDisplay
+              key={param.name}
+              param={param}
+              anyPrimaryActionLoading={anyPrimaryActionLoading}
+              contractTypeName={selectedTemplate.name}
+            />
+          ))}
       </div>
     ) : (
       <div className="pt-6 border-t border-border/20 mt-6">
@@ -416,7 +263,14 @@ export function ContractConfigForm({
               const tabValue = group.title.toLowerCase().replace(/\s+/g, '-');
               return (
                 <TabsContent key={tabValue} value={tabValue} className="mt-0 space-y-6 p-4 md:p-6 rounded-md">
-                  {group.parameters.length > 0 ? group.parameters.map(renderParameterInput) : <p className="text-base text-muted-foreground p-4 text-center">No parameters in this section for the current mode.</p>}
+                  {group.parameters.length > 0 ? group.parameters.map(param => (
+                     <ParameterInputDisplay
+                        key={param.name}
+                        param={param}
+                        anyPrimaryActionLoading={anyPrimaryActionLoading}
+                        contractTypeName={selectedTemplate.name}
+                      />
+                  )) : <p className="text-base text-muted-foreground p-4 text-center">No parameters in this section for the current mode.</p>}
                 </TabsContent>
               );
             })}
@@ -439,9 +293,7 @@ export function ContractConfigForm({
                 revealDelay={300}
             />
         </CardTitle>
-        <CardDescription className="max-w-md mx-auto text-base text-muted-foreground">
-          <AnimatedSubtitle text={subtitleText} isVisible={isSubtitleVisible} />
-        </CardDescription>
+         <AnimatedSubtitle text={subtitleText} />
       </div>
 
       <div className="space-y-6 mb-10">
@@ -501,6 +353,7 @@ export function ContractConfigForm({
         )}
       </div>
 
+    <FormProvider {...methods}>
       {selectedTemplate && (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
 
@@ -587,13 +440,13 @@ export function ContractConfigForm({
                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                   ) : (
                      <Beaker className="mr-2 h-5 w-5" />
-                  )}
+                   )}
                   Conjure Test Suite
                 </Button>
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={onGenerateDocumentation}
+                  onClick={handleGenerateDocumentationClick}
                   disabled={anySubActionLoading || isGeneratingCode || !generatedCode}
                   className="w-full glow-border-purple hover:bg-accent/10 hover:text-accent-foreground text-lg py-6"
                 >
@@ -609,45 +462,10 @@ export function ContractConfigForm({
           )}
         </form>
       )}
-
-      <Dialog open={isExplanationModalOpen} onOpenChange={setIsExplanationModalOpen}>
-        <DialogContent className="sm:max-w-md bg-card/90 backdrop-blur-sm glow-border-cyan">
-          <DialogHeader>
-            <DialogTitle className="text-xl text-glow-primary flex items-center gap-2">
-              <Lightbulb className="h-5 w-5"/>
-              {parameterForExplanation?.label}
-            </DialogTitle>
-            {parameterForExplanation?.description && (
-              <DialogDescription className="italic text-xs pt-1 text-muted-foreground">
-                Original Hint: {parameterForExplanation.description}
-              </DialogDescription>
-            )}
-          </DialogHeader>
-          <div className="py-4 min-h-[80px] flex items-center justify-center">
-            {isFetchingExplanation ? (
-              <div className="flex flex-col items-center justify-center space-y-2">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <span className="text-muted-foreground">BlockSmithAI is conjuring wisdom...</span>
-              </div>
-            ) : explanationText ? (
-              <p className="text-base leading-relaxed text-foreground">{explanationText}</p>
-            ) : (
-              <div className="flex flex-col items-center justify-center space-y-2">
-                <Info className="h-8 w-8 text-destructive" />
-                <p className="text-base text-muted-foreground text-center">Oops! No explanation available. Perhaps the AI is on a coffee break?</p>
-              </div>
-            )}
-          </div>
-          <DialogFooter className="sm:justify-start">
-            <DialogClose asChild>
-              <Button type="button" variant="outline" className="glow-border-accent">
-                Got it, thanks!
-              </Button>
-            </DialogClose>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
+    </FormProvider>
     </div>
   );
-}
+});
+
+ContractConfigForm.displayName = "ContractConfigForm";
+export { ContractConfigForm };
