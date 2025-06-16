@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
@@ -7,13 +8,13 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CardTitle, CardDescription } from '@/components/ui/card';
-import { AlertTriangle, ArrowDownCircle, Loader2, Wand2, Brain, Fuel, Beaker, FileText } from 'lucide-react';
+import { AlertTriangle, ArrowDownCircle, Loader2, Wand2, Brain, Fuel, Beaker, FileText as FileTextIconLucide } from 'lucide-react'; // Renamed FileText import
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from '@/lib/utils';
 import { ScrambledText } from '@/components/effects/ScrambledText';
-import ParameterInputDisplay from './ParameterInputDisplay'; // Import the new component
-import AnimatedSubtitle from './AnimatedSubtitle'; // Import the new component
+import ParameterInputDisplay from './ParameterInputDisplay';
+import AnimatedSubtitle from './AnimatedSubtitle';
 
 
 export type FormData = Record<string, any>;
@@ -34,6 +35,10 @@ const getParameterGroups = (template: ContractTemplate, isAdvancedMode: boolean)
         title: 'Core Details',
         parameters: visibleParams.filter(p => ['tokenName', 'tokenSymbol', 'initialSupply', 'decimals'].includes(p.name)),
         defaultActive: true,
+      },
+      {
+        title: 'Project & Social Links',
+        parameters: visibleParams.filter(p => ['projectDescription', 'logoUrl', 'websiteUrl', 'twitterHandle', 'telegramLink'].includes(p.name)),
       },
       {
         title: 'Features',
@@ -453,7 +458,7 @@ const ContractConfigForm = React.memo(({
                   {isGeneratingDocumentation ? (
                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                   ) : (
-                     <FileText className="mr-2 h-5 w-5" />
+                     <FileTextIconLucide className="mr-2 h-5 w-5" />
                   )}
                   Scribe Docs
                 </Button>

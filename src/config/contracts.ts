@@ -1,6 +1,6 @@
 
 import type { LucideIcon } from 'lucide-react';
-import { Coins, GitFork, ArrowRightLeft, Landmark, FileJson, Puzzle, ShieldCheck, Edit, CircleDollarSign, Gem, Scale, Lock, Unlock, Settings2 } from 'lucide-react';
+import { Coins, GitFork, ArrowRightLeft, Landmark, FileJson, Puzzle, ShieldCheck, Edit, CircleDollarSign, Gem, Scale, Lock, Unlock, Settings2, Info as InfoIcon, Link as LinkIcon, Image as ImageIcon, FileText as FileTextIcon } from 'lucide-react';
 
 export type ParameterType = 'string' | 'number' | 'boolean' | 'address' | 'select' | 'textarea';
 
@@ -16,6 +16,7 @@ export interface ContractParameter {
   advancedOnly?: boolean; // True if this parameter should only appear in "Advanced" mode
   dependsOn?: string; // Name of another parameter that this one depends on
   dependsOnValue?: any; // Value the dependent parameter should have for this one to be active
+  icon?: LucideIcon; // Optional icon for the parameter
 }
 
 export interface ContractTemplate {
@@ -47,26 +48,72 @@ export const CONTRACT_TEMPLATES: ContractTemplate[] = [
   {
     id: 'erc20',
     name: 'ERC20 Token',
-    description: 'A standard fungible token contract (e.g., for cryptocurrencies) with optional advanced features.',
+    description: 'A standard fungible token contract (e.g., for cryptocurrencies) with optional advanced features and metadata.',
     icon: Coins,
     parameters: [
-      { name: 'tokenName', label: 'Token Name', type: 'string', placeholder: 'My Awesome Token', description: 'The full name of your token.' },
-      { name: 'tokenSymbol', label: 'Token Symbol', type: 'string', placeholder: 'MAT', description: 'The ticker symbol for your token (e.g., ETH).' },
-      { 
-        name: 'initialSupply', 
-        label: 'Initial Supply', 
-        type: 'number', 
-        placeholder: '1000000', 
-        description: 'The total number of tokens to mint at deployment. If mintable is enabled and this is 0, no tokens are minted initially.' 
+      // Core Details Group
+      { name: 'tokenName', label: 'Token Name', type: 'string', placeholder: 'My Awesome Token', description: 'The full name of your token.', icon: InfoIcon },
+      { name: 'tokenSymbol', label: 'Token Symbol', type: 'string', placeholder: 'MAT', description: 'The ticker symbol for your token (e.g., ETH).', icon: Gem },
+      {
+        name: 'initialSupply',
+        label: 'Initial Supply',
+        type: 'number',
+        placeholder: '1000000',
+        description: 'The total number of tokens to mint at deployment. If mintable is enabled and this is 0, no tokens are minted initially.',
+        icon: CircleDollarSign
       },
-      { 
-        name: 'decimals', 
-        label: 'Decimals', 
-        type: 'number', 
-        defaultValue: 18, 
-        description: 'The number of decimal places your token will have (typically 18).', 
-        advancedOnly: true 
+      {
+        name: 'decimals',
+        label: 'Decimals',
+        type: 'number',
+        defaultValue: 18,
+        description: 'The number of decimal places your token will have (typically 18).',
+        advancedOnly: true,
+        icon: Scale
       },
+      // Project & Social Links Group
+      {
+        name: 'projectDescription',
+        label: 'Project Description',
+        type: 'textarea',
+        rows: 4,
+        placeholder: 'A brief description of your token project...',
+        description: 'A short summary of the project for on-chain metadata.',
+        icon: FileTextIcon,
+      },
+      {
+        name: 'logoUrl',
+        label: 'Logo URL',
+        type: 'string',
+        placeholder: 'https://example.com/logo.png',
+        description: 'A direct HTTPS URL to the project/token logo image.',
+        icon: ImageIcon,
+      },
+      {
+        name: 'websiteUrl',
+        label: 'Website URL',
+        type: 'string',
+        placeholder: 'https://example.com',
+        description: 'The official website for the project.',
+        icon: LinkIcon,
+      },
+      {
+        name: 'twitterHandle',
+        label: 'X (Twitter) Handle',
+        type: 'string',
+        placeholder: '@MyTokenProject',
+        description: 'The official X (formerly Twitter) handle, including the @.',
+        icon: LinkIcon, // Using generic link icon for brevity
+      },
+      {
+        name: 'telegramLink',
+        label: 'Telegram Link',
+        type: 'string',
+        placeholder: 'https://t.me/MyTokenProject',
+        description: 'The official Telegram group or channel link.',
+        icon: LinkIcon, // Using generic link icon
+      },
+      // Features Group
       {
         name: 'accessControl',
         label: 'Access Control',
@@ -79,31 +126,68 @@ export const CONTRACT_TEMPLATES: ContractTemplate[] = [
         defaultValue: 'Ownable',
         description: 'Mechanism for managing administrative functions like minting, pausing, etc.',
         advancedOnly: false,
+        icon: ShieldCheck
       },
-      { 
-        name: 'mintable', 
-        label: 'Enable Minting', 
-        type: 'boolean', 
-        defaultValue: false, 
+      {
+        name: 'mintable',
+        label: 'Enable Minting',
+        type: 'boolean',
+        defaultValue: false,
         description: 'Allows new tokens to be created after deployment. Requires Access Control.',
         advancedOnly: false,
+        icon: Edit
       },
-      { 
-        name: 'burnable', 
-        label: 'Enable Burning', 
-        type: 'boolean', 
-        defaultValue: false, 
+      {
+        name: 'burnable',
+        label: 'Enable Burning',
+        type: 'boolean',
+        defaultValue: false,
         description: 'Allows tokens to be destroyed. Users can burn their own. Admins might burn from others if Roles are set up.',
-        advancedOnly: true 
+        advancedOnly: true,
+        icon: Edit // Using Edit as a generic "modification" icon
       },
-      { 
-        name: 'pausable', 
-        label: 'Enable Pausable', 
-        type: 'boolean', 
-        defaultValue: false, 
+      {
+        name: 'pausable',
+        label: 'Enable Pausable',
+        type: 'boolean',
+        defaultValue: false,
         description: 'Allows token transfers and other actions to be paused by an admin. Requires Access Control.',
-        advancedOnly: true 
+        advancedOnly: true,
+        icon: Lock
       },
+      // Economics Group
+      {
+        name: 'transactionFeePercent',
+        label: 'Transaction Fee (%)',
+        type: 'number',
+        defaultValue: 0,
+        placeholder: '0.5',
+        description: 'A percentage fee taken on each transfer (0-100). 0 means no fee. Max 2 decimal places (e.g. 0.25 for 0.25%).',
+        advancedOnly: true,
+        icon: CircleDollarSign
+      },
+      {
+        name: 'feeRecipientAddress',
+        label: 'Fee Recipient Address',
+        type: 'address',
+        placeholder: '0x...',
+        description: 'Address to send transaction fees to. Required if Transaction Fee > 0.',
+        advancedOnly: true,
+        dependsOn: 'transactionFeePercent',
+        dependsOnValue: (val: number) => val > 0,
+        icon: Landmark
+      },
+      {
+        name: 'maxTransactionAmount',
+        label: 'Max Transaction Amount',
+        type: 'number',
+        defaultValue: 0,
+        placeholder: '10000',
+        description: 'Maximum amount of tokens that can be transferred in a single transaction. 0 means no limit.',
+        advancedOnly: true,
+        icon: Scale
+      },
+      // Control & Upgrades Group
       {
         name: 'upgradable',
         label: 'Upgradability',
@@ -115,38 +199,18 @@ export const CONTRACT_TEMPLATES: ContractTemplate[] = [
         defaultValue: 'None',
         description: 'Makes the contract upgradable using a proxy pattern. UUPS is recommended.',
         advancedOnly: true,
-      },
-      {
-        name: 'transactionFeePercent',
-        label: 'Transaction Fee (%)',
-        type: 'number',
-        defaultValue: 0,
-        placeholder: '0.5',
-        description: 'A percentage fee taken on each transfer (0-100). 0 means no fee. Max 2 decimal places (e.g. 0.25 for 0.25%).',
-        advancedOnly: true,
-      },
-      {
-        name: 'feeRecipientAddress',
-        label: 'Fee Recipient Address',
-        type: 'address',
-        placeholder: '0x...',
-        description: 'Address to send transaction fees to. Required if Transaction Fee > 0.',
-        advancedOnly: true,
-        dependsOn: 'transactionFeePercent', 
-        dependsOnValue: (val: number) => val > 0 
-      },
-      {
-        name: 'maxTransactionAmount',
-        label: 'Max Transaction Amount',
-        type: 'number',
-        defaultValue: 0,
-        placeholder: '10000',
-        description: 'Maximum amount of tokens that can be transferred in a single transaction. 0 means no limit.',
-        advancedOnly: true,
+        icon: Settings2
       },
     ],
     aiPromptEnhancement: `Generate a feature-rich ERC20 token. Use OpenZeppelin contracts extensively. Default to Solidity pragma ^0.8.20;
 - **Standard Compliance**: Strictly adhere to ERC20 standards. Implement ERC20Metadata.
+- **Metadata Fields**:
+  - If \`projectDescription\` is provided, add \`string public projectDescription;\` and \`function getProjectDescription() public view returns (string memory) { return projectDescription; }\`.
+  - If \`logoUrl\` is provided, add \`string public logoURL;\` and \`function getLogoURL() public view returns (string memory) { return logoURL; }\`.
+  - If \`websiteUrl\` is provided, add \`string public websiteURL;\` and \`function getWebsiteURL() public view returns (string memory) { return websiteURL; }\`.
+  - If \`twitterHandle\` is provided, add \`string public twitterHandle;\` and \`function getTwitterHandle() public view returns (string memory) { return twitterHandle; }\`.
+  - If \`telegramLink\` is provided, add \`string public telegramLink;\` and \`function getTelegramLink() public view returns (string memory) { return telegramLink; }\`.
+  - These metadata fields should be set in the constructor or initializer. Include NatSpec comments for them.
 - **Access Control**:
   - If 'accessControl' is 'Ownable', use OpenZeppelin's Ownable. The deployer becomes the owner.
   - If 'accessControl' is 'Roles', use OpenZeppelin's AccessControl. Define MINTER_ROLE, PAUSER_ROLE, UPGRADER_ROLE (if upgradable and UUPS), and ADMIN_ROLE. Grant all roles to the deployer initially. The ADMIN_ROLE should be able to grant/revoke roles.
@@ -163,7 +227,7 @@ export const CONTRACT_TEMPLATES: ContractTemplate[] = [
   - If 'Ownable', restrict with \`onlyOwner\`.
   - If 'Roles', restrict with \`onlyRole(PAUSER_ROLE)\`.
 - **Upgradability**:
-  - If \`upgradable\` is 'UUPS', use OpenZeppelin Contracts UUPS (\`UUPSUpgradeable\`). The contract must inherit \`Initializable\`. Replace constructor with an \`initializer\` function that takes necessary parameters (name, symbol, initial supply owner etc.). The \`_authorizeUpgrade\` function must be implemented and restricted:
+  - If \`upgradable\` is 'UUPS', use OpenZeppelin Contracts UUPS (\`UUPSUpgradeable\`). The contract must inherit \`Initializable\`. Replace constructor with an \`initializer\` function that takes necessary parameters (name, symbol, initial supply owner, and all metadata fields like projectDescription, logoUrl, etc.). The \`_authorizeUpgrade\` function must be implemented and restricted:
     - If 'Ownable', restrict with \`onlyOwner\`.
     - If 'Roles', restrict with \`onlyRole(UPGRADER_ROLE)\`.
 - **Transaction Fee**: If \`transactionFeePercent\` > 0:
@@ -173,7 +237,7 @@ export const CONTRACT_TEMPLATES: ContractTemplate[] = [
   - Optionally exclude fees for minting/burning operations, or for transfers involving specific addresses (e.g., owner, feeRecipientAddress itself). State such exclusions in comments.
 - **Max Transaction Amount**: If \`maxTransactionAmount\` > 0, add a check in transfers (\`_update\` or \`_transfer\`) that \`amount\` <= \`maxTransactionAmount\`. This limit might not apply to deployer/owner, minting/burning.
 - **Clarity & Security**: Ensure NatSpec comments for all public interfaces. Use Checks-Effects-Interactions.
-- **Constructor/Initializer**: If UUPS, the initializer: \`function initialize(string memory _name, string memory _symbol, uint256 _supplyToMint, address _initialOwner) public initializer { ... }\`. If not upgradable, use a constructor. The \`_initialOwner\` receives the initial supply and Ownable/Admin roles.
+- **Constructor/Initializer**: If UUPS, the initializer: \`function initialize(string memory _name, string memory _symbol, uint256 _supplyToMint, address _initialOwner, string memory _projectDesc, string memory _logo, string memory _website, string memory _twitter, string memory _telegram) public initializer { ... }\`. If not upgradable, use a constructor. The \`_initialOwner\` receives the initial supply and Ownable/Admin roles. Initialize all metadata fields in the constructor/initializer.
 `,
   },
   {
@@ -184,10 +248,10 @@ export const CONTRACT_TEMPLATES: ContractTemplate[] = [
     parameters: [
       { name: 'poolName', label: 'Pool Name (for LP Token)', type: 'string', placeholder: 'TokenA/TokenB LP', description: 'A descriptive name for the liquidity pool token.' },
       { name: 'poolSymbol', label: 'Pool Symbol (for LP Token)', type: 'string', placeholder: 'LP-AB', description: 'A symbol for the liquidity pool token.' },
-      { 
-        name: 'tokenA_Address', 
-        label: 'Token A Address', 
-        type: 'select', 
+      {
+        name: 'tokenA_Address',
+        label: 'Token A Address',
+        type: 'select',
         defaultValue: COMMON_EVM_TOKEN_ADDRESSES_ETH_MAINNET.WETH,
         options: [
           { label: "WETH (Ethereum Mainnet)", value: COMMON_EVM_TOKEN_ADDRESSES_ETH_MAINNET.WETH },
@@ -195,12 +259,12 @@ export const CONTRACT_TEMPLATES: ContractTemplate[] = [
           { label: "USDT (Ethereum Mainnet)", value: COMMON_EVM_TOKEN_ADDRESSES_ETH_MAINNET.USDT },
           { label: "DAI (Ethereum Mainnet)", value: COMMON_EVM_TOKEN_ADDRESSES_ETH_MAINNET.DAI },
         ],
-        description: 'The contract address of the first token. Addresses are for Ethereum Mainnet; adjust if deploying elsewhere.' 
+        description: 'The contract address of the first token. Addresses are for Ethereum Mainnet; adjust if deploying elsewhere.'
       },
-      { 
-        name: 'tokenB_Address', 
-        label: 'Token B Address', 
-        type: 'select', 
+      {
+        name: 'tokenB_Address',
+        label: 'Token B Address',
+        type: 'select',
         defaultValue: COMMON_EVM_TOKEN_ADDRESSES_ETH_MAINNET.USDC,
         options: [
           { label: "USDC (Ethereum Mainnet)", value: COMMON_EVM_TOKEN_ADDRESSES_ETH_MAINNET.USDC },
@@ -208,14 +272,14 @@ export const CONTRACT_TEMPLATES: ContractTemplate[] = [
           { label: "USDT (Ethereum Mainnet)", value: COMMON_EVM_TOKEN_ADDRESSES_ETH_MAINNET.USDT },
           { label: "DAI (Ethereum Mainnet)", value: COMMON_EVM_TOKEN_ADDRESSES_ETH_MAINNET.DAI },
         ],
-        description: 'The contract address of the second token. Addresses are for Ethereum Mainnet; adjust if deploying elsewhere.' 
+        description: 'The contract address of the second token. Addresses are for Ethereum Mainnet; adjust if deploying elsewhere.'
       },
-      { 
-        name: 'feeBps', 
-        label: 'Swap Fee (Basis Points)', 
-        type: 'number', 
-        defaultValue: 30, 
-        placeholder: '30', 
+      {
+        name: 'feeBps',
+        label: 'Swap Fee (Basis Points)',
+        type: 'number',
+        defaultValue: 30,
+        placeholder: '30',
         description: 'Swap fee in basis points (e.g., 30 for 0.30%). Max 10000 (100%).',
         advancedOnly: true
       },
@@ -273,10 +337,10 @@ export const CONTRACT_TEMPLATES: ContractTemplate[] = [
     parameters: [
       { name: 'routerName', label: 'Router Name', type: 'string', placeholder: 'MySwap Router', description: 'The name for your swap router contract (not used in bytecode).' },
       { name: 'factoryAddress', label: 'Pair Factory Address', type: 'address', placeholder: '0x...', description: 'The address of the contract factory that creates liquidity pair contracts (e.g., Uniswap V2 Factory).' },
-      { 
-        name: 'wethAddress', 
-        label: 'WETH Address (Network Specific)', 
-        type: 'select', 
+      {
+        name: 'wethAddress',
+        label: 'WETH Address (Network Specific)',
+        type: 'select',
         defaultValue: WETH_ADDRESSES_BY_NETWORK.ETH_MAINNET,
         options: [
             { label: "WETH (Ethereum Mainnet)", value: WETH_ADDRESSES_BY_NETWORK.ETH_MAINNET },
@@ -285,7 +349,7 @@ export const CONTRACT_TEMPLATES: ContractTemplate[] = [
             { label: "WETH (Arbitrum One)", value: WETH_ADDRESSES_BY_NETWORK.ARBITRUM },
             { label: "WETH (Optimism)", value: WETH_ADDRESSES_BY_NETWORK.OPTIMISM },
         ],
-        description: 'Select the Wrapped Native Token address for your target network (e.g., WETH for Ethereum, WBNB for BNB Chain). Ensure this is correct for your deployment network.' 
+        description: 'Select the Wrapped Native Token address for your target network (e.g., WETH for Ethereum, WBNB for BNB Chain). Ensure this is correct for your deployment network.'
       },
       {
         name: 'accessControl',
@@ -355,35 +419,35 @@ export const CONTRACT_TEMPLATES: ContractTemplate[] = [
     parameters: [
       { name: 'daoName', label: 'DAO Name', type: 'string', placeholder: 'My Governance DAO', description: 'The name of your DAO (used for the Governor contract).' },
       { name: 'proposalTokenAddress', label: 'Governance Token (ERC20Votes) Address', type: 'address', placeholder: '0x...', description: 'The ERC20Votes-compatible token used for voting power.' },
-      { 
-        name: 'votingDelay', 
-        label: 'Voting Delay (Blocks)', 
-        type: 'number', 
-        defaultValue: 1, 
+      {
+        name: 'votingDelay',
+        label: 'Voting Delay (Blocks)',
+        type: 'number',
+        defaultValue: 1,
         description: 'Delay in blocks after a proposal is created before voting starts (e.g., 1 block).',
         advancedOnly: true
       },
-      { 
-        name: 'votingPeriod', 
-        label: 'Voting Period (Blocks)', 
-        type: 'number', 
+      {
+        name: 'votingPeriod',
+        label: 'Voting Period (Blocks)',
+        type: 'number',
         defaultValue: '17280', // ~3 days if 1 block = 15s
-        description: 'Duration in blocks for which a proposal remains open for voting (e.g., 17280 blocks for ~3 days).', 
+        description: 'Duration in blocks for which a proposal remains open for voting (e.g., 17280 blocks for ~3 days).',
       },
-      { 
-        name: 'proposalThreshold', 
-        label: 'Proposal Threshold (Tokens)', 
-        type: 'number', 
-        defaultValue: 0, 
+      {
+        name: 'proposalThreshold',
+        label: 'Proposal Threshold (Tokens)',
+        type: 'number',
+        defaultValue: 0,
         description: 'Minimum number of governance tokens required for an account to create a proposal. 0 means any token holder can propose.',
-        advancedOnly: true 
+        advancedOnly: true
       },
-      { 
-        name: 'quorumNumerator', 
-        label: 'Quorum Numerator (%)', 
-        type: 'number', 
-        defaultValue: 4, 
-        placeholder: '4', 
+      {
+        name: 'quorumNumerator',
+        label: 'Quorum Numerator (%)',
+        type: 'number',
+        defaultValue: 4,
+        placeholder: '4',
         description: 'Percentage of total voting power that must vote for a proposal to be valid (e.g., 4 for 4%). This value is used with GovernorVotesQuorumFraction.',
         advancedOnly: true
       },
