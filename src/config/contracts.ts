@@ -242,45 +242,35 @@ export const CONTRACT_TEMPLATES: ContractTemplate[] = [
   },
   {
     id: 'liquidityPool',
-    name: 'Liquidity Pool',
-    description: 'A contract for providing liquidity between two ERC20 tokens (Uniswap V2 style). Select common tokens or provide custom addresses in the generated code.',
+    name: 'Liquidity Pool Pair',
+    description: 'A Uniswap V2-style pair contract for providing liquidity between two specific ERC20 tokens.',
     icon: GitFork,
     parameters: [
-      { name: 'poolName', label: 'Pool Name (for LP Token)', type: 'string', placeholder: 'TokenA/TokenB LP', description: 'A descriptive name for the liquidity pool token.' },
+      { name: 'poolName', label: 'Pool Name (for LP Token)', type: 'string', placeholder: 'TokenA/TokenB LP', description: 'A descriptive name for the liquidity pool token that will represent shares in this pair.' },
       { name: 'poolSymbol', label: 'Pool Symbol (for LP Token)', type: 'string', placeholder: 'LP-AB', description: 'A symbol for the liquidity pool token.' },
       {
         name: 'tokenA_Address',
         label: 'Token A Address',
-        type: 'select',
-        defaultValue: COMMON_EVM_TOKEN_ADDRESSES_ETH_MAINNET.WETH,
-        options: [
-          { label: "WETH (Ethereum Mainnet)", value: COMMON_EVM_TOKEN_ADDRESSES_ETH_MAINNET.WETH },
-          { label: "USDC (Ethereum Mainnet)", value: COMMON_EVM_TOKEN_ADDRESSES_ETH_MAINNET.USDC },
-          { label: "USDT (Ethereum Mainnet)", value: COMMON_EVM_TOKEN_ADDRESSES_ETH_MAINNET.USDT },
-          { label: "DAI (Ethereum Mainnet)", value: COMMON_EVM_TOKEN_ADDRESSES_ETH_MAINNET.DAI },
-        ],
-        description: 'The contract address of the first token. Addresses are for Ethereum Mainnet; adjust if deploying elsewhere.'
+        type: 'address',
+        defaultValue: '0x...',
+        placeholder: 'Enter contract address for Token A',
+        description: 'The contract address of the first ERC20 token for the pair.'
       },
       {
         name: 'tokenB_Address',
         label: 'Token B Address',
-        type: 'select',
-        defaultValue: COMMON_EVM_TOKEN_ADDRESSES_ETH_MAINNET.USDC,
-        options: [
-          { label: "USDC (Ethereum Mainnet)", value: COMMON_EVM_TOKEN_ADDRESSES_ETH_MAINNET.USDC },
-          { label: "WETH (Ethereum Mainnet)", value: COMMON_EVM_TOKEN_ADDRESSES_ETH_MAINNET.WETH },
-          { label: "USDT (Ethereum Mainnet)", value: COMMON_EVM_TOKEN_ADDRESSES_ETH_MAINNET.USDT },
-          { label: "DAI (Ethereum Mainnet)", value: COMMON_EVM_TOKEN_ADDRESSES_ETH_MAINNET.DAI },
-        ],
-        description: 'The contract address of the second token. Addresses are for Ethereum Mainnet; adjust if deploying elsewhere.'
+        type: 'address',
+        defaultValue: '0x...',
+        placeholder: 'Enter contract address for Token B',
+        description: 'The contract address of the second ERC20 token for the pair.'
       },
       {
         name: 'feeBps',
         label: 'Swap Fee (Basis Points)',
         type: 'number',
-        defaultValue: 30,
+        defaultValue: 30, // 0.3%
         placeholder: '30',
-        description: 'Swap fee in basis points (e.g., 30 for 0.30%). Max 10000 (100%).',
+        description: 'Swap fee in basis points (e.g., 30 for 0.30%, 25 for 0.25%). Typically between 1 (0.01%) and 10000 (100%). This fee accrues to liquidity providers.',
         advancedOnly: true
       },
       {
@@ -292,7 +282,7 @@ export const CONTRACT_TEMPLATES: ContractTemplate[] = [
           { value: 'Ownable', label: 'Ownable (for fee changes, pausing etc.)' },
         ],
         defaultValue: 'Ownable',
-        description: 'Controls admin functions like changing fees or pausing. Not for add/remove liquidity by users.',
+        description: 'Controls admin functions like changing fees or pausing. Does not affect user liquidity provision.',
         advancedOnly: true,
       },
       {
@@ -304,28 +294,29 @@ export const CONTRACT_TEMPLATES: ContractTemplate[] = [
           { value: 'UUPS', label: 'UUPS Proxy (OpenZeppelin)' },
         ],
         defaultValue: 'None',
-        description: 'Makes the contract upgradable. UUPS is recommended.',
+        description: 'Makes the contract upgradable. UUPS is recommended for pairs if upgradability is desired.',
         advancedOnly: true,
       },
     ],
-    aiPromptEnhancement: `Generate a Uniswap V2-style liquidity pool contract. The LP token itself should be an ERC20. Default to Solidity pragma ^0.8.20;
+    aiPromptEnhancement: `Generate a Uniswap V2-style Pair contract for two specific ERC20 tokens. Default to Solidity pragma ^0.8.20;
+- **Pair Definition**: The contract will be for a single pair defined by \`tokenA_Address\` and \`tokenB_Address\`. These should be initialized in the constructor (or an \`initialize\` function if upgradable) and determine \`token0\` and \`token1\` (sorted by address).
+- **LP Token**: The contract itself IS an ERC20 token representing liquidity provider shares. Use \`poolName\` and \`poolSymbol\` for its metadata. It should inherit from OpenZeppelin's ERC20 (or ERC20Upgradeable if UUPS).
 - **Core Logic**: Implement a constant product AMM (k = x*y).
-- **LP Token**: The contract should mint/burn its own LP tokens (ERC20 standard) representing shares in the pool. Use \`poolName\` and \`poolSymbol\` for the LP token metadata.
 - **Interfaces**: Use \`IERC20\` for interacting with \`tokenA_Address\` and \`tokenB_Address\`.
-- **Functions**:
-    - \`addLiquidity(uint amountADesired, uint amountBDesired, uint amountAMin, uint amountBMin, address to, uint deadline)\`: Adds liquidity, mints LP tokens.
-    - \`removeLiquidity(uint liquidity, uint amountAMin, uint amountBMin, address to, uint deadline)\`: Removes liquidity, burns LP tokens.
-    - \`swap(uint amount0Out, uint amount1Out, address to, bytes calldata data)\`: Executes swaps. It expects \`amount0Out\` or \`amount1Out\` to be non-zero. The 'data' field can be used for flash loan callbacks if implementing that (optional advanced feature).
-    - \`skim(address to)\`: Allows recovery of excess tokens sent to the pool.
-    - \`sync()\`: Updates reserves if they are out of sync with balances.
+- **Key Functions**:
+    - \`constructor(address _tokenA, address _tokenB)\` (or \`initialize(address _tokenA, address _tokenB)\` if UUPS): Sets up \`token0\` and \`token1\`.
+    - \`mint(address to) external returns (uint liquidity)\`: Mints LP tokens to \`to\` after liquidity providers transfer underlying tokens to the pair. Calculates liquidity based on current reserves and amounts transferred. Must be protected by a reentrancy guard and lock.
+    - \`burn(address to) external returns (uint amount0, uint amount1)\`: Burns LP tokens (transferred to the pair beforehand) from \`msg.sender\` (or an approved source, but typically LP tokens are sent to pair first) and sends back the underlying \`token0\` and \`token1\` to the \`to\` address. Must be protected by a reentrancy guard and lock.
+    - \`swap(uint amount0Out, uint amount1Out, address to, bytes calldata data) external\`: Executes swaps. Requires tokens to be sent to the pair first (unless \`data\` is used for a flash-loan-like callback). Must be protected by a reentrancy guard and lock. Implements the swap fee (\`feeBps\`) by leaving a portion of input tokens in reserves.
+    - \`skim(address to) external\`: Recovers any excess tokens sent to the pair.
+    - \`sync() external\`: Updates reserves to match current balances if they diverge.
+- **View Functions**: \`getReserves() returns (uint112 _reserve0, uint112 _reserve1, uint32 _blockTimestampLast)\`, \`token0()\`, \`token1()\`, \`kLast()\`, \`price0CumulativeLast()\`, \`price1CumulativeLast()\`.
 - **Fees**:
-    - A swap fee specified by \`feeBps\` (basis points, e.g., 30 for 0.3%) should be taken from the input amount of a swap.
-    - This fee accrues to liquidity providers by remaining in the pool, thus increasing the value of LP tokens over time.
-    - If 'Ownable' access control is chosen, provide a function \`setFee(uint16 newFeeBps)\` restricted to the owner.
-- **Events**: Emit standard \`Mint\`, \`Burn\`, \`Swap\`, \`Sync\` events.
-- **Upgradability**: If \`upgradable\` is 'UUPS', use OpenZeppelin's \`UUPSUpgradeable\` and \`Initializable\`. The initializer should take token addresses, LP token name/symbol. The \`_authorizeUpgrade\` function must be restricted (e.g., by \`onlyOwner\` if Ownable).
+    - The swap fee is specified by \`feeBps\` (e.g., 30 for 0.3%). This fee is collected by liquidity providers by remaining in the pool, effectively increasing the value of their LP shares over time. The fee is applied during swaps.
+    - If 'Ownable' access control is chosen, provide a function \`setFee(uint16 newFeeBps)\` restricted to the owner to update the swap fee.
+- **Upgradability**: If \`upgradable\` is 'UUPS', use OpenZeppelin's \`UUPSUpgradeable\` and \`Initializable\`. The \`_authorizeUpgrade\` function must be implemented and restricted (e.g., by \`onlyOwner\` if Ownable).
 - **Access Control**: If 'Ownable', use OpenZeppelin's Ownable. The deployer becomes owner. This owner can call admin functions like \`setFee\`.
-- **Security**: Use SafeMath/Solidity >0.8.0 checks for arithmetic. Implement reentrancy guard on swap and liquidity functions.
+- **Security**: Use SafeMath/Solidity >0.8.0 checks. Implement reentrancy guard (lock modifier) on \`mint\`, \`burn\`, \`swap\`. Follow Checks-Effects-Interactions.
 - **Clarity**: NatSpec comments for all public functions and state variables.
 `,
   },
