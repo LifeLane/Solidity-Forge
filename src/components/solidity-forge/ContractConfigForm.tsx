@@ -93,7 +93,7 @@ const getParameterGroups = (template: ContractTemplate, isAdvancedMode: boolean)
         parameters: visibleParams.filter(p => ['upgradable'].includes(p.name)),
       }
     ];
-  } else {
+  } else { // For custom and other templates
      groups = [{ title: 'Parameters', parameters: visibleParams, defaultActive: true }];
   }
   return groups.filter(group => group.parameters.length > 0);
@@ -137,7 +137,7 @@ const ContractConfigForm = React.memo(({
     }, [selectedTemplateProp, templates])
   });
 
-  const { handleSubmit, reset } = methods;
+  const { handleSubmit, reset, getValues } = methods;
 
 
   useEffect(() => {
@@ -151,11 +151,9 @@ const ContractConfigForm = React.memo(({
     reset(defaultValues);
 
     const groups = getParameterGroups(currentFormTemplate, isAdvancedMode);
-    const defaultActiveGroup = groups.find(g => g.defaultActive) || groups[0];
+    const defaultActiveGroup = groups.find(g => g.defaultActive) || (groups.length > 0 ? groups[0] : undefined);
     if (defaultActiveGroup) {
       setActiveTabValue(defaultActiveGroup.title.toLowerCase().replace(/\s+/g, '-'));
-    } else if (groups.length > 0) {
-      setActiveTabValue(groups[0].title.toLowerCase().replace(/\s+/g, '-'));
     } else {
       setActiveTabValue(undefined);
     }
@@ -170,14 +168,16 @@ const ContractConfigForm = React.memo(({
   },[templates]);
 
   const onSubmit = useCallback(async (data: FormData) => {
-    await onGenerateCode(currentFormTemplate, data);
-  }, [currentFormTemplate, onGenerateCode]);
+    // Ensure customDescription is included if template is custom
+    const formDataToSubmit = currentFormTemplate.id === 'custom' ? { ...data, customDescription: getValues("customDescription") } : data;
+    await onGenerateCode(currentFormTemplate, formDataToSubmit);
+  }, [currentFormTemplate, onGenerateCode, getValues]);
 
   const parameterGroups = useMemo(() => getParameterGroups(currentFormTemplate, isAdvancedMode), [currentFormTemplate, isAdvancedMode]);
 
   const parameterConfigurationSection = (
     currentFormTemplate.id === 'custom' || parameterGroups.length === 0 ? (
-      <div className="space-y-6 pt-6 border-t border-border/20 mt-6">
+      <div className="space-y-6 pt-2 border-t border-border/20"> {/* Adjusted pt-6 to pt-2 */}
         {currentFormTemplate.parameters
           .filter(param => isAdvancedMode || !param.advancedOnly)
           .map(param => (
@@ -190,7 +190,7 @@ const ContractConfigForm = React.memo(({
           ))}
       </div>
     ) : (
-      <div className="pt-6 border-t border-border/20 mt-6 flex-grow min-h-0">
+      <div className="pt-2 border-t border-border/20 flex-grow min-h-0"> {/* Adjusted: Removed mt-6, changed pt-6 to pt-2 */}
         <Tabs
           orientation="vertical"
           value={activeTabValue}
@@ -207,7 +207,7 @@ const ContractConfigForm = React.memo(({
                   disabled={isGeneratingCode && activeTabValue !== tabValue}
                   className={cn(
                     "tab-running-lines-border param-tab-trigger",
-                    "data-[state=active]:text-primary-foreground",
+                    "data-[state=active]:text-primary-foreground", // Handled by tab-running-lines-border
                     "data-[state=inactive]:text-muted-foreground hover:text-foreground"
                   )}
                 >
@@ -218,8 +218,7 @@ const ContractConfigForm = React.memo(({
               );
             })}
           </TabsList>
-          {/* Ensure this div takes remaining height and enables scrolling for its content */}
-          <div className="flex-grow min-w-0 p-1 rounded-md border border-border/20 bg-card/30 overflow-y-auto max-h-[calc(100vh-30rem)] md:max-h-[calc(100vh-28rem)] lg:max-h-full">
+          <div className="flex-grow min-w-0 p-1 rounded-md border border-border/20 bg-card/30 overflow-y-auto max-h-[calc(100vh-35rem)] md:max-h-[calc(100vh-30rem)] lg:max-h-[calc(100vh-25rem)]"> {/* Adjusted max-h for scrollability */}
             {parameterGroups.map(group => {
               const tabValue = group.title.toLowerCase().replace(/\s+/g, '-');
               return (
@@ -243,9 +242,9 @@ const ContractConfigForm = React.memo(({
 
 
   return (
-    <div className="space-y-8 p-4 md:p-6 lg:p-8 h-full flex flex-col">
+    <div className="space-y-6 p-4 md:p-6 lg:p-8 h-full flex flex-col"> {/* Reduced space-y-8 to space-y-6 */}
       <div className="text-center">
-        <CardTitle className="text-3xl font-headline mb-3">
+        <CardTitle className="text-3xl font-headline mb-2"> {/* Reduced mb-3 to mb-2 */}
             <ScrambledText
                 text="Blueprint Your Brilliance"
                 className="text-3xl font-headline animate-text-multicolor-glow"
@@ -257,12 +256,12 @@ const ContractConfigForm = React.memo(({
          <AnimatedSubtitle text={subtitleText} />
       </div>
 
-      <div className="space-y-6 mb-6">
-        <div className="space-y-3">
+      <div className="space-y-4"> {/* Reduced space-y-6 to space-y-4 */}
+        <div className="space-y-2"> {/* Reduced space-y-3 to space-y-2 */}
           <Label
             htmlFor="contractType"
             className={cn(
-              "text-center block font-bold text-xl"
+              "text-center block font-bold text-lg" // Reduced text-xl to text-lg
             )}
           >
             <span className="animate-text-multicolor-glow">Select Your Destiny</span>
@@ -270,12 +269,12 @@ const ContractConfigForm = React.memo(({
             <span className="animate-text-multicolor-glow">(Contract Type)</span>
           </Label>
           <Select onValueChange={handleTemplateSelectChange} defaultValue={currentFormTemplate.id} disabled={isGeneratingCode}>
-            <SelectTrigger id="contractType" className="glow-border-purple bg-background/70 focus:bg-background text-base py-6">
+            <SelectTrigger id="contractType" className="glow-border-purple bg-background/70 focus:bg-background text-base py-3 h-auto"> {/* Adjusted py-6 to py-3 and h-auto */}
               <SelectValue placeholder="Choose Your Genesis Blueprint" />
             </SelectTrigger>
             <SelectContent>
               {templates.map(template => (
-                <SelectItem key={template.id} value={template.id} className="text-base py-3">
+                <SelectItem key={template.id} value={template.id} className="text-base py-2"> {/* Adjusted py-3 to py-2 */}
                   <div className="flex items-center gap-3">
                     <template.icon className="h-5 w-5 text-muted-foreground" />
                     {template.name}
@@ -285,22 +284,22 @@ const ContractConfigForm = React.memo(({
             </SelectContent>
           </Select>
           {currentFormTemplate &&
-            <p className="text-sm text-muted-foreground mt-2 text-center max-w-lg mx-auto">{currentFormTemplate.description}</p>
+            <p className="text-xs text-muted-foreground mt-1.5 text-center max-w-lg mx-auto">{currentFormTemplate.description}</p> // Reduced text-sm to text-xs, mt-2 to mt-1.5
           }
         </div>
 
         {currentFormTemplate.id !== 'custom' && currentFormTemplate.parameters.length > 0 && (
-          <div className="mt-6 flex flex-col items-center space-y-2">
+          <div className="mt-4 flex flex-col items-center space-y-1.5"> {/* Reduced mt-6 to mt-4, space-y-2 to space-y-1.5 */}
             <Label
               htmlFor="mode-switch"
               className={cn(
-                "text-base font-bold text-center"
+                "text-sm font-bold text-center" // Reduced text-base to text-sm
               )}
             >
               <span className="animate-text-multicolor-glow">Complexity Dial:</span>
             </Label>
             <div className="flex items-center space-x-2">
-              <span className="text-sm text-muted-foreground">Basic</span>
+              <span className="text-xs text-muted-foreground">Basic</span> {/* Reduced text-sm to text-xs */}
               <Switch
                 id="mode-switch"
                 checked={isAdvancedMode}
@@ -308,24 +307,24 @@ const ContractConfigForm = React.memo(({
                 aria-label={isAdvancedMode ? "Switch to Basic Mode" : "Switch to Advanced Mode"}
                 disabled={isGeneratingCode}
               />
-              <span className="text-sm text-muted-foreground">Advanced</span>
+              <span className="text-xs text-muted-foreground">Advanced</span> {/* Reduced text-sm to text-xs */}
             </div>
           </div>
         )}
       </div>
 
     <FormProvider {...methods}>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 flex-grow flex flex-col min-h-0">
-        <div className="flex-grow min-h-0 flex flex-col"> {/* Ensure this container allows parameter section to grow and scroll */}
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 flex-grow flex flex-col min-h-0"> {/* Reduced space-y-6 to space-y-4 */}
+        <div className="flex-grow min-h-0 flex flex-col">
           {parameterConfigurationSection}
         </div>
 
-        <div className="pt-6 border-t border-border/20 mt-auto">
+        <div className="pt-4 border-t border-border/20"> {/* Reduced pt-6 to pt-4 */}
           <div className="flex flex-col sm:flex-row gap-3">
               <Button
                 type="submit"
                 disabled={isGeneratingCode || isForgeDisabledByLimit}
-                className="w-full sm:flex-1 glow-border-primary bg-primary text-primary-foreground hover:bg-primary/90 text-lg py-6"
+                className="w-full sm:flex-1 glow-border-primary bg-primary text-primary-foreground hover:bg-primary/90 text-lg py-4" // Reduced py-6 to py-4
               >
                 {isGeneratingCode ? (
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
@@ -340,7 +339,7 @@ const ContractConfigForm = React.memo(({
                       variant="outline"
                       onClick={onResetForge}
                       disabled={isGeneratingCode}
-                      className="w-full sm:w-auto glow-border-purple text-lg py-6"
+                      className="w-full sm:w-auto glow-border-purple text-lg py-4" // Reduced py-6 to py-4
                   >
                       <Eraser className="mr-2 h-5 w-5" />
                       Clear & Reset
@@ -348,14 +347,14 @@ const ContractConfigForm = React.memo(({
               )}
           </div>
           {isForgeDisabledByLimit && (
-            <div className="mt-4 p-3 bg-destructive/10 border border-destructive/30 rounded-md text-center">
-              <p className="text-sm text-destructive-foreground flex items-center justify-center gap-2">
+            <div className="mt-3 p-3 bg-destructive/10 border border-destructive/30 rounded-md text-center"> {/* Reduced mt-4 to mt-3 */}
+              <p className="text-xs text-destructive-foreground flex items-center justify-center gap-2"> {/* Reduced text-sm to text-xs */}
                 <AlertTriangle className="h-5 w-5 text-destructive" />
                 Daily Forge Quota Maxed Out! Don't let your brilliance be capped.
               </p>
               <Button
                 variant="link"
-                className="text-sm text-accent hover:text-accent/80 mt-1"
+                className="text-xs text-accent hover:text-accent/80 mt-1" // Reduced text-sm to text-xs
                 onClick={(e) => {
                   e.preventDefault();
                   onNavigateToDevAccess();
