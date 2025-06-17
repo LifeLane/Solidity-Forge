@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview Saves lead information submitted through the Developer Access Form.
@@ -36,18 +35,12 @@ const saveLeadFlow = ai.defineFlow(
     outputSchema: SaveLeadOutputSchema, // Uses the internal schema
   },
   async (input) => {
-    console.log('New Developer Access Lead Received:');
-    console.log(`Email: ${input.email}`);
-    console.log(`Telegram: ${input.telegramUsername}`);
-    console.log(`Solana Address: ${input.solanaAddress}`);
-    
     // In a real application, you would save this to a database or CRM.
-    // For now, we just log it and return success.
-    
+    // For this example, we are just confirming receipt.
+    // Consider adding actual data persistence logic here if this were a production app.
     return {
       success: true,
-      message: 'Lead data logged successfully on the server.',
+      message: 'Developer access request received. We will review it shortly.',
     };
   }
 );
-

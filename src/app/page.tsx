@@ -19,9 +19,9 @@ import { refineSmartContractCode } from '@/ai/flows/refine-smart-contract-code';
 import { generateDocumentation } from '@/ai/flows/generate-documentation-flow';
 import { Card, CardContent } from '@/components/ui/card';
 import { CONTRACT_TEMPLATES, type ContractTemplate } from '@/config/contracts';
-import { cn } from '@/lib/utils';
+import { Puzzle } from 'lucide-react';
 
-const MAX_FORGES_PER_DAY = 3;
+const MAX_FORGES_PER_DAY = 5; // Increased slightly for testing
 const LOCAL_STORAGE_USAGE_KEY = 'solidityForgeUsage';
 const LOCAL_STORAGE_DEV_ACCESS_KEY = 'solidityForgeDevAccess';
 
@@ -53,7 +53,7 @@ export default function SolidityForgePage() {
   const [hasDeveloperAccess, setHasDeveloperAccess] = useState<boolean>(false);
 
   const developerAccessFormRef = useRef<HTMLDivElement>(null);
-  const outputSectionRef = useRef<HTMLDivElement>(null); // For scrolling to output
+  const outputSectionRef = useRef<HTMLDivElement>(null); 
 
   const { toast } = useToast();
 
@@ -97,8 +97,8 @@ export default function SolidityForgePage() {
     if (isForgeDisabledByLimit) {
       toast({
         variant: "destructive",
-        title: "Forge Limit Reached",
-        description: "You've hit the daily limit. Get Developer Access for unlimited forging and your AirDrop!",
+        title: "Daily Forge Limit Reached",
+        description: "Upgrade to Developer Access for unlimited forging and your AirDrop!",
       });
       developerAccessFormRef.current?.scrollIntoView({ behavior: 'smooth' });
       return;
@@ -137,7 +137,7 @@ export default function SolidityForgePage() {
       setGeneratedCode(result.code);
       toast({
         title: "Contract Forged!",
-        description: "Your Solidity code has been generated.",
+        description: "Your Solidity masterpiece is ready.",
       });
       setTimeout(() => {
         outputSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -146,20 +146,20 @@ export default function SolidityForgePage() {
       console.error("Error generating code:", error);
       toast({
         variant: "destructive",
-        title: "Code Generation Error!",
-        description: (error as Error).message || "An unexpected error occurred while generating the code.",
+        title: "Code Generation Failed",
+        description: (error as Error).message || "The AI encountered an issue. Please try refining your request or try again later.",
       });
       setGeneratedCode(''); 
       setActiveTemplateForOutput(undefined);
     } finally {
       setIsGeneratingCode(false);
     }
-  }, [isForgeDisabledByLimit, toast, hasDeveloperAccess, usageData, resetAnalyses, getTodayDateString]);
+  }, [isForgeDisabledByLimit, toast, hasDeveloperAccess, usageData, resetAnalyses]);
 
 
   const handleGetAISuggestions = useCallback(async () => {
     if (!generatedCode || !activeTemplateForOutput) {
-      toast({ variant: "destructive", title: "No Code", description: "Generate code first to get AI suggestions." });
+      toast({ variant: "destructive", title: "Code Required", description: "Please generate a contract first to get AI suggestions." });
       return;
     }
     setIsGettingSuggestions(true);
@@ -174,10 +174,10 @@ export default function SolidityForgePage() {
       });
       setAiSuggestions(result.suggestions || []);
       setSecurityScore(result.securityScore);
-      toast({ title: "AI Insights Received", description: "Suggestions and security score updated." });
+      toast({ title: "AI Insights Revealed", description: "Suggestions and security score are now available." });
     } catch (error) {
       console.error("Error getting AI suggestions:", error);
-      toast({ variant: "destructive", title: "Suggestion Error", description: (error as Error).message });
+      toast({ variant: "destructive", title: "AI Suggestion Error", description: (error as Error).message || "Could not retrieve AI suggestions." });
     } finally {
       setIsGettingSuggestions(false);
     }
@@ -185,7 +185,7 @@ export default function SolidityForgePage() {
 
   const handleEstimateGasCosts = useCallback(async () => {
     if (!generatedCode) {
-      toast({ variant: "destructive", title: "No Code", description: "Generate code first to estimate gas." });
+      toast({ variant: "destructive", title: "Code Required", description: "Please generate a contract first to estimate gas costs." });
       return;
     }
     setIsEstimatingGas(true);
@@ -193,10 +193,10 @@ export default function SolidityForgePage() {
     try {
       const result = await estimateGasCost({ code: generatedCode });
       setGasEstimation(result);
-      toast({ title: "Gas Estimation Complete", description: "Gas cost analysis is available." });
+      toast({ title: "Gas Estimation Complete", description: "Analysis of gas consumption is ready." });
     } catch (error) {
       console.error("Error estimating gas costs:", error);
-      toast({ variant: "destructive", title: "Gas Estimation Error", description: (error as Error).message });
+      toast({ variant: "destructive", title: "Gas Estimation Error", description: (error as Error).message || "Failed to estimate gas costs." });
     } finally {
       setIsEstimatingGas(false);
     }
@@ -204,7 +204,7 @@ export default function SolidityForgePage() {
 
   const handleGenerateTestCases = useCallback(async () => {
     if (!generatedCode || !activeTemplateForOutput) {
-      toast({ variant: "destructive", title: "No Code", description: "Generate code first to create test cases." });
+      toast({ variant: "destructive", title: "Code Required", description: "Please generate a contract first to create test cases." });
       return;
     }
     setIsGeneratingTestCases(true);
@@ -213,10 +213,10 @@ export default function SolidityForgePage() {
       const contractName = activeTemplateForOutput.id !== 'custom' ? activeTemplateForOutput.name : undefined;
       const result = await generateTestCases({ code: generatedCode, contractName: contractName });
       setGeneratedTestCases(result.testCasesCode);
-      toast({ title: "Test Cases Generated", description: "Basic test suite is ready." });
+      toast({ title: "Test Cases Generated", description: "A basic Hardhat test suite has been created." });
     } catch (error) {
       console.error("Error generating test cases:", error);
-      toast({ variant: "destructive", title: "Test Generation Error", description: (error as Error).message });
+      toast({ variant: "destructive", title: "Test Generation Error", description: (error as Error).message || "Could not generate test cases." });
     } finally {
       setIsGeneratingTestCases(false);
     }
@@ -224,11 +224,11 @@ export default function SolidityForgePage() {
 
   const handleRefineCode = useCallback(async (request: string) => {
     if (!generatedCode || !activeTemplateForOutput) {
-      toast({ variant: "destructive", title: "No Code", description: "Generate code before refining." });
+      toast({ variant: "destructive", title: "Code Required", description: "Generate code before attempting refinement." });
       return;
     }
     if (!request.trim()) {
-      toast({ variant: "destructive", title: "Empty Request", description: "Please provide refinement instructions." });
+      toast({ variant: "destructive", title: "Instructions Needed", description: "Please provide instructions for refining the code." });
       return;
     }
     setIsRefiningCode(true);
@@ -240,10 +240,10 @@ export default function SolidityForgePage() {
         contractContext: `Contract type: ${activeTemplateForOutput.name}`,
       });
       setGeneratedCode(result.refinedCode); 
-      toast({ title: "Code Refined", description: "The contract code has been updated." });
+      toast({ title: "Code Refined Successfully", description: "Your contract code has been updated as per your instructions." });
     } catch (error) {
       console.error("Error refining code:", error);
-      toast({ variant: "destructive", title: "Refinement Error", description: (error as Error).message });
+      toast({ variant: "destructive", title: "Refinement Error", description: (error as Error).message || "Failed to refine the code." });
     } finally {
       setIsRefiningCode(false);
     }
@@ -251,7 +251,7 @@ export default function SolidityForgePage() {
 
   const handleGenerateDocumentation = useCallback(async () => {
     if (!generatedCode) {
-      toast({ variant: "destructive", title: "No Code", description: "Generate code first to add documentation." });
+      toast({ variant: "destructive", title: "Code Required", description: "Generate code first to add NatSpec documentation." });
       return;
     }
     setIsGeneratingDocumentation(true);
@@ -259,10 +259,10 @@ export default function SolidityForgePage() {
     try {
       const result = await generateDocumentation({ code: generatedCode });
       setGeneratedCode(result.documentedCode); 
-      toast({ title: "Documentation Generated", description: "NatSpec comments added to the code." });
+      toast({ title: "Documentation Generated", description: "NatSpec comments have been added to your code." });
     } catch (error) {
       console.error("Error generating documentation:", error);
-      toast({ variant: "destructive", title: "Documentation Error", description: (error as Error).message });
+      toast({ variant: "destructive", title: "Documentation Error", description: (error as Error).message || "Failed to generate documentation." });
     } finally {
       setIsGeneratingDocumentation(false);
     }
@@ -270,7 +270,7 @@ export default function SolidityForgePage() {
 
   const handleFindAddresses = useCallback(async (query: string) => {
     if (!query.trim()) {
-      toast({ variant: "destructive", title: "Empty Query", description: "Please enter a search query." });
+      toast({ variant: "destructive", title: "Query Needed", description: "Please enter a search term for known addresses." });
       return;
     }
     setIsFindingAddresses(true);
@@ -278,10 +278,15 @@ export default function SolidityForgePage() {
     try {
       const result = await getKnownLiquidityPoolInfo({ query });
       setAddressResults(result);
-      toast({ title: "Address Search Complete", description: result.summary || "Search results are available." });
+      // Toast is handled by KnownAddressesFinder or here if more detail is needed
+      if (!result.results || result.results.length === 0) {
+          toast({ title: "Address Search", description: result.summary || "No specific addresses found for your query."});
+      } else {
+          toast({ title: "Address Search Complete", description: result.summary || "Known addresses fetched." });
+      }
     } catch (error) {
       console.error("Error finding addresses:", error);
-      toast({ variant: "destructive", title: "Address Search Error", description: (error as Error).message });
+      toast({ variant: "destructive", title: "Address Search Error", description: (error as Error).message || "Failed to fetch known addresses." });
     } finally {
       setIsFindingAddresses(false);
     }
@@ -305,7 +310,8 @@ export default function SolidityForgePage() {
     setGeneratedCode('');
     setActiveTemplateForOutput(undefined);
     resetAnalyses();
-    toast({ title: "Forge Reset", description: "Configuration and output cleared." });
+    toast({ title: "Forge Cleared", description: "Contract configuration and output have been reset." });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [resetAnalyses, toast]);
 
   const anySubActionLoading = isGettingSuggestions || isEstimatingGas || isGeneratingTestCases || isRefiningCode || isGeneratingDocumentation;
@@ -313,7 +319,7 @@ export default function SolidityForgePage() {
   return (
     <div className="min-h-screen text-foreground flex flex-col bg-background">
       <Header />
-      <main className="flex-grow container mx-auto px-4 py-6 md:py-8 flex flex-col items-stretch gap-6">
+      <main className="flex-grow container mx-auto px-4 py-6 md:py-8 flex flex-col items-stretch gap-6 md:gap-8">
         
         <Card className="border shadow-sm">
           <ContractConfigForm
@@ -355,14 +361,31 @@ export default function SolidityForgePage() {
           </div>
         )}
 
-        {!generatedCode && (
-           <Card className="border shadow-sm flex items-center justify-center min-h-[300px]">
-            <CardContent className="text-center text-muted-foreground p-6">
-                <p className="text-lg font-medium">Forge Your First Contract</p>
-                <p className="text-sm">Configure the parameters above and click "Review & Forge" to generate your smart contract. The output and analysis tools will appear here.</p>
+        {!generatedCode && !isGeneratingCode && (
+           <Card className="border-dashed border-border/50 shadow-none flex flex-col items-center justify-center min-h-[300px] md:min-h-[400px] text-center bg-muted/20">
+            <CardContent className="text-muted-foreground p-6 md:p-8">
+                <Puzzle className="w-16 h-16 md:w-20 md:h-20 text-primary/40 mx-auto mb-4" />
+                <p className="text-lg md:text-xl font-medium text-foreground mb-1">Ready to Forge?</p>
+                <p className="text-sm md:text-base">
+                    Configure your desired smart contract parameters using the form above.
+                    Once you click "Review & Forge," your generated code and analysis tools will appear in this section.
+                </p>
             </CardContent>
           </Card>
         )}
+        
+        {isGeneratingCode && !generatedCode && (
+             <Card className="border-dashed border-border/50 shadow-none flex flex-col items-center justify-center min-h-[300px] md:min-h-[400px] text-center bg-muted/20">
+                <CardContent className="text-muted-foreground p-6 md:p-8">
+                    <Puzzle className="w-16 h-16 md:w-20 md:h-20 text-primary/40 mx-auto mb-4 animate-pulse" />
+                    <p className="text-lg md:text-xl font-medium text-foreground mb-1">The Alchemist is Working...</p>
+                    <p className="text-sm md:text-base">
+                        Your smart contract is being forged by the AI. Please wait a moment.
+                    </p>
+                </CardContent>
+            </Card>
+        )}
+
 
         <Card className="border shadow-sm">
           <CardContent className="p-4 md:p-6">

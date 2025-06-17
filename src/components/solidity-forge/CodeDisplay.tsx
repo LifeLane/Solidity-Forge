@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ExternalLink, Lightbulb, Copy, Check, ShieldAlert, Zap, Wrench, Info, Fuel, Coins, Beaker, Sparkles, Loader2, Code2, Brain, FileText as FileTextIconLucide, AlertCircle } from 'lucide-react';
+import { ExternalLink, Lightbulb, Copy, Check, ShieldAlert, Zap, Wrench, Info, Fuel, Coins, Beaker, Sparkles, Loader2, Code2, Brain, FileText as FileTextIconLucide, AlertCircle, PackageSearch, Frown } from 'lucide-react';
 import { CardTitle, CardDescription, CardHeader, CardContent as ShadCNCardContent } from '@/components/ui/card'; 
 import { Badge, type BadgeProps } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -96,14 +96,13 @@ export function CodeDisplay({
       const remixURL = `https://remix.ethereum.org/?#code=${base64Code}&lang=sol`;
       window.open(remixURL, '_blank');
     } catch (error) {
-        console.error("Error preparing Remix URL:", error);
         const base64Code = btoa(code); 
         const remixURL = `https://remix.ethereum.org/?#code=${base64Code}&lang=sol`;
         window.open(remixURL, '_blank');
         toast({
             variant: "destructive",
-            title: "Remix Link Error",
-            description: "Standard encoding used as backup.",
+            title: "Remix Link Encoding Note",
+            description: "Used standard Base64 encoding. If issues arise in Remix, copy-paste the code manually.",
         });
     }
   }, [code, toast]);
@@ -121,10 +120,10 @@ export function CodeDisplay({
     if (score === null) return null;
     let variant: BadgeProps["variant"] = "default"; 
     let text = `Audit Readiness: ${score}`;
-     if (score >= 90) { variant = "default"; text = `Excellent: ${score}`; } // Green (using default as primary)
-     else if (score >= 70) { variant = "secondary"; text = `Good: ${score}`; } // Yellow (using secondary)
-     else if (score >= 50) { variant = "outline"; text = `Fair: ${score}`; } // Orange (using outline)
-     else { variant = "destructive"; text = `Needs Review: ${score}`; } // Red
+     if (score >= 90) { variant = "default"; text = `Excellent: ${score}`; } 
+     else if (score >= 70) { variant = "secondary"; text = `Good: ${score}`; } 
+     else if (score >= 50) { variant = "outline"; text = `Fair: ${score}`; } 
+     else { variant = "destructive"; text = `Needs Review: ${score}`; } 
     return <Badge variant={variant} className="text-xs px-2 py-1">{text}</Badge>;
   };
 
@@ -167,27 +166,26 @@ export function CodeDisplay({
     }
   };
   
-  if (isLoadingCode && !code && !isRefiningCode && !isGeneratingDocumentation) { // Initial loading for the entire component
-    return (
-      <div className="flex flex-col h-full p-4 md:p-6 items-center justify-center text-center min-h-[300px]">
-        <Loader2 className="w-12 h-12 mb-4 text-primary animate-spin" />
-        <p className="text-lg font-medium text-muted-foreground">Forging Your Contract...</p>
-        <p className="text-sm text-muted-foreground">The Alchemist is hard at work.</p>
-      </div>
-    );
-  }
-  
-  if (!code && !isLoadingCode) { // Placeholder if no code is generated yet
-    return (
-         <div className="flex flex-col h-full p-6 md:p-8 items-center justify-center text-center min-h-[300px]">
-            <Code2 className="w-16 h-16 mb-6 text-muted-foreground/30" />
-            <h3 className="text-xl font-semibold text-muted-foreground mb-2">The Alchemist's Output</h3>
-            <p className="text-sm text-muted-foreground max-w-sm">
-            Your generated smart contract code, along with AI-powered analysis and tools, will appear here once you configure and forge your contract.
-            </p>
-        </div>
-    );
-  }
+  // This placeholder is now handled by page.tsx for the whole Card
+  // if (isLoadingCode && !code && !isRefiningCode && !isGeneratingDocumentation) { ... }
+  // if (!code && !isLoadingCode) { ... }
+
+
+  const renderEmptyState = (icon: React.ElementType, title: string, message: string) => (
+    <div className="p-6 text-center text-muted-foreground flex flex-col items-center justify-center h-full min-h-[200px]">
+      <icon className="w-12 h-12 mb-4 text-muted-foreground/30" />
+      <p className="text-sm font-medium text-foreground mb-1">{title}</p>
+      <p className="text-xs">{message}</p>
+    </div>
+  );
+
+  const renderLoadingState = (message: string) => (
+    <div className="p-6 text-center text-muted-foreground flex flex-col items-center justify-center h-full min-h-[200px]">
+      <Loader2 className="w-10 h-10 mb-3 text-primary animate-spin" />
+      <p className="text-sm">{message}</p>
+    </div>
+  );
+
 
   return (
     <div className="flex flex-col h-full p-3 md:p-4">
@@ -239,50 +237,47 @@ export function CodeDisplay({
         <TabsContent value="code" className="flex-grow flex flex-col overflow-hidden rounded-md border bg-muted/20">
           <ScrollArea className="flex-grow" style={{maxHeight: 'calc(100vh - 32rem)'}}>
             {isPrimaryCodeActionLoading ? ( 
-              <div className="p-4 space-y-2">
-                <div className="flex items-center justify-center h-32">
-                   <Loader2 className="w-10 h-10 text-primary animate-spin" />
-                </div>
-                {[...Array(6)].map((_, i) => <Skeleton key={i} className={`h-4 ${i % 3 === 0 ? 'w-3/4' : i % 3 === 1 ? 'w-full' : 'w-5/6'} bg-muted/50`} />)}
-              </div>
-            ) : ( 
+              renderLoadingState("Refining code or generating documentation...")
+            ) : code ? ( 
               <SyntaxHighlighter language="solidity" style={customSyntaxHighlighterStyle} showLineNumbers lineNumberStyle={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.75rem' }} wrapLines wrapLongLines>
                 {code}
               </SyntaxHighlighter>
+            ) : (
+              renderEmptyState(Code2, "No Code Generated", "Forge a contract to see the code here.")
             )}
           </ScrollArea>
-          <div className="p-3 border-t border-border/30 bg-card/50 mt-auto">
-            <Label htmlFor="refinementRequest" className="text-xs font-medium flex items-center gap-1.5 mb-1.5">
-              <Sparkles className="h-3.5 w-3.5 text-primary" />
-              Refine Code (AI Assist):
-            </Label>
-            <Textarea
-              id="refinementRequest"
-              value={refinementInput}
-              onChange={(e) => setRefinementInput(e.target.value)}
-              placeholder="e.g., 'Add NatSpec comments for all functions...' or 'Optimize the transfer function for gas efficiency...'"
-              rows={2}
-              className="mb-2 bg-background/70 focus:bg-background text-xs p-2"
-              disabled={isPrimaryCodeActionLoading || anySubActionLoading}
-            />
-            <Button 
-              onClick={handleRefineCodeSubmit} 
-              disabled={isPrimaryCodeActionLoading || anySubActionLoading || !refinementInput.trim()}
-              className="w-full bg-primary text-primary-foreground hover:bg-primary/90 text-xs py-2"
-              size="sm"
-            >
-              {isRefiningCode ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <Sparkles className="mr-2 h-3.5 w-3.5" />}
-              Execute Refinement
-            </Button>
-          </div>
+          {code && !isPrimaryCodeActionLoading && (
+            <div className="p-3 border-t border-border/30 bg-card/50 mt-auto">
+              <Label htmlFor="refinementRequest" className="text-xs font-medium flex items-center gap-1.5 mb-1.5">
+                <Sparkles className="h-3.5 w-3.5 text-primary" />
+                Refine Code (AI Assist):
+              </Label>
+              <Textarea
+                id="refinementRequest"
+                value={refinementInput}
+                onChange={(e) => setRefinementInput(e.target.value)}
+                placeholder="e.g., 'Add NatSpec comments for all functions...' or 'Optimize the transfer function for gas efficiency...'"
+                rows={2}
+                className="mb-2 bg-background/70 focus:bg-background text-xs p-2"
+                disabled={isPrimaryCodeActionLoading || anySubActionLoading}
+              />
+              <Button 
+                onClick={handleRefineCodeSubmit} 
+                disabled={isPrimaryCodeActionLoading || anySubActionLoading || !refinementInput.trim()}
+                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 text-xs py-2"
+                size="sm"
+              >
+                {isRefiningCode ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <Sparkles className="mr-2 h-3.5 w-3.5" />}
+                Execute Refinement
+              </Button>
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="suggestions" className="flex-grow flex flex-col overflow-hidden rounded-md border bg-muted/20">
           <ScrollArea className="h-full flex-grow p-1" style={{maxHeight: 'calc(100vh - 28rem)'}}>
             {isLoadingSuggestions ? (
-               <div className="p-4 space-y-3">
-                {[...Array(3)].map((_, i) => <Skeleton key={i} className={`h-12 ${i % 2 === 0 ? 'w-3/4' : 'w-full'} bg-muted/50`} />)}
-              </div>
+               renderLoadingState("Fetching AI insights...")
             ) : suggestions.length > 0 || securityScore !== null ? (
               <div className="p-3 md:p-4 space-y-3">
                 {securityScore !== null && (
@@ -305,15 +300,16 @@ export function CodeDisplay({
                     </li>
                   ))}
                 </ul>
+                 {suggestions.length === 0 && securityScore !== null && renderEmptyState(PackageSearch, "No Specific Suggestions", "The AI reviewed the code but found no specific items to flag for this category at this time.")}
               </div>
-            ) : ( <div className="p-6 text-center text-muted-foreground flex flex-col items-center justify-center h-full min-h-[200px]"> <Brain className="w-12 h-12 mb-4 text-muted-foreground/30" /> <p className="text-sm">No AI insights yet. Click "AI Scrutiny" below to analyze the code.</p> </div> )}
+            ) : ( renderEmptyState(Brain, "No AI Insights Yet", "Click 'AI Scrutiny' below to analyze the contract code.") )}
           </ScrollArea>
         </TabsContent>
 
         <TabsContent value="gas" className="flex-grow flex flex-col overflow-hidden rounded-md border bg-muted/20">
           <ScrollArea className="h-full flex-grow p-1" style={{maxHeight: 'calc(100vh - 28rem)'}}>
             {isLoadingGasEstimation ? (
-              <div className="p-4 space-y-3"> {[...Array(2)].map((_, i) => <Skeleton key={i} className={`h-16 ${i % 2 === 0 ? 'w-3/4' : 'w-full'} bg-muted/50`} />)} </div>
+              renderLoadingState("Estimating gas consumption...")
             ) : gasEstimation ? (
               <div className="p-3 md:p-4 space-y-3">
                 <div className="bg-card/50 rounded-md shadow-sm border border-border/30">
@@ -325,19 +321,19 @@ export function CodeDisplay({
                   </ShadCNCardContent>
                 </div>
               </div>
-            ) : ( <div className="p-6 text-center text-muted-foreground flex flex-col items-center justify-center h-full min-h-[200px]"> <Fuel className="w-12 h-12 mb-4 text-muted-foreground/30" /> <p className="text-sm">No gas estimation available. Click "Query Gas Oracle" below.</p> </div> )}
+            ) : ( renderEmptyState(Fuel, "Gas Oracle Awaiting Query", "Click 'Query Gas Oracle' below to estimate gas costs.") )}
           </ScrollArea>
         </TabsContent>
 
         <TabsContent value="tests" className="flex-grow flex flex-col overflow-hidden rounded-md border bg-muted/20">
           <ScrollArea className="h-full flex-grow" style={{maxHeight: 'calc(100vh - 28rem)'}}>
             {isLoadingTestCases ? (
-              <div className="p-4 space-y-2"> <div className="flex items-center justify-center h-32"> <Loader2 className="w-10 h-10 text-primary animate-spin" /> </div> {[...Array(6)].map((_, i) => <Skeleton key={i} className={`h-4 ${i % 3 === 0 ? 'w-3/4' : 'w-full'} bg-muted/50`} />)} </div>
+              renderLoadingState("Conjuring test cases...")
             ) : testCasesCode ? (
               <SyntaxHighlighter language="javascript" style={customSyntaxHighlighterStyle} showLineNumbers lineNumberStyle={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.75rem' }} wrapLines wrapLongLines>
                 {testCasesCode}
               </SyntaxHighlighter>
-            ) : ( <div className="p-6 text-center text-muted-foreground flex flex-col items-center justify-center h-full min-h-[200px]"> <Beaker className="w-12 h-12 mb-4 text-muted-foreground/30" /> <p className="text-sm">No test cases generated. Click "Conjure Test Suite" below.</p> </div> )}
+            ) : ( renderEmptyState(Beaker, "Test Suite Not Generated", "Click 'Conjure Test Suite' below to generate basic test cases.") )}
           </ScrollArea>
         </TabsContent>
       </Tabs>
