@@ -31,8 +31,6 @@ interface UsageData {
 }
 
 export default function SolidityForgePage() {
-  // State for the selected template *used for the current generation/analysis context*
-  // ContractConfigForm will manage its own internal selection for display
   const [activeTemplateForOutput, setActiveTemplateForOutput] = useState<ContractTemplate | undefined>(
     CONTRACT_TEMPLATES[0]
   );
@@ -114,7 +112,7 @@ export default function SolidityForgePage() {
       return;
     }
 
-    setActiveTemplateForOutput(template); // Set the template context for the output panel
+    setActiveTemplateForOutput(template);
     setIsGeneratingCode(true);
     setGeneratedCode('');
     resetAnalyses();
@@ -316,7 +314,7 @@ export default function SolidityForgePage() {
       return;
     }
     setIsGeneratingDocumentation(true);
-    resetAnalyses();
+    resetAnalyses(); // Also reset analyses when re-generating docs, as it modifies code
 
     try {
       const result = await generateDocumentation({ code: generatedCode });
@@ -384,6 +382,7 @@ export default function SolidityForgePage() {
   const handleResetForge = useCallback(() => {
     setGeneratedCode('');
     resetAnalyses();
+    // setActiveTemplateForOutput(CONTRACT_TEMPLATES[0]); // Optionally reset selected template context too
     toast({
         title: "Forge Cleared!",
         description: "The slate is clean. Ready for your next grand design (or happy accident)."
@@ -409,12 +408,12 @@ export default function SolidityForgePage() {
                 )}
               style={{ animationDelay: '0.1s' }}
             >
-              <CardContent className="p-0 h-full flex flex-col"> {/* Ensure CardContent can flex its children */}
+              <CardContent className="p-0 h-full flex flex-col">
                 <ContractConfigForm
                   templates={CONTRACT_TEMPLATES}
                   onGenerateCode={handleGenerateCode}
                   isGeneratingCode={isGeneratingCode}
-                  selectedTemplateProp={CONTRACT_TEMPLATES[0]} // Initial template for the form
+                  selectedTemplateProp={CONTRACT_TEMPLATES[0]}
                   isForgeDisabledByLimit={isForgeDisabledByLimit}
                   onNavigateToDevAccess={handleNavigateToDevAccess}
                   onResetForge={handleResetForge}
@@ -433,7 +432,6 @@ export default function SolidityForgePage() {
               )}
               style={{ animationDelay: '0.3s' }}
             >
-              {/* CodeDisplay itself is always rendered, its internal content is conditional */}
               <CodeDisplay
                 code={generatedCode}
                 suggestions={aiSuggestions}
@@ -447,7 +445,7 @@ export default function SolidityForgePage() {
                 isRefiningCode={isRefiningCode}
                 isGeneratingDocumentation={isGeneratingDocumentation}
                 onRefineCode={handleRefineCode}
-                selectedTemplate={activeTemplateForOutput} // Pass the template used for generation
+                selectedTemplate={activeTemplateForOutput}
                 anySubActionLoading={anySubActionLoading}
                 onGetAISuggestions={handleGetAISuggestions}
                 onEstimateGasCosts={handleEstimateGasCosts}

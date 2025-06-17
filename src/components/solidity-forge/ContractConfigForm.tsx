@@ -7,7 +7,7 @@ import type { ContractTemplate, ContractParameter } from '@/config/contracts';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CardTitle } from '@/components/ui/card'; // Removed CardDescription as it's not used here
+import { CardTitle } from '@/components/ui/card';
 import { AlertTriangle, ArrowDownCircle, Loader2, Wand2, Eraser } from 'lucide-react';
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -94,9 +94,12 @@ const getParameterGroups = (template: ContractTemplate, isAdvancedMode: boolean)
       }
     ];
   } else {
+     // For custom contract or other types, show all parameters in a single group
+     // or handle based on a specific grouping strategy if one evolves.
      groups = [{ title: 'Parameters', parameters: visibleParams, defaultActive: true }];
   }
 
+  // Filter out empty groups that might result from advancedOnly filtering
   return groups.filter(group => group.parameters.length > 0);
 };
 
@@ -104,7 +107,7 @@ interface ContractConfigFormProps {
   templates: ContractTemplate[];
   onGenerateCode: (template: ContractTemplate, formData: FormData) => Promise<void>;
   isGeneratingCode: boolean;
-  selectedTemplateProp?: ContractTemplate; // For initial setting
+  selectedTemplateProp?: ContractTemplate;
   isForgeDisabledByLimit: boolean;
   onNavigateToDevAccess: () => void;
   onResetForge: () => void;
@@ -122,7 +125,6 @@ const ContractConfigForm = React.memo(({
   onResetForge,
   hasGeneratedCode,
 }: ContractConfigFormProps) => {
-  // Internal state for the form's currently selected template
   const [currentFormTemplate, setCurrentFormTemplate] = useState<ContractTemplate>(selectedTemplateProp || templates[0]);
   const [isAdvancedMode, setIsAdvancedMode] = useState(false);
   const [activeTabValue, setActiveTabValue] = useState<string | undefined>(undefined);
@@ -135,11 +137,10 @@ const ContractConfigForm = React.memo(({
       return acc;
     }, {} as FormData) || {}
   });
-  const { handleSubmit, reset, getValues } = methods;
+  const { handleSubmit, reset } = methods;
 
 
   useEffect(() => {
-    // Reset form when the template selected *for the form* changes
     const defaultValues = currentFormTemplate.parameters.reduce((acc, param) => {
       acc[param.name] = param.defaultValue ?? '';
       return acc;
@@ -169,7 +170,6 @@ const ContractConfigForm = React.memo(({
   },[templates]);
 
   const onSubmit = useCallback(async (data: FormData) => {
-    // currentFormTemplate is the one selected in this form component
     await onGenerateCode(currentFormTemplate, data);
   }, [currentFormTemplate, onGenerateCode]);
 
@@ -190,7 +190,7 @@ const ContractConfigForm = React.memo(({
           ))}
       </div>
     ) : (
-      <div className="pt-6 border-t border-border/20 mt-6 flex-grow min-h-0"> {/* Ensure this can grow and scroll */}
+      <div className="pt-6 border-t border-border/20 mt-6 flex-grow min-h-0">
         <Tabs
           orientation="vertical"
           value={activeTabValue}
@@ -218,8 +218,7 @@ const ContractConfigForm = React.memo(({
               );
             })}
           </TabsList>
-          {/* This div needs to handle overflow for its content */}
-          <div className="flex-grow min-w-0 p-1 rounded-md border border-border/20 bg-card/30 overflow-y-auto max-h-[calc(100vh-30rem)] md:max-h-full">
+          <div className="flex-grow min-w-0 p-1 rounded-md border border-border/20 bg-card/30 overflow-y-auto max-h-[calc(100vh-28rem)] md:max-h-[calc(100vh-26rem)] lg:max-h-[calc(100%-4rem)]"> {/* Adjusted max-h for better scrollability */}
             {parameterGroups.map(group => {
               const tabValue = group.title.toLowerCase().replace(/\s+/g, '-');
               return (
@@ -243,7 +242,7 @@ const ContractConfigForm = React.memo(({
 
 
   return (
-    <div className="space-y-8 p-4 md:p-6 lg:p-8 h-full flex flex-col"> {/* Added h-full and flex flex-col */}
+    <div className="space-y-8 p-4 md:p-6 lg:p-8 h-full flex flex-col">
       <div className="text-center">
         <CardTitle className="text-3xl font-headline mb-3">
             <ScrambledText
@@ -315,12 +314,12 @@ const ContractConfigForm = React.memo(({
       </div>
 
     <FormProvider {...methods}>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 flex-grow flex flex-col min-h-0"> {/* flex-grow and min-h-0 for scrolling */}
-        <div className="flex-grow min-h-0"> {/* This container will allow parameterConfigurationSection to scroll */}
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 flex-grow flex flex-col min-h-0">
+        <div className="flex-grow min-h-0">
           {parameterConfigurationSection}
         </div>
 
-        <div className="pt-6 border-t border-border/20 mt-auto"> {/* mt-auto pushes this to the bottom */}
+        <div className="pt-6 border-t border-border/20 mt-auto">
           <div className="flex flex-col sm:flex-row gap-3">
               <Button
                 type="submit"

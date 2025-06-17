@@ -35,16 +35,16 @@ interface CodeDisplayProps {
   securityScore: number | null;
   gasEstimation: EstimateGasCostOutput | null;
   testCasesCode: string;
-  isLoadingCode: boolean; // Overall loading for code generation/refinement
+  isLoadingCode: boolean;
   isLoadingSuggestions: boolean;
   isLoadingGasEstimation: boolean;
   isLoadingTestCases: boolean;
-  isRefiningCode: boolean; // Specific to refinement action
+  isRefiningCode: boolean;
   isGeneratingDocumentation: boolean;
   onRefineCode: (request: string) => Promise<void>;
-  selectedTemplate?: ContractTemplate; // Template used for the current code
-  anySubActionLoading: boolean; // True if any analysis action is loading
-  onGetAISuggestions: () => Promise<void>; // No longer needs template/formData here
+  selectedTemplate?: ContractTemplate; 
+  anySubActionLoading: boolean;
+  onGetAISuggestions: () => Promise<void>;
   onEstimateGasCosts: () => Promise<void>;
   onGenerateTestCases: () => Promise<void>;
   onGenerateDocumentation: () => Promise<void>;
@@ -63,7 +63,7 @@ export function CodeDisplay({
   isRefiningCode,
   isGeneratingDocumentation,
   onRefineCode,
-  selectedTemplate, // Keep for context if needed, but AI calls use page's activeTemplateForOutput
+  selectedTemplate,
   anySubActionLoading,
   onGetAISuggestions,
   onEstimateGasCosts,
@@ -75,10 +75,9 @@ export function CodeDisplay({
   const [refinementInput, setRefinementInput] = useState<string>('');
   const { toast } = useToast();
 
-  // isLoadingCode now covers both initial generation and refinement
-  const overallPrimaryLoading = isLoadingCode || isRefiningCode;
+  const overallPrimaryLoading = isLoadingCode || isRefiningCode || isGeneratingDocumentation;
 
-  const handleCopyToClipboard = (textToCopy: string, type: string) => {
+  const handleCopyToClipboard = useCallback((textToCopy: string, type: string) => {
     if (!textToCopy) return;
     navigator.clipboard.writeText(textToCopy).then(() => {
       setCopiedStates(prev => ({ ...prev, [type]: true }));
@@ -88,9 +87,9 @@ export function CodeDisplay({
       console.error(`Failed to copy ${type}: `, err);
       toast({ variant: "destructive", title: "Copy Catastrophe!", description: `Could not copy ${type}. Your clipboard must be full of... other things.` });
     });
-  };
+  }, [toast]);
 
-  const handleDeployToRemix = () => {
+  const handleDeployToRemix = useCallback(() => {
     if (!code) return;
     try {
       const base64Code = btoa(unescape(encodeURIComponent(code)));
@@ -107,16 +106,16 @@ export function CodeDisplay({
             description: "Sent to Remix, but some exotic characters might be on vacation. Standard encoding used as a backup.",
         });
     }
-  };
+  }, [code, toast]);
 
-  const handleRefineCodeSubmit = async () => {
+  const handleRefineCodeSubmit = useCallback(async () => {
     if (!refinementInput.trim()) {
       toast({ variant: "destructive", title: "Empty Request", description: "You want me to refine... nothing? Give me something to work with!" });
       return;
     }
     await onRefineCode(refinementInput);
     setRefinementInput('');
-  };
+  }, [refinementInput, onRefineCode, toast]);
 
   const getSecurityScoreBadge = (score: number | null) => {
     if (score === null) return null;
@@ -187,8 +186,7 @@ export function CodeDisplay({
     }
   };
 
-  // If no code, display placeholder. Otherwise, display the full component.
-  if (isLoadingCode && !code) { // Show loading skeleton only if truly initial loading
+  if (isLoadingCode && !code) {
     return (
       <div className="flex flex-col h-full p-4 md:p-6 lg:p-8 items-center justify-center text-center">
         <Loader2 className="w-16 h-16 mb-6 text-primary animate-spin" />
@@ -207,7 +205,6 @@ export function CodeDisplay({
       </div>
     );
   }
-
 
   return (
     <div className="flex flex-col h-full p-4 md:p-6 lg:p-8">
@@ -244,25 +241,25 @@ export function CodeDisplay({
             { value: "suggestions", label: "AI Insights", icon: Lightbulb },
             { value: "gas", label: "Gas Oracle", icon: Fuel },
             { value: "tests", label: "Test Cases", icon: Beaker },
-          ].map(tab => (
+          ].map(tabItem => (
             <TabsTrigger 
-              key={tab.value}
-              value={tab.value} 
+              key={tabItem.value}
+              value={tabItem.value} 
               className={cn(
                 "tab-running-lines-border",
                 "data-[state=active]:text-primary-foreground",
                 "data-[state=inactive]:text-muted-foreground hover:text-foreground"
               )}
               disabled={
-                (tab.value === "code" && overallPrimaryLoading) || 
-                (tab.value === "suggestions" && isLoadingSuggestions) ||
-                (tab.value === "gas" && isLoadingGasEstimation) ||
-                (tab.value === "tests" && isLoadingTestCases) ||
-                (tab.value !== "code" && overallPrimaryLoading) 
+                (tabItem.value === "code" && overallPrimaryLoading) || 
+                (tabItem.value === "suggestions" && (isLoadingSuggestions || overallPrimaryLoading)) ||
+                (tabItem.value === "gas" && (isLoadingGasEstimation || overallPrimaryLoading)) ||
+                (tabItem.value === "tests" && (isLoadingTestCases || overallPrimaryLoading)) ||
+                (tabItem.value !== "code" && overallPrimaryLoading) 
               }
             >
               <span className="tab-running-lines-content flex items-center justify-center gap-2 px-3 py-2.5 text-sm md:text-base">
-                <tab.icon className="h-5 w-5" /> {tab.label}
+                <tabItem.icon className="h-5 w-5" /> {tabItem.label}
               </span>
             </TabsTrigger>
           ))}
@@ -270,11 +267,11 @@ export function CodeDisplay({
 
         <TabsContent value="code" className="flex-grow flex flex-col overflow-hidden rounded-lg border bg-muted/20 glow-border-yellow">
           <ScrollArea className="flex-grow">
-            {isLoadingCode ? ( // This covers refinement too if it re-uses isLoadingCode
+            {overallPrimaryLoading && !isRefiningCode ? ( 
               <div className="p-6 space-y-3">
                 {[...Array(12)].map((_, i) => <Skeleton key={i} className={`h-5 ${i % 3 === 0 ? 'w-3/4' : i % 3 === 1 ? 'w-full' : 'w-5/6'} bg-muted/50`} />)}
               </div>
-            ) : ( // code is guaranteed to exist here due to outer check
+            ) : ( 
               <SyntaxHighlighter
                 language="solidity"
                 style={customSyntaxHighlighterStyle}
@@ -287,7 +284,6 @@ export function CodeDisplay({
               </SyntaxHighlighter>
             )}
           </ScrollArea>
-          {/* Refinement section */}
           <div className="p-4 md:p-6 border-t border-border/30 bg-card/50 mt-auto">
             <Label 
               htmlFor="refinementRequest" 
@@ -320,8 +316,8 @@ export function CodeDisplay({
           </div>
         </TabsContent>
 
-        <TabsContent value="suggestions" className="flex-grow overflow-hidden rounded-lg border bg-muted/20 glow-border-yellow">
-          <ScrollArea className="h-full p-1">
+        <TabsContent value="suggestions" className="flex-grow flex flex-col overflow-hidden rounded-lg border bg-muted/20 glow-border-yellow">
+          <ScrollArea className="h-full flex-grow p-1">
             {isLoadingSuggestions ? (
                <div className="p-6 space-y-4">
                 {[...Array(5)].map((_, i) => <Skeleton key={i} className={`h-16 ${i % 2 === 0 ? 'w-3/4' : 'w-full'} bg-muted/50`} />)}
@@ -358,8 +354,8 @@ export function CodeDisplay({
           </ScrollArea>
         </TabsContent>
 
-        <TabsContent value="gas" className="flex-grow overflow-hidden rounded-lg border bg-muted/20 glow-border-yellow">
-          <ScrollArea className="h-full p-1">
+        <TabsContent value="gas" className="flex-grow flex flex-col overflow-hidden rounded-lg border bg-muted/20 glow-border-yellow">
+          <ScrollArea className="h-full flex-grow p-1">
             {isLoadingGasEstimation ? (
               <div className="p-6 space-y-4">
                 {[...Array(4)].map((_, i) => <Skeleton key={i} className={`h-20 ${i % 2 === 0 ? 'w-3/4' : 'w-full'} bg-muted/50`} />)}
@@ -392,8 +388,8 @@ export function CodeDisplay({
           </ScrollArea>
         </TabsContent>
 
-        <TabsContent value="tests" className="flex-grow overflow-hidden rounded-lg border bg-muted/20 glow-border-yellow">
-          <ScrollArea className="h-full">
+        <TabsContent value="tests" className="flex-grow flex flex-col overflow-hidden rounded-lg border bg-muted/20 glow-border-yellow">
+          <ScrollArea className="h-full flex-grow">
             {isLoadingTestCases ? (
               <div className="p-6 space-y-3">
                 {[...Array(12)].map((_, i) => <Skeleton key={i} className={`h-5 ${i % 3 === 0 ? 'w-3/4' : i % 3 === 1 ? 'w-full' : 'w-5/6'} bg-muted/50`} />)}
@@ -417,9 +413,11 @@ export function CodeDisplay({
             )}
           </ScrollArea>
         </TabsContent>
+      </Tabs>
 
-        {/* Analysis Action Buttons - Placed below tabs, visible if code exists */}
-        <div className="pt-6 mt-auto space-y-4 border-t border-border/30"> {/* mt-auto here might be tricky with flex-grow on Tabs */}
+      {/* Analysis Action Buttons */}
+      {code && !overallPrimaryLoading && (
+         <div className="pt-6 mt-auto space-y-4 border-t border-border/30">
           <h3 className="text-center text-lg font-semibold mb-2">
             <span className="animate-text-multicolor-glow">Post-Forge Analysis & Augmentation</span>
           </h3>
@@ -482,7 +480,7 @@ export function CodeDisplay({
             </Button>
           </div>
         </div>
-      </Tabs>
+      )}
     </div>
   );
 }
