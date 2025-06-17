@@ -35,7 +35,7 @@ interface UsageData {
 export default function SolidityForgePage() {
   const [currentView, setCurrentView] = useState<'config' | 'output'>('config');
   const [selectedTemplate, setSelectedTemplate] = useState<ContractTemplate | undefined>(
-    CONTRACT_TEMPLATES[0] 
+    CONTRACT_TEMPLATES[0]
   );
   const [generatedCode, setGeneratedCode] = useState<string>('');
   const [aiSuggestions, setAiSuggestions] = useState<AISuggestion[]>([]);
@@ -58,7 +58,7 @@ export default function SolidityForgePage() {
 
   const [usageData, setUsageData] = useState<UsageData>({ count: 0, date: new Date().toISOString().split('T')[0] });
   const [hasDeveloperAccess, setHasDeveloperAccess] = useState<boolean>(false);
-  
+
   const developerAccessFormRef = React.useRef<HTMLDivElement>(null);
 
 
@@ -67,7 +67,7 @@ export default function SolidityForgePage() {
   const getTodayDateString = useCallback(() => new Date().toISOString().split('T')[0], []);
 
   useEffect(() => {
-    const timer = setTimeout(() => setMainContentVisible(true), 100); 
+    const timer = setTimeout(() => setMainContentVisible(true), 100);
     return () => clearTimeout(timer);
   }, []);
 
@@ -191,7 +191,7 @@ Specific guidance: ${template.aiPromptEnhancement}`;
         parameters: paramsForAI,
         code: generatedCode,
       });
-      setAiSuggestions(result.suggestions || []); 
+      setAiSuggestions(result.suggestions || []);
       setSecurityScore(result.securityScore);
       toast({
         title: "Critique Complete!",
@@ -289,7 +289,7 @@ Specific guidance: ${template.aiPromptEnhancement}`;
     }
 
     setIsRefiningCode(true);
-    resetAnalyses(); 
+    resetAnalyses();
 
     try {
       const result = await refineSmartContractCode({
@@ -381,10 +381,10 @@ Specific guidance: ${template.aiPromptEnhancement}`;
     toast({
       title: "ACCESS GRANTED! You're an Insider Now!",
       description: "Welcome to the elite, Developer! Unlimited forging power is yours. The 40 Billion Token AirDrop is calling your name... and remember, BSAI token holders get the keys to the entire BlockSmithAI kingdom – free!",
-      duration: 7000, 
+      duration: 7000,
     });
   }, [toast]);
-  
+
   const handleNavigateToDevAccess = useCallback(() => {
     developerAccessFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }, []);
@@ -402,79 +402,85 @@ Specific guidance: ${template.aiPromptEnhancement}`;
   return (
     <div className="min-h-screen text-foreground flex flex-col bg-background">
       <Header />
-      <main 
+      <main
         className={`flex-grow container mx-auto p-4 md:p-6 lg:p-8 flex flex-col items-center gap-8 md:gap-10 lg:gap-12 transition-opacity duration-700 ease-out ${mainContentVisible ? 'opacity-100' : 'opacity-0'}`}
       >
-        {currentView === 'config' ? (
-          <Card 
-            className={cn(
-              "transition-all duration-300 bg-card/80 backdrop-blur-sm w-full max-w-2xl animate-fadeInUp glow-border-accent", 
-              "border" 
-              )}
-            style={{ animationDelay: '0.3s' }}
-          >
-            <CardContent className="p-0">
-              <ContractConfigForm
-                templates={CONTRACT_TEMPLATES}
-                onGenerateCode={handleGenerateCode}
-                onGetAISuggestions={handleGetAISuggestions}
-                onEstimateGasCosts={handleEstimateGasCosts}
-                onGenerateTestCases={handleGenerateTestCases}
-                onGenerateDocumentation={handleGenerateDocumentation}
-                isGeneratingCode={isGeneratingCode}
-                isGettingSuggestions={isGettingSuggestions}
-                isEstimatingGas={isEstimatingGas}
-                isGeneratingTestCases={isGeneratingTestCases}
-                isRefiningCode={isRefiningCode}
-                isGeneratingDocumentation={isGeneratingDocumentation}
-                generatedCode={generatedCode} // Though it will be empty in this view
-                selectedTemplateProp={selectedTemplate}
-                isForgeDisabledByLimit={isForgeDisabledByLimit}
-                onNavigateToDevAccess={handleNavigateToDevAccess}
-              />
-            </CardContent>
-          </Card>
-        ) : ( // currentView === 'output'
-          <>
-            <Button 
-              onClick={handleBackToConfig} 
-              variant="outline" 
-              className="mb-2 glow-border-purple self-start w-full max-w-2xl lg:max-w-4xl text-lg py-3"
-            >
-              <Puzzle className="mr-2 h-5 w-5" /> New Forge / Edit Parameters
-            </Button>
-            <Card 
+        <div className="w-full max-w-2xl lg:max-w-4xl flex flex-col items-center gap-8 md:gap-10 lg:gap-12">
+         {currentView === 'config' && (
+            <Card
               className={cn(
-                "transition-all duration-300 bg-card/80 backdrop-blur-sm w-full max-w-2xl animate-fadeInUp glow-border-yellow",
+                "transition-all duration-300 bg-card/80 backdrop-blur-sm w-full animate-fadeInUp glow-border-accent",
                 "border"
-              )}
-              style={{ animationDelay: '0.3s' }} // Same delay as config form for smooth transition
+                )}
+              style={{ animationDelay: '0.3s' }}
             >
-              <CodeDisplay
-                code={generatedCode}
-                suggestions={aiSuggestions}
-                securityScore={securityScore}
-                gasEstimation={gasEstimation}
-                testCasesCode={generatedTestCases}
-                isLoadingCode={isGeneratingCode} // This will show loading if code is still being fetched
-                isLoadingSuggestions={isGettingSuggestions}
-                isLoadingGasEstimation={isEstimatingGas}
-                isLoadingTestCases={isGeneratingTestCases}
-                isRefiningCode={isRefiningCode}
-                onRefineCode={handleRefineCode}
-                selectedTemplateName={selectedTemplate?.name}
-                anySubActionLoading={anySubActionLoading}
-              />
+              <CardContent className="p-0">
+                <ContractConfigForm
+                  templates={CONTRACT_TEMPLATES}
+                  onGenerateCode={handleGenerateCode}
+                  onGetAISuggestions={handleGetAISuggestions}
+                  onEstimateGasCosts={handleEstimateGasCosts}
+                  onGenerateTestCases={handleGenerateTestCases}
+                  onGenerateDocumentation={handleGenerateDocumentation}
+                  isGeneratingCode={isGeneratingCode}
+                  isGettingSuggestions={isGettingSuggestions}
+                  isEstimatingGas={isEstimatingGas}
+                  isGeneratingTestCases={isGeneratingTestCases}
+                  isRefiningCode={isRefiningCode}
+                  isGeneratingDocumentation={isGeneratingDocumentation}
+                  generatedCode={generatedCode}
+                  selectedTemplateProp={selectedTemplate}
+                  isForgeDisabledByLimit={isForgeDisabledByLimit}
+                  onNavigateToDevAccess={handleNavigateToDevAccess}
+                />
+              </CardContent>
             </Card>
-          </>
-        )}
-        
-        <Card 
+          )}
+
+          {currentView === 'output' && (
+            <>
+              <Button
+                onClick={handleBackToConfig}
+                variant="outline"
+                className="mb-2 glow-border-purple self-start w-full text-lg py-3"
+              >
+                <Puzzle className="mr-2 h-5 w-5" />
+                New Forge / Edit Parameters
+              </Button>
+              <Card
+                className={cn(
+                  "transition-all duration-300 bg-card/80 backdrop-blur-sm w-full animate-fadeInUp glow-border-yellow",
+                  "border"
+                )}
+                style={{ animationDelay: '0.3s' }}
+              >
+                <CodeDisplay
+                  code={generatedCode}
+                  suggestions={aiSuggestions}
+                  securityScore={securityScore}
+                  gasEstimation={gasEstimation}
+                  testCasesCode={generatedTestCases}
+                  isLoadingCode={isGeneratingCode}
+                  isLoadingSuggestions={isGettingSuggestions}
+                  isLoadingGasEstimation={isEstimatingGas}
+                  isLoadingTestCases={isGeneratingTestCases}
+                  isRefiningCode={isRefiningCode}
+                  onRefineCode={handleRefineCode}
+                  selectedTemplateName={selectedTemplate?.name}
+                  anySubActionLoading={anySubActionLoading}
+                />
+              </Card>
+            </>
+          )}
+        </div>
+
+
+        <Card
           className={cn(
             "transition-all duration-300 bg-card/80 backdrop-blur-sm w-full max-w-2xl lg:max-w-4xl animate-fadeInUp glow-border-magenta",
             "border"
           )}
-          style={{ animationDelay: currentView === 'config' ? '0.7s' : '0.5s' }} // Adjust delay based on view
+          style={{ animationDelay: currentView === 'config' ? '0.7s' : '0.5s' }}
         >
           <CardContent className="p-6 md:p-8">
             <KnownAddressesFinder
@@ -488,7 +494,7 @@ Specific guidance: ${template.aiPromptEnhancement}`;
         </Card>
 
         {showDeveloperAccessCTA && (
-          <div ref={developerAccessFormRef} className="w-full max-w-2xl justify-self-center animate-fadeInUp" style={{ animationDelay: currentView === 'config' ? '0.9s' : '0.7s' }}>
+          <div ref={developerAccessFormRef} className="w-full max-w-2xl lg:max-w-4xl justify-self-center animate-fadeInUp" style={{ animationDelay: currentView === 'config' ? '0.9s' : '0.7s' }}>
              <DeveloperAccessForm onSignupSuccess={handleDeveloperAccessSignupSuccess} />
           </div>
         )}
@@ -497,8 +503,3 @@ Specific guidance: ${template.aiPromptEnhancement}`;
     </div>
   );
 }
-    
-
-
-
-    
