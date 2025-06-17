@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CardTitle, CardDescription } from '@/components/ui/card';
-import { AlertTriangle, ArrowDownCircle, Loader2, Wand2, Brain, Fuel, Beaker, FileText as FileTextIconLucide } from 'lucide-react'; // Renamed FileText import
+import { AlertTriangle, ArrowDownCircle, Loader2, Wand2, Eraser } from 'lucide-react';
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from '@/lib/utils';
@@ -103,40 +103,24 @@ const getParameterGroups = (template: ContractTemplate, isAdvancedMode: boolean)
 interface ContractConfigFormProps {
   templates: ContractTemplate[];
   onGenerateCode: (template: ContractTemplate, formData: FormData) => Promise<void>;
-  onGetAISuggestions: (template: ContractTemplate, formData: FormData) => Promise<void>;
-  onEstimateGasCosts: () => Promise<void>;
-  onGenerateTestCases: () => Promise<void>;
-  onGenerateDocumentation: () => Promise<void>;
   isGeneratingCode: boolean;
-  isGettingSuggestions: boolean;
-  isEstimatingGas: boolean;
-  isGeneratingTestCases: boolean;
-  isRefiningCode: boolean;
-  isGeneratingDocumentation: boolean;
-  generatedCode: string;
   selectedTemplateProp?: ContractTemplate;
   isForgeDisabledByLimit: boolean;
   onNavigateToDevAccess: () => void;
+  onResetForge: () => void;
+  hasGeneratedCode: boolean;
 }
 
 
 const ContractConfigForm = React.memo(({
   templates,
   onGenerateCode,
-  onGetAISuggestions,
-  onEstimateGasCosts,
-  onGenerateTestCases,
-  onGenerateDocumentation,
   isGeneratingCode,
-  isGettingSuggestions,
-  isEstimatingGas,
-  isGeneratingTestCases,
-  isRefiningCode,
-  isGeneratingDocumentation,
-  generatedCode,
   selectedTemplateProp,
   isForgeDisabledByLimit,
   onNavigateToDevAccess,
+  onResetForge,
+  hasGeneratedCode,
 }: ContractConfigFormProps) => {
   const [selectedTemplate, setSelectedTemplate] = useState<ContractTemplate | undefined>(selectedTemplateProp || templates[0]);
   const [isAdvancedMode, setIsAdvancedMode] = useState(false);
@@ -150,7 +134,7 @@ const ContractConfigForm = React.memo(({
       return acc;
     }, {} as FormData) || {}
   });
-  const { handleSubmit, reset, getValues } = methods;
+  const { handleSubmit, reset } = methods;
 
 
   useEffect(() => {
@@ -195,29 +179,6 @@ const ContractConfigForm = React.memo(({
     }
   }, [selectedTemplate, onGenerateCode]);
 
-  const handleAISuggestionsClick = useCallback(async () => {
-    if (selectedTemplate) {
-      const formData = getValues();
-      await onGetAISuggestions(selectedTemplate, formData);
-    }
-  }, [selectedTemplate, onGetAISuggestions, getValues]);
-
-  const handleEstimateGasClick = useCallback(async () => {
-    await onEstimateGasCosts();
-  }, [onEstimateGasCosts]);
-
-  const handleGenerateTestCasesClick = useCallback(async () => {
-    await onGenerateTestCases();
-  }, [onGenerateTestCases]);
-
-  const handleGenerateDocumentationClick = useCallback(async () => {
-    await onGenerateDocumentation();
-  }, [onGenerateDocumentation]);
-
-
-  const anyPrimaryActionLoading = isGeneratingCode || isRefiningCode;
-  const anySubActionLoading = isGettingSuggestions || isEstimatingGas || isGeneratingTestCases || isRefiningCode || isGeneratingDocumentation;
-
   const parameterGroups = useMemo(() => selectedTemplate ? getParameterGroups(selectedTemplate, isAdvancedMode) : [], [selectedTemplate, isAdvancedMode]);
 
   const parameterConfigurationSection = selectedTemplate && (
@@ -229,7 +190,7 @@ const ContractConfigForm = React.memo(({
             <ParameterInputDisplay
               key={param.name}
               param={param}
-              anyPrimaryActionLoading={anyPrimaryActionLoading}
+              anyPrimaryActionLoading={isGeneratingCode}
               contractTypeName={selectedTemplate.name}
             />
           ))}
@@ -240,16 +201,16 @@ const ContractConfigForm = React.memo(({
           orientation="vertical"
           value={activeTabValue}
           onValueChange={setActiveTabValue}
-          className="flex flex-col md:flex-row gap-6 md:gap-8 min-h-[300px]"
+          className="flex flex-col md:flex-row gap-6 md:gap-8 min-h-[300px] max-h-[calc(100vh-25rem)]" // Adjusted max-h
         >
-          <TabsList className="flex flex-row md:flex-col md:space-y-2 md:w-60 shrink-0 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 bg-transparent p-0">
+          <TabsList className="flex flex-row md:flex-col md:space-y-2 md:w-60 shrink-0 overflow-x-auto md:overflow-y-auto md:overflow-x-visible pb-2 md:pb-0 bg-transparent p-0">
             {parameterGroups.map((group) => {
               const tabValue = group.title.toLowerCase().replace(/\s+/g, '-');
               return (
                 <TabsTrigger
                   key={tabValue}
                   value={tabValue}
-                  disabled={anyPrimaryActionLoading && activeTabValue !== tabValue}
+                  disabled={isGeneratingCode && activeTabValue !== tabValue}
                   className={cn(
                     "tab-running-lines-border param-tab-trigger",
                     "data-[state=active]:text-primary-foreground",
@@ -263,7 +224,7 @@ const ContractConfigForm = React.memo(({
               );
             })}
           </TabsList>
-          <div className="flex-grow min-w-0 p-1 rounded-md border border-border/20 bg-card/30 max-h-[70vh] overflow-y-auto">
+          <div className="flex-grow min-w-0 p-1 rounded-md border border-border/20 bg-card/30 h-full overflow-y-auto">
             {parameterGroups.map(group => {
               const tabValue = group.title.toLowerCase().replace(/\s+/g, '-');
               return (
@@ -272,7 +233,7 @@ const ContractConfigForm = React.memo(({
                      <ParameterInputDisplay
                         key={param.name}
                         param={param}
-                        anyPrimaryActionLoading={anyPrimaryActionLoading}
+                        anyPrimaryActionLoading={isGeneratingCode}
                         contractTypeName={selectedTemplate.name}
                       />
                   )) : <p className="text-base text-muted-foreground p-4 text-center">No parameters in this section for the current mode.</p>}
@@ -287,7 +248,7 @@ const ContractConfigForm = React.memo(({
 
 
   return (
-    <div className="space-y-8 p-4 md:p-6 lg:p-8">
+    <div className="space-y-8 p-4 md:p-6 lg:p-8 h-full flex flex-col">
       <div className="text-center">
         <CardTitle className="text-3xl font-headline mb-3">
             <ScrambledText
@@ -301,7 +262,7 @@ const ContractConfigForm = React.memo(({
          <AnimatedSubtitle text={subtitleText} />
       </div>
 
-      <div className="space-y-6 mb-10">
+      <div className="space-y-6 mb-6">
         <div className="space-y-3">
           <Label
             htmlFor="contractType"
@@ -313,7 +274,7 @@ const ContractConfigForm = React.memo(({
             <br />
             <span className="animate-text-multicolor-glow">(Contract Type)</span>
           </Label>
-          <Select onValueChange={handleTemplateChange} defaultValue={selectedTemplate?.id} disabled={anyPrimaryActionLoading}>
+          <Select onValueChange={handleTemplateChange} defaultValue={selectedTemplate?.id} disabled={isGeneratingCode}>
             <SelectTrigger id="contractType" className="glow-border-purple bg-background/70 focus:bg-background text-base py-6">
               <SelectValue placeholder="Choose Your Genesis Blueprint" />
             </SelectTrigger>
@@ -350,7 +311,7 @@ const ContractConfigForm = React.memo(({
                 checked={isAdvancedMode}
                 onCheckedChange={setIsAdvancedMode}
                 aria-label={isAdvancedMode ? "Switch to Basic Mode" : "Switch to Advanced Mode"}
-                disabled={anyPrimaryActionLoading}
+                disabled={isGeneratingCode}
               />
               <span className="text-sm text-muted-foreground">Advanced</span>
             </div>
@@ -360,24 +321,38 @@ const ContractConfigForm = React.memo(({
 
     <FormProvider {...methods}>
       {selectedTemplate && (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 flex-grow flex flex-col">
+          <div className="flex-grow">
+            {parameterConfigurationSection}
+          </div>
 
-          {parameterConfigurationSection}
-
-
-          <div className="pt-8 border-t border-border/20">
-            <Button
-              type="submit"
-              disabled={anyPrimaryActionLoading || isForgeDisabledByLimit}
-              className="w-full glow-border-primary bg-primary text-primary-foreground hover:bg-primary/90 text-lg py-6"
-            >
-              {isGeneratingCode ? (
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-              ) : (
-                <Wand2 className="mr-2 h-5 w-5" />
-              )}
-              {isGeneratingCode ? 'Forging...' : 'Forge Contract'}
-            </Button>
+          <div className="pt-6 border-t border-border/20 mt-auto">
+            <div className="flex flex-col sm:flex-row gap-3">
+                <Button
+                  type="submit"
+                  disabled={isGeneratingCode || isForgeDisabledByLimit}
+                  className="w-full sm:flex-1 glow-border-primary bg-primary text-primary-foreground hover:bg-primary/90 text-lg py-6"
+                >
+                  {isGeneratingCode ? (
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  ) : (
+                    <Wand2 className="mr-2 h-5 w-5" />
+                  )}
+                  {isGeneratingCode ? 'Forging...' : 'Forge Contract'}
+                </Button>
+                {hasGeneratedCode && (
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={onResetForge}
+                        disabled={isGeneratingCode}
+                        className="w-full sm:w-auto glow-border-purple text-lg py-6"
+                    >
+                        <Eraser className="mr-2 h-5 w-5" />
+                        Clear & Reset
+                    </Button>
+                )}
+            </div>
             {isForgeDisabledByLimit && (
               <div className="mt-4 p-3 bg-destructive/10 border border-destructive/30 rounded-md text-center">
                 <p className="text-sm text-destructive-foreground flex items-center justify-center gap-2">
@@ -398,73 +373,6 @@ const ContractConfigForm = React.memo(({
               </div>
             )}
           </div>
-
-
-          {generatedCode && (
-            <div className="pt-6 space-y-4 border-t border-border/20">
-              <h3 className="text-center text-lg font-semibold mb-2">
-                <span className="animate-text-multicolor-glow">Post-Forge Analysis & Augmentation</span>
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleAISuggestionsClick}
-                  disabled={anySubActionLoading || isGeneratingCode || !generatedCode}
-                  className="w-full glow-border-purple hover:bg-accent/10 hover:text-accent-foreground text-lg py-6"
-                >
-                  {isGettingSuggestions ? (
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  ) : (
-                     <Brain className="mr-2 h-5 w-5" />
-                  )}
-                  AI Scrutiny
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleEstimateGasClick}
-                  disabled={anySubActionLoading || isGeneratingCode || !generatedCode}
-                  className="w-full glow-border-purple hover:bg-accent/10 hover:text-accent-foreground text-lg py-6"
-                >
-                  {isEstimatingGas ? (
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  ) : (
-                     <Fuel className="mr-2 h-5 w-5" />
-                  )}
-                  Query Gas Oracle
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleGenerateTestCasesClick}
-                  disabled={anySubActionLoading || isGeneratingCode || !generatedCode}
-                  className="w-full glow-border-purple hover:bg-accent/10 hover:text-accent-foreground text-lg py-6"
-                >
-                  {isGeneratingTestCases ? (
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  ) : (
-                     <Beaker className="mr-2 h-5 w-5" />
-                   )}
-                  Conjure Test Suite
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleGenerateDocumentationClick}
-                  disabled={anySubActionLoading || isGeneratingCode || !generatedCode}
-                  className="w-full glow-border-purple hover:bg-accent/10 hover:text-accent-foreground text-lg py-6"
-                >
-                  {isGeneratingDocumentation ? (
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  ) : (
-                     <FileTextIconLucide className="mr-2 h-5 w-5" />
-                  )}
-                  Scribe Docs
-                </Button>
-              </div>
-            </div>
-          )}
         </form>
       )}
     </FormProvider>
@@ -474,3 +382,4 @@ const ContractConfigForm = React.memo(({
 
 ContractConfigForm.displayName = "ContractConfigForm";
 export { ContractConfigForm };
+    

@@ -1,14 +1,14 @@
 
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ExternalLink, Lightbulb, Copy, Check, ShieldAlert, Zap, Wrench, Info, Fuel, Coins, Beaker, Sparkles, Loader2, Code2 } from 'lucide-react';
+import { ExternalLink, Lightbulb, Copy, Check, ShieldAlert, Zap, Wrench, Info, Fuel, Coins, Beaker, Sparkles, Loader2, Code2, Brain, FileText as FileTextIconLucide } from 'lucide-react';
 import { CardTitle, CardDescription, CardHeader, CardContent as ShadCNCardContent } from '@/components/ui/card';
 import { Badge, type BadgeProps } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -17,7 +17,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from "@/hooks/use-toast";
 import type { EstimateGasCostOutput } from '@/ai/flows/estimate-gas-cost';
 import { cn } from '@/lib/utils';
-
+import type { ContractTemplate, FormData } from '@/config/contracts'; // Import FormData
 
 export type AISuggestionType = 'security' | 'optimization' | 'gas_saving' | 'best_practice' | 'informational';
 export type AISuggestionSeverity = 'critical' | 'high' | 'medium' | 'low' | 'info';
@@ -40,9 +40,14 @@ interface CodeDisplayProps {
   isLoadingGasEstimation: boolean;
   isLoadingTestCases: boolean;
   isRefiningCode: boolean;
+  isGeneratingDocumentation: boolean;
   onRefineCode: (request: string) => Promise<void>;
-  selectedTemplateName?: string;
+  selectedTemplate?: ContractTemplate;
   anySubActionLoading: boolean;
+  onGetAISuggestions: (template: ContractTemplate, formData: FormData) => Promise<void>;
+  onEstimateGasCosts: () => Promise<void>;
+  onGenerateTestCases: () => Promise<void>;
+  onGenerateDocumentation: () => Promise<void>;
 }
 
 export function CodeDisplay({
@@ -56,9 +61,14 @@ export function CodeDisplay({
   isLoadingGasEstimation,
   isLoadingTestCases,
   isRefiningCode,
+  isGeneratingDocumentation,
   onRefineCode,
-  selectedTemplateName,
+  selectedTemplate,
   anySubActionLoading,
+  onGetAISuggestions,
+  onEstimateGasCosts,
+  onGenerateTestCases,
+  onGenerateDocumentation,
 }: CodeDisplayProps) {
   const [activeTab, setActiveTab] = useState("code");
   const [copiedStates, setCopiedStates] = useState<{ [key: string]: boolean }>({});
@@ -165,7 +175,7 @@ export function CodeDisplay({
       ...vscDarkPlus['pre[class*="language-"]'],
       backgroundColor: 'transparent', 
       margin: 0, 
-      padding: '1.5rem', 
+      padding: '1rem 1.5rem', // Adjusted padding
       fontSize: '0.9rem', 
       fontFamily: 'var(--font-code)', 
       lineHeight: '1.7',
@@ -176,10 +186,18 @@ export function CodeDisplay({
     }
   };
 
+  const handleAISuggestionsClick = useCallback(async () => {
+    if (selectedTemplate) {
+      // For simplicity, we assume FormData is not needed here or is empty
+      // If specific form data is needed, it would have to be passed down or fetched differently
+      await onGetAISuggestions(selectedTemplate, {}); 
+    }
+  }, [selectedTemplate, onGetAISuggestions]);
+
 
   return (
     <div className="flex flex-col h-full p-4 md:p-6 lg:p-8">
-      <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-8 gap-4 text-center sm:text-left">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4 text-center sm:text-left">
         <div>
             <CardTitle className="text-3xl font-headline text-glow-primary mb-2">The Alchemist's Output</CardTitle>
             <CardDescription className="text-base text-muted-foreground">Witness the digital alchemy! Your instructions, my execution. Mostly.</CardDescription>
@@ -205,8 +223,8 @@ export function CodeDisplay({
         )}
       </div>
       
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-grow flex flex-col">
-        <TabsList className="mb-8 grid w-full grid-cols-2 sm:grid-cols-4 gap-2 p-1.5 rounded-lg bg-card/30 border border-border/20">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-grow flex flex-col min-h-0"> {/* Added min-h-0 */}
+        <TabsList className="mb-6 grid w-full grid-cols-2 sm:grid-cols-4 gap-2 p-1.5 rounded-lg bg-card/30 border border-border/20">
           {[
             { value: "code", label: "Code", icon: Code2 },
             { value: "suggestions", label: "AI Insights", icon: Lightbulb },
@@ -221,7 +239,14 @@ export function CodeDisplay({
                 "data-[state=active]:text-primary-foreground",
                 "data-[state=inactive]:text-muted-foreground hover:text-foreground"
               )}
-              disabled={(tab.value !== "code" && (!code && (tab.value === "suggestions" ? !isLoadingSuggestions : tab.value === "gas" ? !isLoadingGasEstimation : !isLoadingTestCases))) || overallLoading}
+              disabled={
+                (tab.value !== "code" && !code) || // Disable non-code tabs if no code
+                (tab.value === "code" && overallLoading) || // Disable code tab only if overall loading (generation/refinement)
+                (tab.value === "suggestions" && isLoadingSuggestions) ||
+                (tab.value === "gas" && isLoadingGasEstimation) ||
+                (tab.value === "tests" && isLoadingTestCases) ||
+                (tab.value !== "code" && overallLoading) // Disable other tabs if generation/refinement in progress
+              }
             >
               <span className="tab-running-lines-content flex items-center justify-center gap-2 px-3 py-2.5 text-sm md:text-base">
                 <tab.icon className="h-5 w-5" /> {tab.label}
@@ -250,7 +275,7 @@ export function CodeDisplay({
             ) : (
               <div className="p-8 text-center text-muted-foreground flex flex-col items-center justify-center h-full min-h-[250px]">
                 <Code2 className="w-16 h-16 mb-6 text-muted-foreground/50" />
-                <p className="text-base">The codex awaits your command. Generate something, and it shall appear.</p>
+                <p className="text-base">The codex awaits your command. Use the "Blueprint" panel to generate. My power needs your input!</p>
               </div>
             )}
           </ScrollArea>
@@ -289,7 +314,7 @@ export function CodeDisplay({
         </TabsContent>
 
         <TabsContent value="suggestions" className="flex-grow overflow-hidden rounded-lg border bg-muted/20 glow-border-yellow">
-          <ScrollArea className="h-full max-h-[calc(100vh-25rem)] p-1"> 
+          <ScrollArea className="h-full max-h-[calc(100vh-30rem)] p-1"> {/* Adjusted max-h */}
             {isLoadingSuggestions ? (
                <div className="p-6 space-y-4">
                 {[...Array(5)].map((_, i) => <Skeleton key={i} className={`h-16 ${i % 2 === 0 ? 'w-3/4' : 'w-full'} bg-muted/50`} />)}
@@ -320,7 +345,7 @@ export function CodeDisplay({
             ) : code && !isLoadingCode && !overallLoading ? (
                  <div className="p-8 text-center text-muted-foreground flex flex-col items-center justify-center h-full min-h-[250px]">
                     <Lightbulb className="w-16 h-16 mb-6 text-muted-foreground/50" />
-                    <p className="text-base">My analysis chamber is idle. Your code might be perfect (ha!), or you simply haven't requested my critique.</p>
+                    <p className="text-base">My analysis chamber is idle. Your code might be perfect (ha!), or you simply haven't requested my critique using the "AI Scrutiny" button below.</p>
                  </div>
             ) : (
               <div className="p-8 text-center text-muted-foreground flex flex-col items-center justify-center h-full min-h-[250px]">
@@ -332,7 +357,7 @@ export function CodeDisplay({
         </TabsContent>
 
         <TabsContent value="gas" className="flex-grow overflow-hidden rounded-lg border bg-muted/20 glow-border-yellow">
-          <ScrollArea className="h-full max-h-[calc(100vh-25rem)] p-1">
+          <ScrollArea className="h-full max-h-[calc(100vh-30rem)] p-1">
             {isLoadingGasEstimation ? (
               <div className="p-6 space-y-4">
                 {[...Array(4)].map((_, i) => <Skeleton key={i} className={`h-20 ${i % 2 === 0 ? 'w-3/4' : 'w-full'} bg-muted/50`} />)}
@@ -359,7 +384,7 @@ export function CodeDisplay({
             ) : code && !isLoadingCode && !overallLoading ? (
               <div className="p-8 text-center text-muted-foreground flex flex-col items-center justify-center h-full min-h-[250px]">
                 <Fuel className="w-16 h-16 mb-6 text-muted-foreground/50" />
-                <p className="text-base">Pondering the price of computation? Dare to 'Query Gas Oracle'.</p>
+                <p className="text-base">Pondering the price of computation? Dare to 'Query Gas Oracle' using the button below.</p>
               </div>
             ) : (
               <div className="p-8 text-center text-muted-foreground flex flex-col items-center justify-center h-full min-h-[250px]">
@@ -371,7 +396,7 @@ export function CodeDisplay({
         </TabsContent>
 
         <TabsContent value="tests" className="flex-grow overflow-hidden rounded-lg border bg-muted/20 glow-border-yellow">
-          <ScrollArea className="h-full max-h-[calc(100vh-25rem)]">
+          <ScrollArea className="h-full max-h-[calc(100vh-30rem)]">
             {isLoadingTestCases ? (
               <div className="p-6 space-y-3">
                 {[...Array(12)].map((_, i) => <Skeleton key={i} className={`h-5 ${i % 3 === 0 ? 'w-3/4' : i % 3 === 1 ? 'w-full' : 'w-5/6'} bg-muted/50`} />)}
@@ -390,7 +415,7 @@ export function CodeDisplay({
             ) : code && !isLoadingCode && !overallLoading ? (
               <div className="p-8 text-center text-muted-foreground flex flex-col items-center justify-center h-full min-h-[250px]">
                 <Beaker className="w-16 h-16 mb-6 text-muted-foreground/50" />
-                <p className="text-base">Yearning for test structures? 'Conjure Test Suite' and witness... basic tests.</p>
+                <p className="text-base">Yearning for test structures? 'Conjure Test Suite' using the button below and witness... basic tests.</p>
               </div>
             ) : (
               <div className="p-8 text-center text-muted-foreground flex flex-col items-center justify-center h-full min-h-[250px]">
@@ -400,11 +425,75 @@ export function CodeDisplay({
             )}
           </ScrollArea>
         </TabsContent>
+
+        {/* Analysis Action Buttons - only if code is generated */}
+        {code && !isLoadingCode && !isRefiningCode && (
+            <div className="pt-6 mt-4 space-y-4 border-t border-border/30">
+              <h3 className="text-center text-lg font-semibold mb-2">
+                <span className="animate-text-multicolor-glow">Post-Forge Analysis & Augmentation</span>
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleAISuggestionsClick}
+                  disabled={anySubActionLoading || isLoadingCode || !code || !selectedTemplate}
+                  className="w-full glow-border-purple hover:bg-accent/10 hover:text-accent-foreground text-base py-4"
+                >
+                  {isLoadingSuggestions ? (
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  ) : (
+                     <Brain className="mr-2 h-5 w-5" />
+                  )}
+                  AI Scrutiny
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onEstimateGasCosts}
+                  disabled={anySubActionLoading || isLoadingCode || !code}
+                  className="w-full glow-border-purple hover:bg-accent/10 hover:text-accent-foreground text-base py-4"
+                >
+                  {isLoadingGasEstimation ? (
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  ) : (
+                     <Fuel className="mr-2 h-5 w-5" />
+                  )}
+                  Query Gas Oracle
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onGenerateTestCases}
+                  disabled={anySubActionLoading || isLoadingCode || !code}
+                  className="w-full glow-border-purple hover:bg-accent/10 hover:text-accent-foreground text-base py-4"
+                >
+                  {isLoadingTestCases ? (
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  ) : (
+                     <Beaker className="mr-2 h-5 w-5" />
+                   )}
+                  Conjure Test Suite
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onGenerateDocumentation}
+                  disabled={anySubActionLoading || isLoadingCode || !code}
+                  className="w-full glow-border-purple hover:bg-accent/10 hover:text-accent-foreground text-base py-4"
+                >
+                  {isGeneratingDocumentation ? (
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  ) : (
+                     <FileTextIconLucide className="mr-2 h-5 w-5" />
+                  )}
+                  Scribe Docs
+                </Button>
+              </div>
+            </div>
+          )}
       </Tabs>
     </div>
   );
 }
-
-    
-
     
