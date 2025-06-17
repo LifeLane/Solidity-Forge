@@ -40,12 +40,6 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
-
-    /* Custom Glow Colors HSL values */
-    --glow-yellow-hsl: 50 100% 50%;
-    --glow-magenta-hsl: 300 100% 50%;
-    --glow-purple-hsl: 270 80% 60%;
-    --glow-cyan-hsl: 180 70% 50%;
   }
 
   .dark {
@@ -104,228 +98,29 @@
   }
 }
 
-@keyframes pulsate-glow {
-  0%, 100% {
-    box-shadow: 0 0 6px 1px var(--current-glow-color), 0 0 8px 2px var(--current-glow-color-transparent);
-    border-color: var(--current-glow-color-border-alpha);
-  }
-  50% {
-    box-shadow: 0 0 12px 3px var(--current-glow-color), 0 0 16px 5px var(--current-glow-color-transparent);
-    border-color: var(--current-glow-color);
-  }
-}
-
-@keyframes multiColorTextGlow {
-  0%, 100% {
-    color: hsl(var(--primary)); 
-  }
-  20% {
-    color: hsl(var(--glow-cyan-hsl)); 
-  }
-  40% {
-    color: hsl(var(--glow-purple-hsl)); 
-  }
-  60% {
-    color: hsl(var(--glow-magenta-hsl)); 
-  }
-  80% {
-    color: hsl(var(--glow-yellow-hsl)); 
-  }
-}
-
+/* Simplified Tab Styling */
 @layer utilities {
-  .animate-text-multicolor-glow {
-    animation: multiColorTextGlow 10s linear infinite;
+  .param-tab-trigger {
+    @apply justify-start text-left font-medium transition-colors;
+    @apply px-3 py-2.5 text-sm md:text-base rounded-md; /* Ensure consistent padding and rounding */
   }
 
-  .text-glow-primary {
-    animation: multiColorTextGlow 10s linear infinite;
+  .param-tab-trigger[data-state="active"] {
+    @apply bg-primary/10 text-primary; /* Example active state: subtle background and primary text */
+    /* border-left: 2px solid hsl(var(--primary)); */ /* Optional: active border */
   }
   
-  .text-glow-yellow {
-    color: hsl(var(--glow-yellow-hsl));
-    text-shadow: 0 0 8px hsl(var(--glow-yellow-hsl)), 0 0 10px hsl(var(--glow-yellow-hsl));
+  .param-tab-trigger:not([data-state="active"]):hover {
+     @apply bg-muted/50 text-foreground;
   }
 
-  .glow-border-animated {
-    border: 1px solid transparent !important; 
-    animation: pulsate-glow 3s infinite alternate;
+  /* Optional: Basic glow for primary interactive elements if desired, but keep it minimal */
+  .interactive-glow-primary {
+     box-shadow: 0 0 8px 1px hsl(var(--primary) / 0.3), 0 0 10px 2px hsl(var(--primary) / 0.2);
+     border-color: hsl(var(--primary) / 0.6);
   }
-
-  .glow-border-primary {
-    @apply glow-border-animated;
-    --current-glow-color: hsl(var(--primary));
-    --current-glow-color-transparent: hsl(var(--primary) / 0.7);
-    --current-glow-color-border-alpha: hsl(var(--primary) / 0.5);
+  .interactive-glow-primary:hover {
+    box-shadow: 0 0 12px 2px hsl(var(--primary) / 0.4), 0 0 16px 3px hsl(var(--primary) / 0.3);
+    border-color: hsl(var(--primary));
   }
-  .glow-border-accent {
-    @apply glow-border-animated;
-    --current-glow-color: hsl(var(--accent));
-    --current-glow-color-transparent: hsl(var(--accent) / 0.7);
-    --current-glow-color-border-alpha: hsl(var(--accent) / 0.5);
-  }
-  .glow-border-yellow {
-    @apply glow-border-animated;
-    --current-glow-color: hsl(var(--glow-yellow-hsl));
-    --current-glow-color-transparent: hsl(var(--glow-yellow-hsl) / 0.7);
-    --current-glow-color-border-alpha: hsl(var(--glow-yellow-hsl) / 0.5);
-  }
-  .glow-border-magenta {
-    @apply glow-border-animated;
-    --current-glow-color: hsl(var(--glow-magenta-hsl));
-    --current-glow-color-transparent: hsl(var(--glow-magenta-hsl) / 0.7);
-    --current-glow-color-border-alpha: hsl(var(--glow-magenta-hsl) / 0.5);
-  }
-  .glow-border-purple {
-    @apply glow-border-animated;
-    --current-glow-color: hsl(var(--glow-purple-hsl));
-    --current-glow-color-transparent: hsl(var(--glow-purple-hsl) / 0.7);
-    --current-glow-color-border-alpha: hsl(var(--glow-purple-hsl) / 0.5);
-  }
-   .glow-border-cyan {
-    @apply glow-border-animated;
-    --current-glow-color: hsl(var(--glow-cyan-hsl));
-    --current-glow-color-transparent: hsl(var(--glow-cyan-hsl) / 0.7);
-    --current-glow-color-border-alpha: hsl(var(--glow-cyan-hsl) / 0.5);
-  }
-
-  @keyframes runningLinesSpin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-
-  .tab-running-lines-border {
-    position: relative;
-    overflow: hidden;
-    padding: 2px; 
-    border-radius: var(--radius); 
-    display: inline-flex; 
-    align-items: center;
-    justify-content: center;
-    z-index: 1;
-    border: none !important; /* Ensure no base border from * selector */
-  }
-
-  .tab-running-lines-border::before {
-    content: "";
-    position: absolute;
-    top: -50%; left: -50%;
-    width: 200%; height: 200%;
-    background: conic-gradient(
-      from 0deg,
-      hsl(var(--glow-cyan-hsl)), 
-      hsl(220 70% 50%), 
-      hsl(var(--glow-magenta-hsl)),
-      hsl(var(--accent)), 
-      hsl(var(--glow-yellow-hsl)),
-      hsl(var(--primary)), 
-      hsl(var(--glow-cyan-hsl)) 
-    );
-    animation: runningLinesSpin 6s linear infinite;
-    z-index: -2; 
-  }
-
-  .tab-running-lines-border::after {
-    content: "";
-    position: absolute;
-    top: 2px; left: 2px;
-    right: 2px; bottom: 2px;
-    background-color: hsl(var(--card)); 
-    border-radius: calc(var(--radius) - 2px); 
-    z-index: -1; 
-  }
-  
-  .tab-running-lines-border[data-state="active"]::after {
-     background-color: hsl(var(--primary) / 0.15); /* Subtle primary tint for active tab background */
-  }
-  .tab-running-lines-border:not([data-state="active"]):hover::after {
-     background-color: hsl(var(--muted) / 0.1); /* Subtle muted tint for hover background */
-  }
-
-  .tab-running-lines-content {
-    position: relative; 
-    z-index: 2;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center; 
-  }
-  
-  .tab-running-lines-border[data-state="active"] .tab-running-lines-content {
-    color: hsl(var(--primary)); /* Use primary color for text in light mode */
-  }
-  .dark .tab-running-lines-border[data-state="active"] .tab-running-lines-content {
-    color: hsl(var(--primary-foreground)); /* Use primary-foreground for text in dark mode */
-  }
-
-  .tab-running-lines-border:not([data-state="active"]) .tab-running-lines-content {
-    color: hsl(var(--muted-foreground));
-  }
-   .tab-running-lines-border:not([data-state="active"]):hover .tab-running-lines-content {
-    color: hsl(var(--foreground));
-  }
-
-  /* Styles for Vertical Parameter Tabs */
-  .param-tab-trigger { 
-    /* Inherits .tab-running-lines-border for the border effect */
-    /* Specific adjustments for vertical layout */
-    border-right: none; 
-    margin-bottom: 0.5rem; /* Space between vertical tabs */
-    text-align: left; 
-    font-weight: 500; 
-    transition: all 0.2s ease-in-out;
-    width: 100%; 
-    /* Ensure border radius is applied correctly for vertical tabs */
-    border-radius: var(--radius) !important; /* Override default radius if needed for the wrapper */
-  }
-  
-  .param-tab-trigger .tab-running-lines-content {
-    justify-content: flex-start; /* Align content (text) to the left */
-    padding: 0.75rem 1rem; /* Inner padding for text */
-    border-radius: calc(var(--radius) - 2px); /* Match inner radius for content background */
-  }
-
-  .param-tab-trigger[data-state="active"] .tab-running-lines-content {
-    /* background-color: hsl(var(--primary) / 0.1); /* Active tab background tint */
-    /* Color is handled by .tab-running-lines-border[data-state="active"] .tab-running-lines-content */
-  }
-
-  .param-tab-trigger:not([data-state="active"]) .tab-running-lines-content {
-    opacity: 0.8;
-  }
-  .param-tab-trigger:hover:not([data-state="active"]) .tab-running-lines-content {
-    opacity: 1;
-    /* background-color: hsl(var(--muted) / 0.05); /* Hover background tint for inactive tabs */
-  }
-
-}
-
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fadeInUp {
-  animation: fadeInUp 0.5s ease-out forwards;
-}
-
-.word-glow-active {
-  animation: multiColorTextGlow 10s linear infinite; 
-  opacity: 1;
-  display: inline-block; 
-}
-
-.word-dimmed {
-  opacity: 0.7; 
-  color: hsl(var(--muted-foreground));
-  transition: opacity 0.3s ease-in-out, color 0.3s ease-in-out;
-  display: inline-block; 
 }
