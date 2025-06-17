@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { AlertTriangle, ArrowDownCircle, Loader2, Wand2, Eraser, CheckCircle2 } from 'lucide-react';
+import { AlertTriangle, Loader2, Wand2, Eraser, CheckCircle2 } from 'lucide-react';
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -137,6 +137,8 @@ const ContractConfigForm = React.memo(({
 
   const { handleSubmit, reset, getValues } = methods;
 
+  const parameterGroups = useMemo(() => getParameterGroups(currentFormTemplate, isAdvancedMode), [currentFormTemplate, isAdvancedMode]);
+
   useEffect(() => {
     const defaultValues = currentFormTemplate.parameters.reduce((acc, param) => {
       acc[param.name] = param.defaultValue ?? '';
@@ -147,13 +149,13 @@ const ContractConfigForm = React.memo(({
     }
     reset(defaultValues);
 
-    const groups = getParameterGroups(currentFormTemplate, isAdvancedMode);
-    const defaultActiveGroup = groups.find(g => g.defaultActive) || (groups.length > 0 ? groups[0] : undefined);
+    const currentGroups = getParameterGroups(currentFormTemplate, isAdvancedMode);
+    const defaultActiveGroup = currentGroups.find(g => g.defaultActive) || (currentGroups.length > 0 ? currentGroups[0] : undefined);
     
     if (defaultActiveGroup) {
         setActiveTabValue(defaultActiveGroup.title.toLowerCase().replace(/\s+/g, '-'));
-    } else if (groups.length > 0) { 
-        setActiveTabValue(groups[0].title.toLowerCase().replace(/\s+/g, '-'));
+    } else if (currentGroups.length > 0) { 
+        setActiveTabValue(currentGroups[0].title.toLowerCase().replace(/\s+/g, '-'));
     } else { 
         setActiveTabValue(undefined);
     }
@@ -180,11 +182,9 @@ const ContractConfigForm = React.memo(({
     setFormDataForConfirmation(null);
   }, [onGenerateCode, currentFormTemplate, formDataForConfirmation]);
 
-  const parameterGroups = useMemo(() => getParameterGroups(currentFormTemplate, isAdvancedMode), [currentFormTemplate, isAdvancedMode]);
-
   const parameterConfigurationSection = (
     currentFormTemplate.id === 'custom' || parameterGroups.length === 0 ? (
-      <div className="space-y-4 pt-2 border-t border-border/30">
+      <div className="space-y-3 pt-1 flex-grow min-h-0">
         {currentFormTemplate.parameters
           .filter(param => isAdvancedMode || !param.advancedOnly)
           .map(param => (
@@ -197,14 +197,14 @@ const ContractConfigForm = React.memo(({
           ))}
       </div>
     ) : (
-      <div className="pt-2 border-t border-border/30 flex-grow min-h-0 flex flex-col">
+      <div className="pt-1 border-t border-border/30 flex-grow min-h-0 flex flex-col">
         <Tabs
           orientation="vertical"
           value={activeTabValue}
           onValueChange={setActiveTabValue}
-          className="flex flex-col md:flex-row gap-x-0 md:gap-x-4 h-full min-h-[250px] flex-grow" 
+          className="flex flex-col md:flex-row gap-x-0 md:gap-x-3 h-full min-h-0 flex-grow" 
         >
-          <TabsList className="flex flex-row md:flex-col md:space-y-1 md:w-44 lg:w-48 shrink-0 overflow-x-auto md:overflow-y-auto md:overflow-x-visible pb-2 md:pb-0 bg-transparent p-0 border-b md:border-b-0 md:border-r border-border/30 pr-0 md:pr-2 lg:pr-3">
+          <TabsList className="flex flex-row md:flex-col md:space-y-1 md:w-40 lg:w-44 shrink-0 overflow-x-auto md:overflow-y-auto md:overflow-x-visible pb-1 md:pb-0 bg-transparent p-0 border-b md:border-b-0 md:border-r border-border/30 pr-0 md:pr-2">
             {parameterGroups.map((group) => {
               const tabValue = group.title.toLowerCase().replace(/\s+/g, '-');
               return (
@@ -212,7 +212,7 @@ const ContractConfigForm = React.memo(({
                   key={tabValue}
                   value={tabValue}
                   disabled={isGeneratingCode && activeTabValue !== tabValue}
-                  className="param-tab-trigger w-full"
+                  className="param-tab-trigger w-full text-xs md:text-sm"
                 >
                    {group.title}
                 </TabsTrigger>
@@ -220,12 +220,12 @@ const ContractConfigForm = React.memo(({
             })}
           </TabsList>
           
-          <div className="flex-grow min-w-0 rounded-md mt-2 md:mt-0 flex flex-col min-h-0">
-            <ScrollArea className="h-full max-h-[calc(100vh-30rem)] md:max-h-[calc(100vh-25rem)] lg:max-h-[calc(100vh-22rem)] pr-1 flex-grow">
+          <div className="flex-grow min-w-0 rounded-md mt-1 md:mt-0 flex flex-col min-h-0">
+            <ScrollArea className="h-full max-h-[calc(100vh-28rem)] md:max-h-[calc(100vh-23rem)] lg:max-h-[calc(100vh-20rem)] pr-0.5 flex-grow">
                 {parameterGroups.map(group => {
                 const tabValue = group.title.toLowerCase().replace(/\s+/g, '-');
                 return (
-                    <TabsContent key={tabValue} value={tabValue} className="mt-0 space-y-4 p-2 md:p-3 rounded-md focus-visible:outline-none focus-visible:ring-0">
+                    <TabsContent key={tabValue} value={tabValue} className="mt-0 space-y-3 p-1.5 md:p-2 rounded-md focus-visible:outline-none focus-visible:ring-0">
                     {group.parameters.length > 0 ? group.parameters.map(param => (
                         <ParameterInputDisplay
                             key={param.name}
@@ -233,7 +233,7 @@ const ContractConfigForm = React.memo(({
                             anyPrimaryActionLoading={isGeneratingCode}
                             contractTypeName={currentFormTemplate.name}
                         />
-                    )) : <p className="text-sm text-muted-foreground p-2 text-center">No parameters in this section.</p>}
+                    )) : <p className="text-xs text-muted-foreground p-2 text-center">No parameters in this section.</p>}
                     </TabsContent>
                 );
                 })}
@@ -249,7 +249,7 @@ const ContractConfigForm = React.memo(({
     const details = Object.entries(formDataForConfirmation)
       .map(([key, value]) => {
         const paramConfig = currentFormTemplate.parameters.find(p => p.name === key);
-        if (!paramConfig || value === '' || value === undefined || value === null || (paramConfig.advancedOnly && !isAdvancedMode)) return null; 
+        if (!paramConfig || value === '' || value === undefined || value === null || (paramConfig.advancedOnly && !isAdvancedMode && paramConfig.name !== 'customDescription')) return null; 
         
         let displayValue = String(value);
         if (paramConfig.type === 'boolean') {
@@ -263,7 +263,7 @@ const ContractConfigForm = React.memo(({
       .filter(Boolean);
 
     return (
-      <div className="space-y-1 text-sm max-h-60 overflow-y-auto p-1">
+      <div className="space-y-1 text-xs max-h-52 overflow-y-auto p-1">
         <div className="flex justify-between font-semibold">
           <span className="text-primary">Template:</span>
           <span className="text-right text-foreground">{currentFormTemplate.name}</span>
@@ -279,30 +279,30 @@ const ContractConfigForm = React.memo(({
   };
 
   return (
-    <div className="space-y-4 p-4 md:p-6 h-full flex flex-col">
-      <CardHeader className="p-0 text-center mb-2">
-        <CardTitle className="text-xl md:text-2xl font-semibold text-foreground">
-            Configure Your Smart Contract
+    <div className="space-y-3 p-3 md:p-4 h-full flex flex-col">
+      <CardHeader className="p-0 text-center mb-1">
+        <CardTitle className="text-lg md:text-xl font-semibold text-foreground">
+            Blueprint Your Brilliance
         </CardTitle>
-        <CardDescription className="text-sm text-muted-foreground">
-          Select a template and define its parameters to generate your code.
+        <CardDescription className="text-xs text-muted-foreground">
+          Select a template and define its parameters.
         </CardDescription>
       </CardHeader>
 
-      <div className="space-y-3">
-        <div className="space-y-1.5">
-          <Label htmlFor="contractType" className="text-sm font-medium">
+      <div className="space-y-2">
+        <div className="space-y-1">
+          <Label htmlFor="contractType" className="text-xs font-medium">
             Contract Type
           </Label>
           <Select onValueChange={handleTemplateSelectChange} defaultValue={currentFormTemplate.id} disabled={isGeneratingCode}>
-            <SelectTrigger id="contractType" className="bg-background/70 focus:bg-background text-sm">
+            <SelectTrigger id="contractType" className="bg-background/70 focus:bg-background text-xs h-9">
               <SelectValue placeholder="Choose contract template" />
             </SelectTrigger>
             <SelectContent>
               {templates.map(template => (
-                <SelectItem key={template.id} value={template.id} className="text-sm py-1.5">
-                  <div className="flex items-center gap-2">
-                    <template.icon className="h-4 w-4 text-muted-foreground" />
+                <SelectItem key={template.id} value={template.id} className="text-xs py-1.5">
+                  <div className="flex items-center gap-1.5">
+                    <template.icon className="h-3.5 w-3.5 text-muted-foreground" />
                     {template.name}
                   </div>
                 </SelectItem>
@@ -310,13 +310,13 @@ const ContractConfigForm = React.memo(({
             </SelectContent>
           </Select>
           {currentFormTemplate &&
-            <p className="text-xs text-muted-foreground mt-1 text-center">{currentFormTemplate.description}</p>
+            <p className="text-xs text-muted-foreground/80 mt-0.5 text-center italic px-1">{currentFormTemplate.description}</p>
           }
         </div>
 
         {currentFormTemplate.id !== 'custom' && currentFormTemplate.parameters.length > 0 && (
-          <div className="mt-2 flex items-center justify-center space-x-2">
-            <Label htmlFor="mode-switch" className="text-xs font-medium text-muted-foreground">Basic</Label>
+          <div className="py-1 flex items-center justify-center space-x-2.5">
+            <Label htmlFor="mode-switch" className="text-sm font-medium text-muted-foreground">Basic</Label>
             <Switch
               id="mode-switch"
               checked={isAdvancedMode}
@@ -324,28 +324,28 @@ const ContractConfigForm = React.memo(({
               aria-label={isAdvancedMode ? "Switch to Basic Mode" : "Switch to Advanced Mode"}
               disabled={isGeneratingCode}
             />
-            <Label htmlFor="mode-switch" className="text-xs font-medium text-muted-foreground">Advanced</Label>
+            <Label htmlFor="mode-switch" className="text-sm font-medium text-muted-foreground">Advanced</Label>
           </div>
         )}
       </div>
 
     <FormProvider {...methods}>
-      <form onSubmit={handleSubmit(onSubmitInternal)} className="space-y-3 flex-grow flex flex-col min-h-0">
+      <form onSubmit={handleSubmit(onSubmitInternal)} className="space-y-2 flex-grow flex flex-col min-h-0">
         <div className="flex-grow min-h-0 flex flex-col">
           {parameterConfigurationSection}
         </div>
 
-        <div className="pt-3 border-t border-border/30">
-          <div className="flex flex-col sm:flex-row gap-2.5">
+        <div className="pt-2 border-t border-border/30">
+          <div className="flex flex-col sm:flex-row gap-2">
               <Button
                 type="submit"
                 disabled={isGeneratingCode || isForgeDisabledByLimit}
-                className="w-full sm:flex-1 bg-primary text-primary-foreground hover:bg-primary/90 text-base py-2.5"
+                className="w-full sm:flex-1 bg-primary text-primary-foreground hover:bg-primary/90 text-sm py-2 h-auto"
               >
                 {isGeneratingCode ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
                 ) : (
-                  <Wand2 className="mr-2 h-4 w-4" />
+                  <Wand2 className="mr-1.5 h-4 w-4" />
                 )}
                 Review & Forge
               </Button>
@@ -355,25 +355,25 @@ const ContractConfigForm = React.memo(({
                       variant="outline"
                       onClick={onResetForge}
                       disabled={isGeneratingCode}
-                      className="w-full sm:w-auto text-base py-2.5"
+                      className="w-full sm:w-auto text-sm py-2 h-auto"
                   >
-                      <Eraser className="mr-2 h-4 w-4" />
+                      <Eraser className="mr-1.5 h-4 w-4" />
                       Clear & Reset
                   </Button>
               )}
           </div>
           {isForgeDisabledByLimit && (
-            <div className="mt-2 p-2 bg-destructive/10 border border-destructive/30 rounded-md text-center">
-              <p className="text-xs text-destructive-foreground flex items-center justify-center gap-1.5">
-                <AlertTriangle className="h-3.5 w-3.5 text-destructive" />
+            <div className="mt-1.5 p-1.5 bg-destructive/10 border border-destructive/30 rounded-md text-center">
+              <p className="text-xs text-destructive-foreground flex items-center justify-center gap-1">
+                <AlertTriangle className="h-3 w-3 text-destructive" />
                 Daily Forge Limit Reached!
               </p>
               <Button
                 variant="link"
-                className="text-xs text-accent hover:text-accent/80 mt-0.5 h-auto p-0"
+                className="text-xs text-accent hover:text-accent/80 mt-0 h-auto p-0"
                 onClick={(e) => { e.preventDefault(); onNavigateToDevAccess(); }}
               >
-                Get Developer Access <ArrowDownCircle className="ml-1 h-3 w-3"/>
+                Get Developer Access
               </Button>
             </div>
           )}
@@ -385,16 +385,16 @@ const ContractConfigForm = React.memo(({
         <AlertDialog open={isConfirmationModalOpen} onOpenChange={setIsConfirmationModalOpen}>
             <AlertDialogContent>
             <AlertDialogHeader>
-                <AlertDialogTitle className="text-lg flex items-center gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-primary"/>Confirm Your Blueprint
+                <AlertDialogTitle className="text-base flex items-center gap-1.5">
+                    <CheckCircle2 className="h-4.5 w-4.5 text-primary"/>Confirm Your Blueprint
                 </AlertDialogTitle>
-                <AlertDialogDescription className="text-sm text-muted-foreground">
+                <AlertDialogDescription className="text-xs text-muted-foreground">
                     Review your choices for the <strong>{currentFormTemplate.name}</strong> contract before forging.
                 </AlertDialogDescription>
             </AlertDialogHeader>
             
-            <div className="my-2 p-2.5 border border-border/30 rounded-md bg-muted/30 shadow-inner">
-                <h4 className="font-semibold text-base mb-1 text-primary">Summary:</h4>
+            <div className="my-1 p-2 border border-border/30 rounded-md bg-muted/30 shadow-inner">
+                <h4 className="font-semibold text-sm mb-0.5 text-primary">Summary:</h4>
                 {renderConfirmationDetails()}
             </div>
 
@@ -402,15 +402,16 @@ const ContractConfigForm = React.memo(({
                 <AlertDialogCancel 
                     onClick={() => { setIsConfirmationModalOpen(false); setFormDataForConfirmation(null); }}
                     disabled={isGeneratingCode}
+                    className="h-8 px-3 text-xs"
                 >
                     Edit
                 </AlertDialogCancel>
                 <AlertDialogAction 
                     onClick={handleConfirmForge} 
                     disabled={isGeneratingCode}
-                    className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground h-8 px-3 text-xs"
                 >
-                {isGeneratingCode ? ( <Loader2 className="mr-2 h-4 w-4 animate-spin" /> ) : ( <Wand2 className="mr-2 h-4 w-4" /> )}
+                {isGeneratingCode ? ( <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> ) : ( <Wand2 className="mr-1.5 h-3.5 w-3.5" /> )}
                 Confirm & Forge
                 </AlertDialogAction>
             </AlertDialogFooter>
