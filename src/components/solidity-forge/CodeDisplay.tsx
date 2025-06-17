@@ -35,15 +35,15 @@ interface CodeDisplayProps {
   securityScore: number | null;
   gasEstimation: EstimateGasCostOutput | null;
   testCasesCode: string;
-  isLoadingCode: boolean;
+  isLoadingCode: boolean; // Indicates primary code generation/refinement/docgen is happening
   isLoadingSuggestions: boolean;
   isLoadingGasEstimation: boolean;
   isLoadingTestCases: boolean;
-  isRefiningCode: boolean;
-  isGeneratingDocumentation: boolean;
+  isRefiningCode: boolean; // Specific loading for refinement action
+  isGeneratingDocumentation: boolean; // Specific loading for docgen action
   onRefineCode: (request: string) => Promise<void>;
   selectedTemplate?: ContractTemplate; 
-  anySubActionLoading: boolean;
+  anySubActionLoading: boolean; // True if any analysis action is loading
   onGetAISuggestions: () => Promise<void>;
   onEstimateGasCosts: () => Promise<void>;
   onGenerateTestCases: () => Promise<void>;
@@ -56,12 +56,12 @@ export function CodeDisplay({
   securityScore,
   gasEstimation,
   testCasesCode,
-  isLoadingCode,
+  isLoadingCode, // This prop is true if initial generation, refinement, or doc gen is happening
   isLoadingSuggestions,
   isLoadingGasEstimation,
   isLoadingTestCases,
-  isRefiningCode,
-  isGeneratingDocumentation,
+  isRefiningCode, // Specific state for refinement button
+  isGeneratingDocumentation, // Specific state for documentation button
   onRefineCode,
   selectedTemplate,
   anySubActionLoading,
@@ -75,7 +75,9 @@ export function CodeDisplay({
   const [refinementInput, setRefinementInput] = useState<string>('');
   const { toast } = useToast();
 
-  const overallPrimaryLoading = isLoadingCode || isRefiningCode || isGeneratingDocumentation;
+  // Overall loading state for the primary code display area (generation, refinement, doc generation)
+  const isPrimaryCodeActionLoading = isLoadingCode || isRefiningCode || isGeneratingDocumentation;
+
 
   const handleCopyToClipboard = useCallback((textToCopy: string, type: string) => {
     if (!textToCopy) return;
@@ -114,7 +116,7 @@ export function CodeDisplay({
       return;
     }
     await onRefineCode(refinementInput);
-    setRefinementInput('');
+    setRefinementInput(''); 
   }, [refinementInput, onRefineCode, toast]);
 
   const getSecurityScoreBadge = (score: number | null) => {
@@ -185,10 +187,11 @@ export function CodeDisplay({
        fontFamily: 'var(--font-code)', 
     }
   };
-
-  if (isLoadingCode && !code) {
+  
+  // If initial code generation is happening, show a specific loader.
+  if (isLoadingCode && !code && !isRefiningCode && !isGeneratingDocumentation) {
     return (
-      <div className="flex flex-col h-full p-4 md:p-6 lg:p-8 items-center justify-center text-center">
+      <div className="flex flex-col h-full p-4 md:p-6 lg:p-8 items-center justify-center text-center min-h-[400px]">
         <Loader2 className="w-16 h-16 mb-6 text-primary animate-spin" />
         <p className="text-xl font-semibold text-muted-foreground">The Alchemist is Forging...</p>
         <p className="text-base text-muted-foreground">Your digital masterpiece is moments away.</p>
@@ -196,12 +199,13 @@ export function CodeDisplay({
     );
   }
   
+  // If no code is generated yet, show placeholder (this case is mostly handled by conditional rendering in page.tsx)
   if (!code && !isLoadingCode) {
      return (
-      <div className="flex flex-col h-full p-4 md:p-6 lg:p-8 items-center justify-center text-center">
+      <div className="flex flex-col h-full p-4 md:p-6 lg:p-8 items-center justify-center text-center min-h-[400px]">
         <Code2 className="w-20 h-20 mb-8 text-muted-foreground/30" />
         <p className="text-xl font-semibold text-muted-foreground">The Codex Awaits Your Command</p>
-        <p className="text-base text-muted-foreground">Use the "Blueprint Your Brilliance" panel to generate your smart contract. The Alchemist's output will appear here.</p>
+        <p className="text-base text-muted-foreground">Use the "Forge Contract" button above to generate your smart contract. The Alchemist's output will appear here.</p>
       </div>
     );
   }
@@ -213,20 +217,20 @@ export function CodeDisplay({
             <CardTitle className="text-3xl font-headline text-glow-primary mb-2">The Alchemist's Output</CardTitle>
             <CardDescription className="text-base text-muted-foreground">Witness the digital alchemy! Your instructions, my execution. Mostly.</CardDescription>
         </div>
-        {activeTab === "code" && code && !overallPrimaryLoading && (
+        {activeTab === "code" && code && !isPrimaryCodeActionLoading && (
           <div className="flex gap-3 mt-2 sm:mt-0 self-center sm:self-auto">
-            <Button variant="outline" size="lg" onClick={() => handleCopyToClipboard(code, "Code")} aria-label="Copy code" disabled={overallPrimaryLoading} className="glow-border-purple text-base py-3 px-5">
+            <Button variant="outline" size="lg" onClick={() => handleCopyToClipboard(code, "Code")} aria-label="Copy code" disabled={isPrimaryCodeActionLoading} className="glow-border-purple text-base py-3 px-5">
               {copiedStates['Code'] ? <Check className="h-5 w-5 mr-2" /> : <Copy className="h-5 w-5 mr-2" />}
               {copiedStates['Code'] ? "Copied" : "Copy"}
             </Button>
-            <Button variant="outline" size="lg" onClick={handleDeployToRemix} aria-label="Deploy to Remix" disabled={overallPrimaryLoading} className="glow-border-purple text-base py-3 px-5">
+            <Button variant="outline" size="lg" onClick={handleDeployToRemix} aria-label="Deploy to Remix" disabled={isPrimaryCodeActionLoading} className="glow-border-purple text-base py-3 px-5">
               Remix <ExternalLink className="h-5 w-5 ml-2" />
             </Button>
           </div>
         )}
-         {activeTab === "tests" && testCasesCode && !overallPrimaryLoading && (
+         {activeTab === "tests" && testCasesCode && !isPrimaryCodeActionLoading && (
           <div className="flex gap-3 mt-2 sm:mt-0 self-center sm:self-auto">
-            <Button variant="outline" size="lg" onClick={() => handleCopyToClipboard(testCasesCode, "Test Cases")} aria-label="Copy test cases" disabled={overallPrimaryLoading} className="glow-border-purple text-base py-3 px-5">
+            <Button variant="outline" size="lg" onClick={() => handleCopyToClipboard(testCasesCode, "Test Cases")} aria-label="Copy test cases" disabled={isPrimaryCodeActionLoading} className="glow-border-purple text-base py-3 px-5">
               {copiedStates['Test Cases'] ? <Check className="h-5 w-5 mr-2" /> : <Copy className="h-5 w-5 mr-2" />}
               {copiedStates['Test Cases'] ? "Copied Tests" : "Copy Tests"}
             </Button>
@@ -251,11 +255,11 @@ export function CodeDisplay({
                 "data-[state=inactive]:text-muted-foreground hover:text-foreground"
               )}
               disabled={
-                (tabItem.value === "code" && overallPrimaryLoading) || 
-                (tabItem.value === "suggestions" && (isLoadingSuggestions || overallPrimaryLoading)) ||
-                (tabItem.value === "gas" && (isLoadingGasEstimation || overallPrimaryLoading)) ||
-                (tabItem.value === "tests" && (isLoadingTestCases || overallPrimaryLoading)) ||
-                (tabItem.value !== "code" && overallPrimaryLoading) 
+                (tabItem.value === "code" && isPrimaryCodeActionLoading) || 
+                (tabItem.value === "suggestions" && (isLoadingSuggestions || isPrimaryCodeActionLoading)) ||
+                (tabItem.value === "gas" && (isLoadingGasEstimation || isPrimaryCodeActionLoading)) ||
+                (tabItem.value === "tests" && (isLoadingTestCases || isPrimaryCodeActionLoading)) ||
+                (tabItem.value !== "code" && isPrimaryCodeActionLoading) 
               }
             >
               <span className="tab-running-lines-content flex items-center justify-center gap-2 px-3 py-2.5 text-sm md:text-base">
@@ -267,9 +271,12 @@ export function CodeDisplay({
 
         <TabsContent value="code" className="flex-grow flex flex-col overflow-hidden rounded-lg border bg-muted/20 glow-border-yellow">
           <ScrollArea className="flex-grow">
-            {overallPrimaryLoading && !isRefiningCode ? ( 
+            {isPrimaryCodeActionLoading ? ( 
               <div className="p-6 space-y-3">
-                {[...Array(12)].map((_, i) => <Skeleton key={i} className={`h-5 ${i % 3 === 0 ? 'w-3/4' : i % 3 === 1 ? 'w-full' : 'w-5/6'} bg-muted/50`} />)}
+                <div className="flex items-center justify-center h-48">
+                   <Loader2 className="w-12 h-12 text-primary animate-spin" />
+                </div>
+                {[...Array(8)].map((_, i) => <Skeleton key={i} className={`h-5 ${i % 3 === 0 ? 'w-3/4' : i % 3 === 1 ? 'w-full' : 'w-5/6'} bg-muted/50`} />)}
               </div>
             ) : ( 
               <SyntaxHighlighter
@@ -284,6 +291,7 @@ export function CodeDisplay({
               </SyntaxHighlighter>
             )}
           </ScrollArea>
+          {/* Refinement Section within Code Tab */}
           <div className="p-4 md:p-6 border-t border-border/30 bg-card/50 mt-auto">
             <Label 
               htmlFor="refinementRequest" 
@@ -299,11 +307,11 @@ export function CodeDisplay({
               placeholder="e.g., 'Add NatSpec comments to all public functions and state variables.'"
               rows={3}
               className="mb-3 bg-background/70 focus:bg-background glow-border-purple text-base p-3"
-              disabled={overallPrimaryLoading || anySubActionLoading}
+              disabled={isPrimaryCodeActionLoading || anySubActionLoading}
             />
             <Button 
               onClick={handleRefineCodeSubmit} 
-              disabled={overallPrimaryLoading || anySubActionLoading || !refinementInput.trim()}
+              disabled={isPrimaryCodeActionLoading || anySubActionLoading || !refinementInput.trim()}
               className="w-full glow-border-primary bg-primary text-primary-foreground hover:bg-primary/90 text-lg py-3"
             >
               {isRefiningCode ? (
@@ -392,7 +400,10 @@ export function CodeDisplay({
           <ScrollArea className="h-full flex-grow">
             {isLoadingTestCases ? (
               <div className="p-6 space-y-3">
-                {[...Array(12)].map((_, i) => <Skeleton key={i} className={`h-5 ${i % 3 === 0 ? 'w-3/4' : i % 3 === 1 ? 'w-full' : 'w-5/6'} bg-muted/50`} />)}
+                 <div className="flex items-center justify-center h-48">
+                   <Loader2 className="w-12 h-12 text-primary animate-spin" />
+                </div>
+                {[...Array(8)].map((_, i) => <Skeleton key={i} className={`h-5 ${i % 3 === 0 ? 'w-3/4' : i % 3 === 1 ? 'w-full' : 'w-5/6'} bg-muted/50`} />)}
               </div>
             ) : testCasesCode ? (
               <SyntaxHighlighter
@@ -416,8 +427,8 @@ export function CodeDisplay({
       </Tabs>
 
       {/* Analysis Action Buttons */}
-      {code && !overallPrimaryLoading && (
-         <div className="pt-6 mt-auto space-y-4 border-t border-border/30">
+      {code && !isPrimaryCodeActionLoading && (
+         <div className="pt-6 mt-4 space-y-4 border-t border-border/30">
           <h3 className="text-center text-lg font-semibold mb-2">
             <span className="animate-text-multicolor-glow">Post-Forge Analysis & Augmentation</span>
           </h3>
@@ -426,7 +437,7 @@ export function CodeDisplay({
               type="button"
               variant="outline"
               onClick={onGetAISuggestions}
-              disabled={anySubActionLoading || overallPrimaryLoading || !selectedTemplate}
+              disabled={anySubActionLoading || isPrimaryCodeActionLoading || !selectedTemplate}
               className="w-full glow-border-purple hover:bg-accent/10 hover:text-accent-foreground text-base py-4"
             >
               {isLoadingSuggestions ? (
@@ -440,7 +451,7 @@ export function CodeDisplay({
               type="button"
               variant="outline"
               onClick={onEstimateGasCosts}
-              disabled={anySubActionLoading || overallPrimaryLoading}
+              disabled={anySubActionLoading || isPrimaryCodeActionLoading}
               className="w-full glow-border-purple hover:bg-accent/10 hover:text-accent-foreground text-base py-4"
             >
               {isLoadingGasEstimation ? (
@@ -454,7 +465,7 @@ export function CodeDisplay({
               type="button"
               variant="outline"
               onClick={onGenerateTestCases}
-              disabled={anySubActionLoading || overallPrimaryLoading}
+              disabled={anySubActionLoading || isPrimaryCodeActionLoading}
               className="w-full glow-border-purple hover:bg-accent/10 hover:text-accent-foreground text-base py-4"
             >
               {isLoadingTestCases ? (
@@ -468,7 +479,7 @@ export function CodeDisplay({
               type="button"
               variant="outline"
               onClick={onGenerateDocumentation}
-              disabled={anySubActionLoading || overallPrimaryLoading}
+              disabled={anySubActionLoading || isPrimaryCodeActionLoading || isGeneratingDocumentation} // Added specific disabled state for doc gen
               className="w-full glow-border-purple hover:bg-accent/10 hover:text-accent-foreground text-base py-4"
             >
               {isGeneratingDocumentation ? (

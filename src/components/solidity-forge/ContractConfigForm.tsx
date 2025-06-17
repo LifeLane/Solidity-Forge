@@ -94,12 +94,8 @@ const getParameterGroups = (template: ContractTemplate, isAdvancedMode: boolean)
       }
     ];
   } else {
-     // For custom contract or other types, show all parameters in a single group
-     // or handle based on a specific grouping strategy if one evolves.
      groups = [{ title: 'Parameters', parameters: visibleParams, defaultActive: true }];
   }
-
-  // Filter out empty groups that might result from advancedOnly filtering
   return groups.filter(group => group.parameters.length > 0);
 };
 
@@ -132,11 +128,15 @@ const ContractConfigForm = React.memo(({
   const subtitleText = "Sculpt your smart contract's soul. Or, you know, just click randomly. My circuits won't judge. Much.";
 
   const methods = useForm<FormData>({
-    defaultValues: currentFormTemplate.parameters.reduce((acc, param) => {
-      acc[param.name] = param.defaultValue ?? '';
-      return acc;
-    }, {} as FormData) || {}
+    defaultValues: useMemo(() => {
+        const initialTemplate = selectedTemplateProp || templates[0];
+        return initialTemplate.parameters.reduce((acc, param) => {
+        acc[param.name] = param.defaultValue ?? '';
+        return acc;
+        }, {} as FormData);
+    }, [selectedTemplateProp, templates])
   });
+
   const { handleSubmit, reset } = methods;
 
 
@@ -218,7 +218,8 @@ const ContractConfigForm = React.memo(({
               );
             })}
           </TabsList>
-          <div className="flex-grow min-w-0 p-1 rounded-md border border-border/20 bg-card/30 overflow-y-auto max-h-[calc(100vh-28rem)] md:max-h-[calc(100vh-26rem)] lg:max-h-[calc(100%-4rem)]"> {/* Adjusted max-h for better scrollability */}
+          {/* Ensure this div takes remaining height and enables scrolling for its content */}
+          <div className="flex-grow min-w-0 p-1 rounded-md border border-border/20 bg-card/30 overflow-y-auto max-h-[calc(100vh-30rem)] md:max-h-[calc(100vh-28rem)] lg:max-h-full">
             {parameterGroups.map(group => {
               const tabValue = group.title.toLowerCase().replace(/\s+/g, '-');
               return (
@@ -315,7 +316,7 @@ const ContractConfigForm = React.memo(({
 
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 flex-grow flex flex-col min-h-0">
-        <div className="flex-grow min-h-0">
+        <div className="flex-grow min-h-0 flex flex-col"> {/* Ensure this container allows parameter section to grow and scroll */}
           {parameterConfigurationSection}
         </div>
 

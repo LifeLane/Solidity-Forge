@@ -20,6 +20,7 @@ import { generateDocumentation } from '@/ai/flows/generate-documentation-flow';
 import { Card, CardContent } from '@/components/ui/card';
 import { CONTRACT_TEMPLATES, type ContractTemplate } from '@/config/contracts';
 import { cn } from '@/lib/utils';
+import { Puzzle } from 'lucide-react';
 
 const MAX_FORGES_PER_DAY = 3;
 const LOCAL_STORAGE_USAGE_KEY = 'solidityForgeUsage';
@@ -31,9 +32,7 @@ interface UsageData {
 }
 
 export default function SolidityForgePage() {
-  const [activeTemplateForOutput, setActiveTemplateForOutput] = useState<ContractTemplate | undefined>(
-    CONTRACT_TEMPLATES[0]
-  );
+  const [activeTemplateForOutput, setActiveTemplateForOutput] = useState<ContractTemplate | undefined>(undefined);
   const [generatedCode, setGeneratedCode] = useState<string>('');
   const [aiSuggestions, setAiSuggestions] = useState<AISuggestion[]>([]);
   const [securityScore, setSecurityScore] = useState<number | null>(null);
@@ -57,6 +56,7 @@ export default function SolidityForgePage() {
   const [hasDeveloperAccess, setHasDeveloperAccess] = useState<boolean>(false);
 
   const developerAccessFormRef = useRef<HTMLDivElement>(null);
+  const outputSectionRef = useRef<HTMLDivElement>(null);
 
   const { toast } = useToast();
 
@@ -112,10 +112,10 @@ export default function SolidityForgePage() {
       return;
     }
 
-    setActiveTemplateForOutput(template);
     setIsGeneratingCode(true);
-    setGeneratedCode('');
-    resetAnalyses();
+    setGeneratedCode(''); // Clear previous code
+    resetAnalyses(); // Clear previous analyses
+    setActiveTemplateForOutput(template); // Set context for output section
 
     if (!hasDeveloperAccess) {
       const newCount = usageData.count + 1;
@@ -147,6 +147,10 @@ export default function SolidityForgePage() {
         title: "Code Manifested!",
         description: "Behold, your Solidity. Try not to introduce *too* many bugs, human.",
       });
+      // Scroll to output section after generation
+      setTimeout(() => {
+        outputSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
     } catch (error) {
       console.error("Error generating code:", error);
       toast({
@@ -154,11 +158,13 @@ export default function SolidityForgePage() {
         title: "Code Conjuring Chaos!",
         description: (error as Error).message || "My circuits whimpered and refused. Perhaps your request was *too* ambitious? Or just try again.",
       });
-      setGeneratedCode('');
+      setGeneratedCode(''); // Ensure code is cleared on error
+      setActiveTemplateForOutput(undefined);
     } finally {
       setIsGeneratingCode(false);
     }
-  }, [isForgeDisabledByLimit, toast, hasDeveloperAccess, usageData, resetAnalyses]);
+  }, [isForgeDisabledByLimit, toast, hasDeveloperAccess, usageData, resetAnalyses, getTodayDateString]);
+
 
   const handleGetAISuggestions = useCallback(async () => {
     if (!generatedCode || !activeTemplateForOutput) {
@@ -178,7 +184,7 @@ export default function SolidityForgePage() {
     try {
       const result = await suggestErrorPrevention({
         contractType: activeTemplateForOutput.name,
-        parameters: paramsForAI,
+        parameters: paramsForAI, // This might need adjustment if formData is required.
         code: generatedCode,
       });
       setAiSuggestions(result.suggestions || []);
@@ -242,7 +248,9 @@ export default function SolidityForgePage() {
     setIsGeneratingTestCases(true);
     setGeneratedTestCases('');
     try {
-      const result = await generateTestCases({ code: generatedCode, contractName: activeTemplateForOutput.name });
+      // Pass contract name if available, otherwise AI will infer
+      const contractName = activeTemplateForOutput.id !== 'custom' ? activeTemplateForOutput.name : undefined;
+      const result = await generateTestCases({ code: generatedCode, contractName: contractName });
       setGeneratedTestCases(result.testCasesCode);
       toast({
         title: "Test Blueprints Rendered!",
@@ -279,7 +287,7 @@ export default function SolidityForgePage() {
     }
 
     setIsRefiningCode(true);
-    resetAnalyses();
+    resetAnalyses(); // Clear previous analyses before refining
 
     try {
       const result = await refineSmartContractCode({
@@ -287,7 +295,7 @@ export default function SolidityForgePage() {
         refinementRequest: request,
         contractContext: `Contract type: ${activeTemplateForOutput.name}`,
       });
-      setGeneratedCode(result.refinedCode);
+      setGeneratedCode(result.refinedCode); // Update code with refined version
       toast({
         title: "Code Polished (Allegedly)!",
         description: "I've applied your 'refinements'. Rerun analyses at your own peril.",
@@ -314,11 +322,14 @@ export default function SolidityForgePage() {
       return;
     }
     setIsGeneratingDocumentation(true);
-    resetAnalyses(); // Also reset analyses when re-generating docs, as it modifies code
+    // We don't necessarily need to reset all analyses, but the code will change.
+    // Depending on desired UX, you might keep suggestions if they are still relevant.
+    // For simplicity, let's assume documentation changes the code enough that analyses should be fresh.
+    resetAnalyses(); 
 
     try {
       const result = await generateDocumentation({ code: generatedCode });
-      setGeneratedCode(result.documentedCode);
+      setGeneratedCode(result.documentedCode); // Update code with docs
       toast({
         title: "Documentation Scribed!",
         description: "Your code is now (hopefully) more understandable. Or at least has more words.",
@@ -334,6 +345,7 @@ export default function SolidityForgePage() {
       setIsGeneratingDocumentation(false);
     }
   }, [generatedCode, toast, resetAnalyses]);
+
 
   const handleFindAddresses = useCallback(async (query: string) => {
     if (!query.trim()) {
@@ -381,14 +393,13 @@ export default function SolidityForgePage() {
 
   const handleResetForge = useCallback(() => {
     setGeneratedCode('');
+    setActiveTemplateForOutput(undefined);
     resetAnalyses();
-    // setActiveTemplateForOutput(CONTRACT_TEMPLATES[0]); // Optionally reset selected template context too
     toast({
         title: "Forge Cleared!",
         description: "The slate is clean. Ready for your next grand design (or happy accident)."
     })
   }, [resetAnalyses, toast]);
-
 
   const anySubActionLoading = isGettingSuggestions || isEstimatingGas || isGeneratingTestCases || isRefiningCode || isGeneratingDocumentation;
 
@@ -396,41 +407,38 @@ export default function SolidityForgePage() {
     <div className="min-h-screen text-foreground flex flex-col bg-background">
       <Header />
       <main
-        className={`flex-grow container mx-auto px-4 py-6 md:px-6 md:py-8 lg:px-8 lg:py-10 flex flex-col items-start gap-8 transition-opacity duration-700 ease-out ${mainContentVisible ? 'opacity-100' : 'opacity-0'}`}
+        className={`flex-grow container mx-auto px-4 py-6 md:px-6 md:py-8 lg:px-8 lg:py-10 flex flex-col items-center gap-8 transition-opacity duration-700 ease-out ${mainContentVisible ? 'opacity-100' : 'opacity-0'}`}
       >
-        <div className="w-full flex flex-col lg:flex-row gap-8">
-          {/* Configuration Column */}
-          <div className="lg:w-2/5 flex-shrink-0">
-            <Card
-              className={cn(
-                "transition-all duration-300 bg-card/80 backdrop-blur-sm w-full animate-fadeInUp glow-border-accent h-full",
-                "border"
-                )}
-              style={{ animationDelay: '0.1s' }}
-            >
-              <CardContent className="p-0 h-full flex flex-col">
-                <ContractConfigForm
-                  templates={CONTRACT_TEMPLATES}
-                  onGenerateCode={handleGenerateCode}
-                  isGeneratingCode={isGeneratingCode}
-                  selectedTemplateProp={CONTRACT_TEMPLATES[0]}
-                  isForgeDisabledByLimit={isForgeDisabledByLimit}
-                  onNavigateToDevAccess={handleNavigateToDevAccess}
-                  onResetForge={handleResetForge}
-                  hasGeneratedCode={!!generatedCode}
-                />
-              </CardContent>
-            </Card>
-          </div>
+        {/* Configuration Section */}
+        <Card
+          className={cn(
+            "transition-all duration-300 bg-card/80 backdrop-blur-sm w-full animate-fadeInUp glow-border-accent",
+            "border self-stretch" // Ensure it stretches if content is small
+          )}
+          style={{ animationDelay: '0.1s' }}
+        >
+          <CardContent className="p-0 h-full flex flex-col">
+            <ContractConfigForm
+              templates={CONTRACT_TEMPLATES}
+              onGenerateCode={handleGenerateCode}
+              isGeneratingCode={isGeneratingCode}
+              selectedTemplateProp={CONTRACT_TEMPLATES[0]} // For initial form setup
+              isForgeDisabledByLimit={isForgeDisabledByLimit}
+              onNavigateToDevAccess={handleNavigateToDevAccess}
+              onResetForge={handleResetForge}
+              hasGeneratedCode={!!generatedCode}
+            />
+          </CardContent>
+        </Card>
 
-          {/* Output Column */}
-          <div className="lg:w-3/5 flex-grow min-w-0">
+        {/* Output Section - Conditionally Rendered */}
+        {generatedCode && activeTemplateForOutput && (
+          <div ref={outputSectionRef} className="w-full animate-fadeInUp" style={{ animationDelay: '0.3s' }}>
             <Card
               className={cn(
-                "transition-all duration-300 bg-card/80 backdrop-blur-sm w-full animate-fadeInUp glow-border-yellow h-full",
-                "border"
+                "transition-all duration-300 bg-card/80 backdrop-blur-sm w-full glow-border-yellow",
+                "border self-stretch" 
               )}
-              style={{ animationDelay: '0.3s' }}
             >
               <CodeDisplay
                 code={generatedCode}
@@ -438,7 +446,7 @@ export default function SolidityForgePage() {
                 securityScore={securityScore}
                 gasEstimation={gasEstimation}
                 testCasesCode={generatedTestCases}
-                isLoadingCode={isGeneratingCode}
+                isLoadingCode={isGeneratingCode} // This might be confusing if code is already generated. Consider a more specific loading state for this section.
                 isLoadingSuggestions={isGettingSuggestions}
                 isLoadingGasEstimation={isEstimatingGas}
                 isLoadingTestCases={isGeneratingTestCases}
@@ -454,16 +462,15 @@ export default function SolidityForgePage() {
               />
             </Card>
           </div>
-        </div>
+        )}
 
-        {/* Lower Section - Stays below the two main columns */}
-        <div className="w-full mt-8 space-y-8">
+        {/* Lower Section - Utilities */}
+        <div className="w-full mt-0 space-y-8 animate-fadeInUp" style={{ animationDelay: '0.5s' }}>
             <Card
               className={cn(
-                "transition-all duration-300 bg-card/80 backdrop-blur-sm w-full max-w-full animate-fadeInUp glow-border-magenta",
+                "transition-all duration-300 bg-card/80 backdrop-blur-sm w-full max-w-full glow-border-magenta",
                 "border"
               )}
-              style={{ animationDelay: '0.5s' }}
             >
               <CardContent className="p-6 md:p-8">
                 <KnownAddressesFinder
