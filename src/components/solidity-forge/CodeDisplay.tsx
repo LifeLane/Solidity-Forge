@@ -8,8 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ExternalLink, Lightbulb, Copy, Check, ShieldAlert, Zap, Wrench, Info, Fuel, Coins, Beaker, Sparkles, Loader2, Code2, Brain, FileText as FileTextIconLucide } from 'lucide-react';
-import { CardTitle, CardDescription, CardHeader, CardContent as ShadCNCardContent } from '@/components/ui/card'; // Renamed to avoid conflict
+import { ExternalLink, Lightbulb, Copy, Check, ShieldAlert, Zap, Wrench, Info, Fuel, Coins, Beaker, Sparkles, Loader2, Code2, Brain, FileText as FileTextIconLucide, AlertCircle } from 'lucide-react';
+import { CardTitle, CardDescription, CardHeader, CardContent as ShadCNCardContent } from '@/components/ui/card'; 
 import { Badge, type BadgeProps } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
@@ -121,10 +121,10 @@ export function CodeDisplay({
     if (score === null) return null;
     let variant: BadgeProps["variant"] = "default"; 
     let text = `Audit Readiness: ${score}`;
-     if (score >= 90) { variant = "default"; text = `Excellent: ${score}`; }
-     else if (score >= 70) { variant = "secondary"; text = `Good: ${score}`; }
-     else if (score >= 50) { variant = "outline"; text = `Fair: ${score}`; }
-     else { variant = "destructive"; text = `Needs Review: ${score}`; }
+     if (score >= 90) { variant = "default"; text = `Excellent: ${score}`; } // Green (using default as primary)
+     else if (score >= 70) { variant = "secondary"; text = `Good: ${score}`; } // Yellow (using secondary)
+     else if (score >= 50) { variant = "outline"; text = `Fair: ${score}`; } // Orange (using outline)
+     else { variant = "destructive"; text = `Needs Review: ${score}`; } // Red
     return <Badge variant={variant} className="text-xs px-2 py-1">{text}</Badge>;
   };
 
@@ -155,7 +155,7 @@ export function CodeDisplay({
       ...vscDarkPlus['pre[class*="language-"]'],
       backgroundColor: 'hsl(var(--muted)/0.3)', 
       margin: 0, 
-      padding: '0.75rem 1rem', // Reduced padding
+      padding: '0.75rem 1rem', 
       fontSize: '0.85rem', 
       fontFamily: 'var(--font-code)', 
       lineHeight: '1.6',
@@ -167,42 +167,50 @@ export function CodeDisplay({
     }
   };
   
-  if (isLoadingCode && !code && !isRefiningCode && !isGeneratingDocumentation) {
+  if (isLoadingCode && !code && !isRefiningCode && !isGeneratingDocumentation) { // Initial loading for the entire component
     return (
       <div className="flex flex-col h-full p-4 md:p-6 items-center justify-center text-center min-h-[300px]">
         <Loader2 className="w-12 h-12 mb-4 text-primary animate-spin" />
-        <p className="text-lg font-medium text-muted-foreground">Forging Contract...</p>
+        <p className="text-lg font-medium text-muted-foreground">Forging Your Contract...</p>
+        <p className="text-sm text-muted-foreground">The Alchemist is hard at work.</p>
       </div>
     );
   }
   
-  if (!code && !isLoadingCode) {
-    // Placeholder is handled by page.tsx now
-    return null;
+  if (!code && !isLoadingCode) { // Placeholder if no code is generated yet
+    return (
+         <div className="flex flex-col h-full p-6 md:p-8 items-center justify-center text-center min-h-[300px]">
+            <Code2 className="w-16 h-16 mb-6 text-muted-foreground/30" />
+            <h3 className="text-xl font-semibold text-muted-foreground mb-2">The Alchemist's Output</h3>
+            <p className="text-sm text-muted-foreground max-w-sm">
+            Your generated smart contract code, along with AI-powered analysis and tools, will appear here once you configure and forge your contract.
+            </p>
+        </div>
+    );
   }
 
   return (
-    <div className="flex flex-col h-full p-4 md:p-6">
-      <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-4 gap-3 text-center sm:text-left">
+    <div className="flex flex-col h-full p-3 md:p-4">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-3 gap-2 text-center sm:text-left">
         <div>
-            <CardTitle className="text-xl md:text-2xl font-semibold text-foreground">Generated Code & Analysis</CardTitle>
-            <CardDescription className="text-sm text-muted-foreground">Review, refine, and analyze your smart contract.</CardDescription>
+            <CardTitle className="text-base md:text-lg font-semibold text-foreground">The Alchemist's Output</CardTitle>
+            <CardDescription className="text-xs text-muted-foreground mt-0.5">Review, refine, and analyze your smart contract.</CardDescription>
         </div>
         {activeTab === "code" && code && !isPrimaryCodeActionLoading && (
           <div className="flex gap-2 mt-2 sm:mt-0 self-center sm:self-auto">
-            <Button variant="outline" size="sm" onClick={() => handleCopyToClipboard(code, "Code")} aria-label="Copy code" disabled={isPrimaryCodeActionLoading}>
-              {copiedStates['Code'] ? <Check className="h-4 w-4 mr-1.5" /> : <Copy className="h-4 w-4 mr-1.5" />}
-              {copiedStates['Code'] ? "Copied" : "Copy"}
+            <Button variant="outline" size="sm" onClick={() => handleCopyToClipboard(code, "Code")} aria-label="Copy code" disabled={isPrimaryCodeActionLoading} className="h-8 text-xs px-2.5">
+              {copiedStates['Code'] ? <Check className="h-3.5 w-3.5 mr-1" /> : <Copy className="h-3.5 w-3.5 mr-1" />}
+              {copiedStates['Code'] ? "Copied" : "Copy Code"}
             </Button>
-            <Button variant="outline" size="sm" onClick={handleDeployToRemix} aria-label="Deploy to Remix" disabled={isPrimaryCodeActionLoading}>
-              Remix <ExternalLink className="h-4 w-4 ml-1.5" />
+            <Button variant="outline" size="sm" onClick={handleDeployToRemix} aria-label="Deploy to Remix" disabled={isPrimaryCodeActionLoading} className="h-8 text-xs px-2.5">
+              Deploy to Remix <ExternalLink className="h-3.5 w-3.5 ml-1" />
             </Button>
           </div>
         )}
          {activeTab === "tests" && testCasesCode && !isPrimaryCodeActionLoading && (
           <div className="flex gap-2 mt-2 sm:mt-0 self-center sm:self-auto">
-            <Button variant="outline" size="sm" onClick={() => handleCopyToClipboard(testCasesCode, "Test Cases")} aria-label="Copy test cases" disabled={isPrimaryCodeActionLoading}>
-              {copiedStates['Test Cases'] ? <Check className="h-4 w-4 mr-1.5" /> : <Copy className="h-4 w-4 mr-1.5" />}
+            <Button variant="outline" size="sm" onClick={() => handleCopyToClipboard(testCasesCode, "Test Cases")} aria-label="Copy test cases" disabled={isPrimaryCodeActionLoading} className="h-8 text-xs px-2.5">
+              {copiedStates['Test Cases'] ? <Check className="h-3.5 w-3.5 mr-1" /> : <Copy className="h-3.5 w-3.5 mr-1" />}
               {copiedStates['Test Cases'] ? "Copied" : "Copy Tests"}
             </Button>
           </div>
@@ -210,9 +218,9 @@ export function CodeDisplay({
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-grow flex flex-col min-h-0">
-        <TabsList className="mb-3 grid w-full grid-cols-2 sm:grid-cols-4 gap-1 p-1 rounded-md bg-muted">
+        <TabsList className="mb-2.5 grid w-full grid-cols-2 sm:grid-cols-4 gap-1 p-1 rounded-md bg-muted h-auto">
           {[
-            { value: "code", label: "Code", icon: Code2 },
+            { value: "code", label: "Contract Code", icon: Code2 },
             { value: "suggestions", label: "AI Insights", icon: Brain },
             { value: "gas", label: "Gas Oracle", icon: Fuel },
             { value: "tests", label: "Test Cases", icon: Beaker },
@@ -220,16 +228,16 @@ export function CodeDisplay({
             <TabsTrigger 
               key={tabItem.value}
               value={tabItem.value} 
-              className="text-xs sm:text-sm py-1.5 px-2 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+              className="text-xs sm:text-sm py-1.5 px-2 data-[state=active]:bg-background data-[state=active]:shadow-sm h-full flex-1"
               disabled={isPrimaryCodeActionLoading || (tabItem.value !== "code" && anySubActionLoading)}
             >
-                <tabItem.icon className="h-4 w-4 mr-1.5" /> {tabItem.label}
+                <tabItem.icon className="h-3.5 w-3.5 mr-1 sm:mr-1.5" /> {tabItem.label}
             </TabsTrigger>
           ))}
         </TabsList>
 
         <TabsContent value="code" className="flex-grow flex flex-col overflow-hidden rounded-md border bg-muted/20">
-          <ScrollArea className="flex-grow" style={{maxHeight: 'calc(100vh - 28rem)'}}>
+          <ScrollArea className="flex-grow" style={{maxHeight: 'calc(100vh - 32rem)'}}>
             {isPrimaryCodeActionLoading ? ( 
               <div className="p-4 space-y-2">
                 <div className="flex items-center justify-center h-32">
@@ -244,33 +252,33 @@ export function CodeDisplay({
             )}
           </ScrollArea>
           <div className="p-3 border-t border-border/30 bg-card/50 mt-auto">
-            <Label htmlFor="refinementRequest" className="text-sm font-medium flex items-center gap-1.5 mb-1.5">
-              <Sparkles className="h-4 w-4 text-primary" />
-              Refine Code:
+            <Label htmlFor="refinementRequest" className="text-xs font-medium flex items-center gap-1.5 mb-1.5">
+              <Sparkles className="h-3.5 w-3.5 text-primary" />
+              Refine Code (AI Assist):
             </Label>
             <Textarea
               id="refinementRequest"
               value={refinementInput}
               onChange={(e) => setRefinementInput(e.target.value)}
-              placeholder="e.g., 'Add NatSpec comments...'"
+              placeholder="e.g., 'Add NatSpec comments for all functions...' or 'Optimize the transfer function for gas efficiency...'"
               rows={2}
-              className="mb-2 bg-background/70 focus:bg-background text-sm p-2"
+              className="mb-2 bg-background/70 focus:bg-background text-xs p-2"
               disabled={isPrimaryCodeActionLoading || anySubActionLoading}
             />
             <Button 
               onClick={handleRefineCodeSubmit} 
               disabled={isPrimaryCodeActionLoading || anySubActionLoading || !refinementInput.trim()}
-              className="w-full bg-primary text-primary-foreground hover:bg-primary/90 text-sm py-2"
+              className="w-full bg-primary text-primary-foreground hover:bg-primary/90 text-xs py-2"
               size="sm"
             >
-              {isRefiningCode ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+              {isRefiningCode ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <Sparkles className="mr-2 h-3.5 w-3.5" />}
               Execute Refinement
             </Button>
           </div>
         </TabsContent>
 
         <TabsContent value="suggestions" className="flex-grow flex flex-col overflow-hidden rounded-md border bg-muted/20">
-          <ScrollArea className="h-full flex-grow p-1" style={{maxHeight: 'calc(100vh - 25rem)'}}>
+          <ScrollArea className="h-full flex-grow p-1" style={{maxHeight: 'calc(100vh - 28rem)'}}>
             {isLoadingSuggestions ? (
                <div className="p-4 space-y-3">
                 {[...Array(3)].map((_, i) => <Skeleton key={i} className={`h-12 ${i % 2 === 0 ? 'w-3/4' : 'w-full'} bg-muted/50`} />)}
@@ -279,7 +287,7 @@ export function CodeDisplay({
               <div className="p-3 md:p-4 space-y-3">
                 {securityScore !== null && (
                   <div className="flex items-center justify-between p-2.5 bg-card/50 rounded-md shadow-sm mb-3 border border-border/30">
-                    <h3 className="text-sm font-semibold text-primary">Overall Audit Readiness</h3>
+                    <h3 className="text-sm font-semibold text-primary flex items-center gap-1.5"><ShieldAlert className="h-4 w-4"/>Overall Audit Readiness</h3>
                     {getSecurityScoreBadge(securityScore)}
                   </div>
                 )}
@@ -298,12 +306,12 @@ export function CodeDisplay({
                   ))}
                 </ul>
               </div>
-            ) : ( <div className="p-6 text-center text-muted-foreground flex flex-col items-center justify-center h-full min-h-[200px]"> <Lightbulb className="w-12 h-12 mb-4 text-muted-foreground/50" /> <p className="text-sm">No AI insights yet. Click "AI Scrutiny" below to analyze the code.</p> </div> )}
+            ) : ( <div className="p-6 text-center text-muted-foreground flex flex-col items-center justify-center h-full min-h-[200px]"> <Brain className="w-12 h-12 mb-4 text-muted-foreground/30" /> <p className="text-sm">No AI insights yet. Click "AI Scrutiny" below to analyze the code.</p> </div> )}
           </ScrollArea>
         </TabsContent>
 
         <TabsContent value="gas" className="flex-grow flex flex-col overflow-hidden rounded-md border bg-muted/20">
-          <ScrollArea className="h-full flex-grow p-1" style={{maxHeight: 'calc(100vh - 25rem)'}}>
+          <ScrollArea className="h-full flex-grow p-1" style={{maxHeight: 'calc(100vh - 28rem)'}}>
             {isLoadingGasEstimation ? (
               <div className="p-4 space-y-3"> {[...Array(2)].map((_, i) => <Skeleton key={i} className={`h-16 ${i % 2 === 0 ? 'w-3/4' : 'w-full'} bg-muted/50`} />)} </div>
             ) : gasEstimation ? (
@@ -317,34 +325,34 @@ export function CodeDisplay({
                   </ShadCNCardContent>
                 </div>
               </div>
-            ) : ( <div className="p-6 text-center text-muted-foreground flex flex-col items-center justify-center h-full min-h-[200px]"> <Fuel className="w-12 h-12 mb-4 text-muted-foreground/50" /> <p className="text-sm">No gas estimation available. Click "Query Gas Oracle" below.</p> </div> )}
+            ) : ( <div className="p-6 text-center text-muted-foreground flex flex-col items-center justify-center h-full min-h-[200px]"> <Fuel className="w-12 h-12 mb-4 text-muted-foreground/30" /> <p className="text-sm">No gas estimation available. Click "Query Gas Oracle" below.</p> </div> )}
           </ScrollArea>
         </TabsContent>
 
         <TabsContent value="tests" className="flex-grow flex flex-col overflow-hidden rounded-md border bg-muted/20">
-          <ScrollArea className="h-full flex-grow" style={{maxHeight: 'calc(100vh - 25rem)'}}>
+          <ScrollArea className="h-full flex-grow" style={{maxHeight: 'calc(100vh - 28rem)'}}>
             {isLoadingTestCases ? (
               <div className="p-4 space-y-2"> <div className="flex items-center justify-center h-32"> <Loader2 className="w-10 h-10 text-primary animate-spin" /> </div> {[...Array(6)].map((_, i) => <Skeleton key={i} className={`h-4 ${i % 3 === 0 ? 'w-3/4' : 'w-full'} bg-muted/50`} />)} </div>
             ) : testCasesCode ? (
               <SyntaxHighlighter language="javascript" style={customSyntaxHighlighterStyle} showLineNumbers lineNumberStyle={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.75rem' }} wrapLines wrapLongLines>
                 {testCasesCode}
               </SyntaxHighlighter>
-            ) : ( <div className="p-6 text-center text-muted-foreground flex flex-col items-center justify-center h-full min-h-[200px]"> <Beaker className="w-12 h-12 mb-4 text-muted-foreground/50" /> <p className="text-sm">No test cases generated. Click "Conjure Test Suite" below.</p> </div> )}
+            ) : ( <div className="p-6 text-center text-muted-foreground flex flex-col items-center justify-center h-full min-h-[200px]"> <Beaker className="w-12 h-12 mb-4 text-muted-foreground/30" /> <p className="text-sm">No test cases generated. Click "Conjure Test Suite" below.</p> </div> )}
           </ScrollArea>
         </TabsContent>
       </Tabs>
 
       {code && !isPrimaryCodeActionLoading && (
-         <div className="pt-4 mt-3 space-y-3 border-t border-border/30">
-          <h3 className="text-center text-base font-medium text-foreground mb-1.5">
-            Analysis & Augmentation
+         <div className="pt-3 mt-2.5 space-y-2.5 border-t border-border/30">
+          <h3 className="text-center text-sm font-medium text-foreground mb-1.5">
+            Post-Forge Analysis & Augmentation
           </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {[
               { handler: onGetAISuggestions, isLoading: isLoadingSuggestions, icon: Brain, label: "AI Scrutiny", key: "sug" },
               { handler: onEstimateGasCosts, isLoading: isLoadingGasEstimation, icon: Fuel, label: "Query Gas Oracle", key: "gas" },
               { handler: onGenerateTestCases, isLoading: isLoadingTestCases, icon: Beaker, label: "Conjure Test Suite", key: "test" },
-              { handler: onGenerateDocumentation, isLoading: isGeneratingDocumentation, icon: FileTextIconLucide, label: "Scribe Docs", key: "doc" },
+              { handler: onGenerateDocumentation, isLoading: isGeneratingDocumentation, icon: FileTextIconLucide, label: "Scribe Docs (NatSpec)", key: "doc" },
             ].map(action => (
               <Button
                 key={action.key}
@@ -353,12 +361,12 @@ export function CodeDisplay({
                 size="sm"
                 onClick={action.handler}
                 disabled={anySubActionLoading || isPrimaryCodeActionLoading || (action.key === "sug" && !selectedTemplate)}
-                className="w-full text-xs sm:text-sm py-2"
+                className="w-full text-xs sm:text-sm py-2 h-auto"
               >
                 {action.isLoading ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
                 ) : (
-                  <action.icon className="mr-2 h-4 w-4" />
+                  <action.icon className="mr-2 h-3.5 w-3.5" />
                 )}
                 {action.label}
               </Button>
@@ -369,4 +377,3 @@ export function CodeDisplay({
     </div>
   );
 }
-    
