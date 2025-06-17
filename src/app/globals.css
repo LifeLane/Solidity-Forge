@@ -270,27 +270,35 @@
   .param-tab-trigger { 
     /* Inherits .tab-running-lines-border for the border effect */
     /* Specific adjustments for vertical layout */
-    border-right: none; /* Remove right border if any from base tab trigger */
+    border-right: none; 
     margin-bottom: 0.5rem; /* Space between vertical tabs */
-    text-align: left; /* Align text to the left */
-    font-weight: 500; /* Medium font weight */
+    text-align: left; 
+    font-weight: 500; 
     transition: all 0.2s ease-in-out;
-    border-radius: var(--radius) 0 0 var(--radius); /* Rounded corners on left side */
-    width: 100%; /* Take full width of the TabsList column */
+    width: 100%; 
+    /* Ensure border radius is applied correctly for vertical tabs */
+    border-radius: var(--radius) !important; /* Override default radius if needed for the wrapper */
   }
   
   .param-tab-trigger .tab-running-lines-content {
     justify-content: flex-start; /* Align content (text) to the left */
     padding: 0.75rem 1rem; /* Inner padding for text */
+    border-radius: calc(var(--radius) - 2px); /* Match inner radius for content background */
   }
-  
-  /* Opacity for inactive tabs to de-emphasize */
+
+  .param-tab-trigger[data-state="active"] .tab-running-lines-content {
+    /* background-color: hsl(var(--primary) / 0.1); /* Active tab background tint */
+    /* Color is handled by .tab-running-lines-border[data-state="active"] .tab-running-lines-content */
+  }
+
   .param-tab-trigger:not([data-state="active"]) .tab-running-lines-content {
     opacity: 0.8;
   }
   .param-tab-trigger:hover:not([data-state="active"]) .tab-running-lines-content {
     opacity: 1;
+    /* background-color: hsl(var(--muted) / 0.05); /* Hover background tint for inactive tabs */
   }
+
 }
 
 
@@ -321,8 +329,3 @@
   transition: opacity 0.3s ease-in-out, color 0.3s ease-in-out;
   display: inline-block; 
 }
-
-
-    
-
-    
