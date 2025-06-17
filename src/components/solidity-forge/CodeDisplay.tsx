@@ -17,7 +17,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from "@/hooks/use-toast";
 import type { EstimateGasCostOutput } from '@/ai/flows/estimate-gas-cost';
 import { cn } from '@/lib/utils';
-import type { ContractTemplate, FormData } from '@/config/contracts'; // Import FormData
+import type { ContractTemplate } from '@/config/contracts';
 
 export type AISuggestionType = 'security' | 'optimization' | 'gas_saving' | 'best_practice' | 'informational';
 export type AISuggestionSeverity = 'critical' | 'high' | 'medium' | 'low' | 'info';
@@ -35,16 +35,16 @@ interface CodeDisplayProps {
   securityScore: number | null;
   gasEstimation: EstimateGasCostOutput | null;
   testCasesCode: string;
-  isLoadingCode: boolean;
+  isLoadingCode: boolean; // Overall loading for code generation/refinement
   isLoadingSuggestions: boolean;
   isLoadingGasEstimation: boolean;
   isLoadingTestCases: boolean;
-  isRefiningCode: boolean;
+  isRefiningCode: boolean; // Specific to refinement action
   isGeneratingDocumentation: boolean;
   onRefineCode: (request: string) => Promise<void>;
-  selectedTemplate?: ContractTemplate;
-  anySubActionLoading: boolean;
-  onGetAISuggestions: (template: ContractTemplate, formData: FormData) => Promise<void>;
+  selectedTemplate?: ContractTemplate; // Template used for the current code
+  anySubActionLoading: boolean; // True if any analysis action is loading
+  onGetAISuggestions: () => Promise<void>; // No longer needs template/formData here
   onEstimateGasCosts: () => Promise<void>;
   onGenerateTestCases: () => Promise<void>;
   onGenerateDocumentation: () => Promise<void>;
@@ -63,7 +63,7 @@ export function CodeDisplay({
   isRefiningCode,
   isGeneratingDocumentation,
   onRefineCode,
-  selectedTemplate,
+  selectedTemplate, // Keep for context if needed, but AI calls use page's activeTemplateForOutput
   anySubActionLoading,
   onGetAISuggestions,
   onEstimateGasCosts,
@@ -75,7 +75,8 @@ export function CodeDisplay({
   const [refinementInput, setRefinementInput] = useState<string>('');
   const { toast } = useToast();
 
-  const overallLoading = isLoadingCode || isRefiningCode;
+  // isLoadingCode now covers both initial generation and refinement
+  const overallPrimaryLoading = isLoadingCode || isRefiningCode;
 
   const handleCopyToClipboard = (textToCopy: string, type: string) => {
     if (!textToCopy) return;
@@ -175,7 +176,7 @@ export function CodeDisplay({
       ...vscDarkPlus['pre[class*="language-"]'],
       backgroundColor: 'transparent', 
       margin: 0, 
-      padding: '1rem 1.5rem', // Adjusted padding
+      padding: '1rem 1.5rem',
       fontSize: '0.9rem', 
       fontFamily: 'var(--font-code)', 
       lineHeight: '1.7',
@@ -186,13 +187,26 @@ export function CodeDisplay({
     }
   };
 
-  const handleAISuggestionsClick = useCallback(async () => {
-    if (selectedTemplate) {
-      // For simplicity, we assume FormData is not needed here or is empty
-      // If specific form data is needed, it would have to be passed down or fetched differently
-      await onGetAISuggestions(selectedTemplate, {}); 
-    }
-  }, [selectedTemplate, onGetAISuggestions]);
+  // If no code, display placeholder. Otherwise, display the full component.
+  if (isLoadingCode && !code) { // Show loading skeleton only if truly initial loading
+    return (
+      <div className="flex flex-col h-full p-4 md:p-6 lg:p-8 items-center justify-center text-center">
+        <Loader2 className="w-16 h-16 mb-6 text-primary animate-spin" />
+        <p className="text-xl font-semibold text-muted-foreground">The Alchemist is Forging...</p>
+        <p className="text-base text-muted-foreground">Your digital masterpiece is moments away.</p>
+      </div>
+    );
+  }
+  
+  if (!code && !isLoadingCode) {
+     return (
+      <div className="flex flex-col h-full p-4 md:p-6 lg:p-8 items-center justify-center text-center">
+        <Code2 className="w-20 h-20 mb-8 text-muted-foreground/30" />
+        <p className="text-xl font-semibold text-muted-foreground">The Codex Awaits Your Command</p>
+        <p className="text-base text-muted-foreground">Use the "Blueprint Your Brilliance" panel to generate your smart contract. The Alchemist's output will appear here.</p>
+      </div>
+    );
+  }
 
 
   return (
@@ -202,20 +216,20 @@ export function CodeDisplay({
             <CardTitle className="text-3xl font-headline text-glow-primary mb-2">The Alchemist's Output</CardTitle>
             <CardDescription className="text-base text-muted-foreground">Witness the digital alchemy! Your instructions, my execution. Mostly.</CardDescription>
         </div>
-        {activeTab === "code" && code && !overallLoading && (
+        {activeTab === "code" && code && !overallPrimaryLoading && (
           <div className="flex gap-3 mt-2 sm:mt-0 self-center sm:self-auto">
-            <Button variant="outline" size="lg" onClick={() => handleCopyToClipboard(code, "Code")} aria-label="Copy code" disabled={overallLoading} className="glow-border-purple text-base py-3 px-5">
+            <Button variant="outline" size="lg" onClick={() => handleCopyToClipboard(code, "Code")} aria-label="Copy code" disabled={overallPrimaryLoading} className="glow-border-purple text-base py-3 px-5">
               {copiedStates['Code'] ? <Check className="h-5 w-5 mr-2" /> : <Copy className="h-5 w-5 mr-2" />}
               {copiedStates['Code'] ? "Copied" : "Copy"}
             </Button>
-            <Button variant="outline" size="lg" onClick={handleDeployToRemix} aria-label="Deploy to Remix" disabled={overallLoading} className="glow-border-purple text-base py-3 px-5">
+            <Button variant="outline" size="lg" onClick={handleDeployToRemix} aria-label="Deploy to Remix" disabled={overallPrimaryLoading} className="glow-border-purple text-base py-3 px-5">
               Remix <ExternalLink className="h-5 w-5 ml-2" />
             </Button>
           </div>
         )}
-         {activeTab === "tests" && testCasesCode && !overallLoading && (
+         {activeTab === "tests" && testCasesCode && !overallPrimaryLoading && (
           <div className="flex gap-3 mt-2 sm:mt-0 self-center sm:self-auto">
-            <Button variant="outline" size="lg" onClick={() => handleCopyToClipboard(testCasesCode, "Test Cases")} aria-label="Copy test cases" disabled={overallLoading} className="glow-border-purple text-base py-3 px-5">
+            <Button variant="outline" size="lg" onClick={() => handleCopyToClipboard(testCasesCode, "Test Cases")} aria-label="Copy test cases" disabled={overallPrimaryLoading} className="glow-border-purple text-base py-3 px-5">
               {copiedStates['Test Cases'] ? <Check className="h-5 w-5 mr-2" /> : <Copy className="h-5 w-5 mr-2" />}
               {copiedStates['Test Cases'] ? "Copied Tests" : "Copy Tests"}
             </Button>
@@ -223,7 +237,7 @@ export function CodeDisplay({
         )}
       </div>
       
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-grow flex flex-col min-h-0"> {/* Added min-h-0 */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-grow flex flex-col min-h-0">
         <TabsList className="mb-6 grid w-full grid-cols-2 sm:grid-cols-4 gap-2 p-1.5 rounded-lg bg-card/30 border border-border/20">
           {[
             { value: "code", label: "Code", icon: Code2 },
@@ -240,12 +254,11 @@ export function CodeDisplay({
                 "data-[state=inactive]:text-muted-foreground hover:text-foreground"
               )}
               disabled={
-                (tab.value !== "code" && !code) || // Disable non-code tabs if no code
-                (tab.value === "code" && overallLoading) || // Disable code tab only if overall loading (generation/refinement)
+                (tab.value === "code" && overallPrimaryLoading) || 
                 (tab.value === "suggestions" && isLoadingSuggestions) ||
                 (tab.value === "gas" && isLoadingGasEstimation) ||
                 (tab.value === "tests" && isLoadingTestCases) ||
-                (tab.value !== "code" && overallLoading) // Disable other tabs if generation/refinement in progress
+                (tab.value !== "code" && overallPrimaryLoading) 
               }
             >
               <span className="tab-running-lines-content flex items-center justify-center gap-2 px-3 py-2.5 text-sm md:text-base">
@@ -257,11 +270,11 @@ export function CodeDisplay({
 
         <TabsContent value="code" className="flex-grow flex flex-col overflow-hidden rounded-lg border bg-muted/20 glow-border-yellow">
           <ScrollArea className="flex-grow">
-            {isLoadingCode ? (
+            {isLoadingCode ? ( // This covers refinement too if it re-uses isLoadingCode
               <div className="p-6 space-y-3">
                 {[...Array(12)].map((_, i) => <Skeleton key={i} className={`h-5 ${i % 3 === 0 ? 'w-3/4' : i % 3 === 1 ? 'w-full' : 'w-5/6'} bg-muted/50`} />)}
               </div>
-            ) : code ? (
+            ) : ( // code is guaranteed to exist here due to outer check
               <SyntaxHighlighter
                 language="solidity"
                 style={customSyntaxHighlighterStyle}
@@ -272,49 +285,43 @@ export function CodeDisplay({
               >
                 {code}
               </SyntaxHighlighter>
-            ) : (
-              <div className="p-8 text-center text-muted-foreground flex flex-col items-center justify-center h-full min-h-[250px]">
-                <Code2 className="w-16 h-16 mb-6 text-muted-foreground/50" />
-                <p className="text-base">The codex awaits your command. Use the "Blueprint" panel to generate. My power needs your input!</p>
-              </div>
             )}
           </ScrollArea>
-          {code && !isLoadingCode && (
-            <div className="p-4 md:p-6 border-t border-border/30 bg-card/50 mt-auto">
-              <Label 
-                htmlFor="refinementRequest" 
-                className="text-base font-bold flex items-center justify-center gap-2 mb-3 text-glow-primary"
-              >
-                <Sparkles className="h-5 w-5" />
-                Decree Your Refinements:
-              </Label>
-              <Textarea
-                id="refinementRequest"
-                value={refinementInput}
-                onChange={(e) => setRefinementInput(e.target.value)}
-                placeholder="e.g., 'Add NatSpec comments to all public functions and state variables.'"
-                rows={3}
-                className="mb-3 bg-background/70 focus:bg-background glow-border-purple text-base p-3"
-                disabled={overallLoading || anySubActionLoading}
-              />
-              <Button 
-                onClick={handleRefineCodeSubmit} 
-                disabled={overallLoading || anySubActionLoading || !refinementInput.trim()}
-                className="w-full glow-border-primary bg-primary text-primary-foreground hover:bg-primary/90 text-lg py-3"
-              >
-                {isRefiningCode ? (
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                ) : (
-                  <Sparkles className="mr-2 h-5 w-5" />
-                )}
-                Execute Refinement
-              </Button>
-            </div>
-          )}
+          {/* Refinement section */}
+          <div className="p-4 md:p-6 border-t border-border/30 bg-card/50 mt-auto">
+            <Label 
+              htmlFor="refinementRequest" 
+              className="text-base font-bold flex items-center justify-center gap-2 mb-3 text-glow-primary"
+            >
+              <Sparkles className="h-5 w-5" />
+              Decree Your Refinements:
+            </Label>
+            <Textarea
+              id="refinementRequest"
+              value={refinementInput}
+              onChange={(e) => setRefinementInput(e.target.value)}
+              placeholder="e.g., 'Add NatSpec comments to all public functions and state variables.'"
+              rows={3}
+              className="mb-3 bg-background/70 focus:bg-background glow-border-purple text-base p-3"
+              disabled={overallPrimaryLoading || anySubActionLoading}
+            />
+            <Button 
+              onClick={handleRefineCodeSubmit} 
+              disabled={overallPrimaryLoading || anySubActionLoading || !refinementInput.trim()}
+              className="w-full glow-border-primary bg-primary text-primary-foreground hover:bg-primary/90 text-lg py-3"
+            >
+              {isRefiningCode ? (
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              ) : (
+                <Sparkles className="mr-2 h-5 w-5" />
+              )}
+              Execute Refinement
+            </Button>
+          </div>
         </TabsContent>
 
         <TabsContent value="suggestions" className="flex-grow overflow-hidden rounded-lg border bg-muted/20 glow-border-yellow">
-          <ScrollArea className="h-full max-h-[calc(100vh-30rem)] p-1"> {/* Adjusted max-h */}
+          <ScrollArea className="h-full p-1">
             {isLoadingSuggestions ? (
                <div className="p-6 space-y-4">
                 {[...Array(5)].map((_, i) => <Skeleton key={i} className={`h-16 ${i % 2 === 0 ? 'w-3/4' : 'w-full'} bg-muted/50`} />)}
@@ -342,22 +349,17 @@ export function CodeDisplay({
                   ))}
                 </ul>
               </div>
-            ) : code && !isLoadingCode && !overallLoading ? (
+            ) : (
                  <div className="p-8 text-center text-muted-foreground flex flex-col items-center justify-center h-full min-h-[250px]">
                     <Lightbulb className="w-16 h-16 mb-6 text-muted-foreground/50" />
                     <p className="text-base">My analysis chamber is idle. Your code might be perfect (ha!), or you simply haven't requested my critique using the "AI Scrutiny" button below.</p>
                  </div>
-            ) : (
-              <div className="p-8 text-center text-muted-foreground flex flex-col items-center justify-center h-full min-h-[250px]">
-                <Lightbulb className="mx-auto h-16 w-16 mb-6 text-muted-foreground/50" /> 
-                <p className="text-base">Summon code first. My wisdom isn't wasted on the void.</p>
-              </div>
             )}
           </ScrollArea>
         </TabsContent>
 
         <TabsContent value="gas" className="flex-grow overflow-hidden rounded-lg border bg-muted/20 glow-border-yellow">
-          <ScrollArea className="h-full max-h-[calc(100vh-30rem)] p-1">
+          <ScrollArea className="h-full p-1">
             {isLoadingGasEstimation ? (
               <div className="p-6 space-y-4">
                 {[...Array(4)].map((_, i) => <Skeleton key={i} className={`h-20 ${i % 2 === 0 ? 'w-3/4' : 'w-full'} bg-muted/50`} />)}
@@ -381,22 +383,17 @@ export function CodeDisplay({
                   </ShadCNCardContent>
                 </div>
               </div>
-            ) : code && !isLoadingCode && !overallLoading ? (
+            ) : (
               <div className="p-8 text-center text-muted-foreground flex flex-col items-center justify-center h-full min-h-[250px]">
                 <Fuel className="w-16 h-16 mb-6 text-muted-foreground/50" />
                 <p className="text-base">Pondering the price of computation? Dare to 'Query Gas Oracle' using the button below.</p>
-              </div>
-            ) : (
-              <div className="p-8 text-center text-muted-foreground flex flex-col items-center justify-center h-full min-h-[250px]">
-                <Fuel className="mx-auto h-16 w-16 mb-6 text-muted-foreground/50" /> 
-                <p className="text-base">To estimate costs, one needs code. A novel concept, I know.</p>
               </div>
             )}
           </ScrollArea>
         </TabsContent>
 
         <TabsContent value="tests" className="flex-grow overflow-hidden rounded-lg border bg-muted/20 glow-border-yellow">
-          <ScrollArea className="h-full max-h-[calc(100vh-30rem)]">
+          <ScrollArea className="h-full">
             {isLoadingTestCases ? (
               <div className="p-6 space-y-3">
                 {[...Array(12)].map((_, i) => <Skeleton key={i} className={`h-5 ${i % 3 === 0 ? 'w-3/4' : i % 3 === 1 ? 'w-full' : 'w-5/6'} bg-muted/50`} />)}
@@ -412,86 +409,79 @@ export function CodeDisplay({
               >
                 {testCasesCode}
               </SyntaxHighlighter>
-            ) : code && !isLoadingCode && !overallLoading ? (
+            ) : (
               <div className="p-8 text-center text-muted-foreground flex flex-col items-center justify-center h-full min-h-[250px]">
                 <Beaker className="w-16 h-16 mb-6 text-muted-foreground/50" />
                 <p className="text-base">Yearning for test structures? 'Conjure Test Suite' using the button below and witness... basic tests.</p>
-              </div>
-            ) : (
-              <div className="p-8 text-center text-muted-foreground flex flex-col items-center justify-center h-full min-h-[250px]">
-                <Beaker className="mx-auto h-16 w-16 mb-6 text-muted-foreground/50" /> 
-                <p className="text-base">Testing the ether? Materialize some code first, then we'll talk tests.</p>
               </div>
             )}
           </ScrollArea>
         </TabsContent>
 
-        {/* Analysis Action Buttons - only if code is generated */}
-        {code && !isLoadingCode && !isRefiningCode && (
-            <div className="pt-6 mt-4 space-y-4 border-t border-border/30">
-              <h3 className="text-center text-lg font-semibold mb-2">
-                <span className="animate-text-multicolor-glow">Post-Forge Analysis & Augmentation</span>
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleAISuggestionsClick}
-                  disabled={anySubActionLoading || isLoadingCode || !code || !selectedTemplate}
-                  className="w-full glow-border-purple hover:bg-accent/10 hover:text-accent-foreground text-base py-4"
-                >
-                  {isLoadingSuggestions ? (
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  ) : (
-                     <Brain className="mr-2 h-5 w-5" />
-                  )}
-                  AI Scrutiny
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={onEstimateGasCosts}
-                  disabled={anySubActionLoading || isLoadingCode || !code}
-                  className="w-full glow-border-purple hover:bg-accent/10 hover:text-accent-foreground text-base py-4"
-                >
-                  {isLoadingGasEstimation ? (
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  ) : (
-                     <Fuel className="mr-2 h-5 w-5" />
-                  )}
-                  Query Gas Oracle
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={onGenerateTestCases}
-                  disabled={anySubActionLoading || isLoadingCode || !code}
-                  className="w-full glow-border-purple hover:bg-accent/10 hover:text-accent-foreground text-base py-4"
-                >
-                  {isLoadingTestCases ? (
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  ) : (
-                     <Beaker className="mr-2 h-5 w-5" />
-                   )}
-                  Conjure Test Suite
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={onGenerateDocumentation}
-                  disabled={anySubActionLoading || isLoadingCode || !code}
-                  className="w-full glow-border-purple hover:bg-accent/10 hover:text-accent-foreground text-base py-4"
-                >
-                  {isGeneratingDocumentation ? (
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  ) : (
-                     <FileTextIconLucide className="mr-2 h-5 w-5" />
-                  )}
-                  Scribe Docs
-                </Button>
-              </div>
-            </div>
-          )}
+        {/* Analysis Action Buttons - Placed below tabs, visible if code exists */}
+        <div className="pt-6 mt-auto space-y-4 border-t border-border/30"> {/* mt-auto here might be tricky with flex-grow on Tabs */}
+          <h3 className="text-center text-lg font-semibold mb-2">
+            <span className="animate-text-multicolor-glow">Post-Forge Analysis & Augmentation</span>
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 px-1 pb-1">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onGetAISuggestions}
+              disabled={anySubActionLoading || overallPrimaryLoading || !selectedTemplate}
+              className="w-full glow-border-purple hover:bg-accent/10 hover:text-accent-foreground text-base py-4"
+            >
+              {isLoadingSuggestions ? (
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              ) : (
+                  <Brain className="mr-2 h-5 w-5" />
+              )}
+              AI Scrutiny
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onEstimateGasCosts}
+              disabled={anySubActionLoading || overallPrimaryLoading}
+              className="w-full glow-border-purple hover:bg-accent/10 hover:text-accent-foreground text-base py-4"
+            >
+              {isLoadingGasEstimation ? (
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              ) : (
+                  <Fuel className="mr-2 h-5 w-5" />
+              )}
+              Query Gas Oracle
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onGenerateTestCases}
+              disabled={anySubActionLoading || overallPrimaryLoading}
+              className="w-full glow-border-purple hover:bg-accent/10 hover:text-accent-foreground text-base py-4"
+            >
+              {isLoadingTestCases ? (
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              ) : (
+                  <Beaker className="mr-2 h-5 w-5" />
+                )}
+              Conjure Test Suite
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onGenerateDocumentation}
+              disabled={anySubActionLoading || overallPrimaryLoading}
+              className="w-full glow-border-purple hover:bg-accent/10 hover:text-accent-foreground text-base py-4"
+            >
+              {isGeneratingDocumentation ? (
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              ) : (
+                  <FileTextIconLucide className="mr-2 h-5 w-5" />
+              )}
+              Scribe Docs
+            </Button>
+          </div>
+        </div>
       </Tabs>
     </div>
   );

@@ -7,7 +7,7 @@ import type { ContractTemplate, ContractParameter } from '@/config/contracts';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CardTitle, CardDescription } from '@/components/ui/card';
+import { CardTitle } from '@/components/ui/card'; // Removed CardDescription as it's not used here
 import { AlertTriangle, ArrowDownCircle, Loader2, Wand2, Eraser } from 'lucide-react';
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -42,7 +42,7 @@ const getParameterGroups = (template: ContractTemplate, isAdvancedMode: boolean)
       },
       {
         title: 'Features',
-        parameters: visibleParams.filter(p => ['mintable', 'burnable', 'pausable'].includes(p.name))
+        parameters: visibleParams.filter(p => ['accessControl', 'mintable', 'burnable', 'pausable'].includes(p.name))
       },
       {
         title: 'Economics',
@@ -50,7 +50,7 @@ const getParameterGroups = (template: ContractTemplate, isAdvancedMode: boolean)
       },
       {
         title: 'Control & Upgrades',
-        parameters: visibleParams.filter(p => ['accessControl', 'upgradable'].includes(p.name))
+        parameters: visibleParams.filter(p => ['upgradable'].includes(p.name))
       },
     ];
   } else if (template.id === 'liquidityPool') {
@@ -104,7 +104,7 @@ interface ContractConfigFormProps {
   templates: ContractTemplate[];
   onGenerateCode: (template: ContractTemplate, formData: FormData) => Promise<void>;
   isGeneratingCode: boolean;
-  selectedTemplateProp?: ContractTemplate;
+  selectedTemplateProp?: ContractTemplate; // For initial setting
   isForgeDisabledByLimit: boolean;
   onNavigateToDevAccess: () => void;
   onResetForge: () => void;
@@ -122,86 +122,80 @@ const ContractConfigForm = React.memo(({
   onResetForge,
   hasGeneratedCode,
 }: ContractConfigFormProps) => {
-  const [selectedTemplate, setSelectedTemplate] = useState<ContractTemplate | undefined>(selectedTemplateProp || templates[0]);
+  // Internal state for the form's currently selected template
+  const [currentFormTemplate, setCurrentFormTemplate] = useState<ContractTemplate>(selectedTemplateProp || templates[0]);
   const [isAdvancedMode, setIsAdvancedMode] = useState(false);
   const [activeTabValue, setActiveTabValue] = useState<string | undefined>(undefined);
 
   const subtitleText = "Sculpt your smart contract's soul. Or, you know, just click randomly. My circuits won't judge. Much.";
 
   const methods = useForm<FormData>({
-    defaultValues: selectedTemplate?.parameters.reduce((acc, param) => {
+    defaultValues: currentFormTemplate.parameters.reduce((acc, param) => {
       acc[param.name] = param.defaultValue ?? '';
       return acc;
     }, {} as FormData) || {}
   });
-  const { handleSubmit, reset } = methods;
+  const { handleSubmit, reset, getValues } = methods;
 
 
   useEffect(() => {
-    if (selectedTemplateProp) {
-      setSelectedTemplate(selectedTemplateProp);
+    // Reset form when the template selected *for the form* changes
+    const defaultValues = currentFormTemplate.parameters.reduce((acc, param) => {
+      acc[param.name] = param.defaultValue ?? '';
+      return acc;
+    }, {} as FormData);
+    if (currentFormTemplate.id === 'custom' && !defaultValues.customDescription) {
+      defaultValues.customDescription = '';
     }
-  }, [selectedTemplateProp]);
+    reset(defaultValues);
 
-  useEffect(() => {
-    if (selectedTemplate) {
-      const defaultValues = selectedTemplate.parameters.reduce((acc, param) => {
-        acc[param.name] = param.defaultValue ?? '';
-        return acc;
-      }, {} as FormData);
-      if (selectedTemplate.id === 'custom' && !defaultValues.customDescription) {
-        defaultValues.customDescription = '';
-      }
-      reset(defaultValues);
-
-      const groups = getParameterGroups(selectedTemplate, isAdvancedMode);
-      const defaultActiveGroup = groups.find(g => g.defaultActive) || groups[0];
-      if (defaultActiveGroup) {
-        setActiveTabValue(defaultActiveGroup.title.toLowerCase().replace(/\s+/g, '-'));
-      } else if (groups.length > 0) {
-        setActiveTabValue(groups[0].title.toLowerCase().replace(/\s+/g, '-'));
-      }
-       else {
-        setActiveTabValue(undefined);
-      }
+    const groups = getParameterGroups(currentFormTemplate, isAdvancedMode);
+    const defaultActiveGroup = groups.find(g => g.defaultActive) || groups[0];
+    if (defaultActiveGroup) {
+      setActiveTabValue(defaultActiveGroup.title.toLowerCase().replace(/\s+/g, '-'));
+    } else if (groups.length > 0) {
+      setActiveTabValue(groups[0].title.toLowerCase().replace(/\s+/g, '-'));
+    } else {
+      setActiveTabValue(undefined);
     }
-  }, [selectedTemplate, reset, isAdvancedMode]);
+  }, [currentFormTemplate, reset, isAdvancedMode]);
 
 
-  const handleTemplateChange = useCallback((templateId: string) => {
+  const handleTemplateSelectChange = useCallback((templateId: string) => {
     const newTemplate = templates.find(t => t.id === templateId);
-    setSelectedTemplate(newTemplate);
+    if (newTemplate) {
+      setCurrentFormTemplate(newTemplate);
+    }
   },[templates]);
 
   const onSubmit = useCallback(async (data: FormData) => {
-    if (selectedTemplate) {
-      await onGenerateCode(selectedTemplate, data);
-    }
-  }, [selectedTemplate, onGenerateCode]);
+    // currentFormTemplate is the one selected in this form component
+    await onGenerateCode(currentFormTemplate, data);
+  }, [currentFormTemplate, onGenerateCode]);
 
-  const parameterGroups = useMemo(() => selectedTemplate ? getParameterGroups(selectedTemplate, isAdvancedMode) : [], [selectedTemplate, isAdvancedMode]);
+  const parameterGroups = useMemo(() => getParameterGroups(currentFormTemplate, isAdvancedMode), [currentFormTemplate, isAdvancedMode]);
 
-  const parameterConfigurationSection = selectedTemplate && (
-    selectedTemplate.id === 'custom' || parameterGroups.length === 0 ? (
+  const parameterConfigurationSection = (
+    currentFormTemplate.id === 'custom' || parameterGroups.length === 0 ? (
       <div className="space-y-6 pt-6 border-t border-border/20 mt-6">
-        {selectedTemplate.parameters
+        {currentFormTemplate.parameters
           .filter(param => isAdvancedMode || !param.advancedOnly)
           .map(param => (
             <ParameterInputDisplay
               key={param.name}
               param={param}
               anyPrimaryActionLoading={isGeneratingCode}
-              contractTypeName={selectedTemplate.name}
+              contractTypeName={currentFormTemplate.name}
             />
           ))}
       </div>
     ) : (
-      <div className="pt-6 border-t border-border/20 mt-6">
+      <div className="pt-6 border-t border-border/20 mt-6 flex-grow min-h-0"> {/* Ensure this can grow and scroll */}
         <Tabs
           orientation="vertical"
           value={activeTabValue}
           onValueChange={setActiveTabValue}
-          className="flex flex-col md:flex-row gap-6 md:gap-8 min-h-[300px] max-h-[calc(100vh-25rem)]" // Adjusted max-h
+          className="flex flex-col md:flex-row gap-6 md:gap-8 h-full" 
         >
           <TabsList className="flex flex-row md:flex-col md:space-y-2 md:w-60 shrink-0 overflow-x-auto md:overflow-y-auto md:overflow-x-visible pb-2 md:pb-0 bg-transparent p-0">
             {parameterGroups.map((group) => {
@@ -224,7 +218,8 @@ const ContractConfigForm = React.memo(({
               );
             })}
           </TabsList>
-          <div className="flex-grow min-w-0 p-1 rounded-md border border-border/20 bg-card/30 h-full overflow-y-auto">
+          {/* This div needs to handle overflow for its content */}
+          <div className="flex-grow min-w-0 p-1 rounded-md border border-border/20 bg-card/30 overflow-y-auto max-h-[calc(100vh-30rem)] md:max-h-full">
             {parameterGroups.map(group => {
               const tabValue = group.title.toLowerCase().replace(/\s+/g, '-');
               return (
@@ -234,7 +229,7 @@ const ContractConfigForm = React.memo(({
                         key={param.name}
                         param={param}
                         anyPrimaryActionLoading={isGeneratingCode}
-                        contractTypeName={selectedTemplate.name}
+                        contractTypeName={currentFormTemplate.name}
                       />
                   )) : <p className="text-base text-muted-foreground p-4 text-center">No parameters in this section for the current mode.</p>}
                 </TabsContent>
@@ -248,7 +243,7 @@ const ContractConfigForm = React.memo(({
 
 
   return (
-    <div className="space-y-8 p-4 md:p-6 lg:p-8 h-full flex flex-col">
+    <div className="space-y-8 p-4 md:p-6 lg:p-8 h-full flex flex-col"> {/* Added h-full and flex flex-col */}
       <div className="text-center">
         <CardTitle className="text-3xl font-headline mb-3">
             <ScrambledText
@@ -274,7 +269,7 @@ const ContractConfigForm = React.memo(({
             <br />
             <span className="animate-text-multicolor-glow">(Contract Type)</span>
           </Label>
-          <Select onValueChange={handleTemplateChange} defaultValue={selectedTemplate?.id} disabled={isGeneratingCode}>
+          <Select onValueChange={handleTemplateSelectChange} defaultValue={currentFormTemplate.id} disabled={isGeneratingCode}>
             <SelectTrigger id="contractType" className="glow-border-purple bg-background/70 focus:bg-background text-base py-6">
               <SelectValue placeholder="Choose Your Genesis Blueprint" />
             </SelectTrigger>
@@ -289,12 +284,12 @@ const ContractConfigForm = React.memo(({
               ))}
             </SelectContent>
           </Select>
-          {selectedTemplate &&
-            <p className="text-sm text-muted-foreground mt-2 text-center max-w-lg mx-auto">{selectedTemplate.description}</p>
+          {currentFormTemplate &&
+            <p className="text-sm text-muted-foreground mt-2 text-center max-w-lg mx-auto">{currentFormTemplate.description}</p>
           }
         </div>
 
-        {selectedTemplate && selectedTemplate.id !== 'custom' && selectedTemplate.parameters.length > 0 && (
+        {currentFormTemplate.id !== 'custom' && currentFormTemplate.parameters.length > 0 && (
           <div className="mt-6 flex flex-col items-center space-y-2">
             <Label
               htmlFor="mode-switch"
@@ -320,61 +315,59 @@ const ContractConfigForm = React.memo(({
       </div>
 
     <FormProvider {...methods}>
-      {selectedTemplate && (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 flex-grow flex flex-col">
-          <div className="flex-grow">
-            {parameterConfigurationSection}
-          </div>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 flex-grow flex flex-col min-h-0"> {/* flex-grow and min-h-0 for scrolling */}
+        <div className="flex-grow min-h-0"> {/* This container will allow parameterConfigurationSection to scroll */}
+          {parameterConfigurationSection}
+        </div>
 
-          <div className="pt-6 border-t border-border/20 mt-auto">
-            <div className="flex flex-col sm:flex-row gap-3">
-                <Button
-                  type="submit"
-                  disabled={isGeneratingCode || isForgeDisabledByLimit}
-                  className="w-full sm:flex-1 glow-border-primary bg-primary text-primary-foreground hover:bg-primary/90 text-lg py-6"
-                >
-                  {isGeneratingCode ? (
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  ) : (
-                    <Wand2 className="mr-2 h-5 w-5" />
-                  )}
-                  {isGeneratingCode ? 'Forging...' : 'Forge Contract'}
-                </Button>
-                {hasGeneratedCode && (
-                    <Button
-                        type="button"
-                        variant="outline"
-                        onClick={onResetForge}
-                        disabled={isGeneratingCode}
-                        className="w-full sm:w-auto glow-border-purple text-lg py-6"
-                    >
-                        <Eraser className="mr-2 h-5 w-5" />
-                        Clear & Reset
-                    </Button>
+        <div className="pt-6 border-t border-border/20 mt-auto"> {/* mt-auto pushes this to the bottom */}
+          <div className="flex flex-col sm:flex-row gap-3">
+              <Button
+                type="submit"
+                disabled={isGeneratingCode || isForgeDisabledByLimit}
+                className="w-full sm:flex-1 glow-border-primary bg-primary text-primary-foreground hover:bg-primary/90 text-lg py-6"
+              >
+                {isGeneratingCode ? (
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                ) : (
+                  <Wand2 className="mr-2 h-5 w-5" />
                 )}
-            </div>
-            {isForgeDisabledByLimit && (
-              <div className="mt-4 p-3 bg-destructive/10 border border-destructive/30 rounded-md text-center">
-                <p className="text-sm text-destructive-foreground flex items-center justify-center gap-2">
-                  <AlertTriangle className="h-5 w-5 text-destructive" />
-                  Daily Forge Quota Maxed Out! Don't let your brilliance be capped.
-                </p>
-                <Button
-                  variant="link"
-                  className="text-sm text-accent hover:text-accent/80 mt-1"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    onNavigateToDevAccess();
-                  }}
-                >
-                  Upgrade to Developer Access (Unlimited Forging & AirDrop!)
-                  <ArrowDownCircle className="ml-2 h-4 w-4"/>
-                </Button>
-              </div>
-            )}
+                {isGeneratingCode ? 'Forging...' : 'Forge Contract'}
+              </Button>
+              {hasGeneratedCode && (
+                  <Button
+                      type="button"
+                      variant="outline"
+                      onClick={onResetForge}
+                      disabled={isGeneratingCode}
+                      className="w-full sm:w-auto glow-border-purple text-lg py-6"
+                  >
+                      <Eraser className="mr-2 h-5 w-5" />
+                      Clear & Reset
+                  </Button>
+              )}
           </div>
-        </form>
-      )}
+          {isForgeDisabledByLimit && (
+            <div className="mt-4 p-3 bg-destructive/10 border border-destructive/30 rounded-md text-center">
+              <p className="text-sm text-destructive-foreground flex items-center justify-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-destructive" />
+                Daily Forge Quota Maxed Out! Don't let your brilliance be capped.
+              </p>
+              <Button
+                variant="link"
+                className="text-sm text-accent hover:text-accent/80 mt-1"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onNavigateToDevAccess();
+                }}
+              >
+                Upgrade to Developer Access (Unlimited Forging & AirDrop!)
+                <ArrowDownCircle className="ml-2 h-4 w-4"/>
+              </Button>
+            </div>
+          )}
+        </div>
+      </form>
     </FormProvider>
     </div>
   );

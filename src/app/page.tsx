@@ -4,7 +4,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Header } from '@/components/solidity-forge/Header';
 import { Footer } from '@/components/solidity-forge/Footer';
-import { ContractConfigForm, type FormData } from '@/components/solidity-forge/ContractConfigForm';
+import { ContractConfigForm, type FormData as ContractFormData } from '@/components/solidity-forge/ContractConfigForm';
 import { CodeDisplay, type AISuggestion } from '@/components/solidity-forge/CodeDisplay';
 import type { EstimateGasCostOutput } from '@/ai/flows/estimate-gas-cost';
 import { KnownAddressesFinder } from '@/components/solidity-forge/KnownAddressesFinder';
@@ -18,10 +18,8 @@ import { generateTestCases } from '@/ai/flows/generate-test-cases';
 import { refineSmartContractCode } from '@/ai/flows/refine-smart-contract-code';
 import { generateDocumentation } from '@/ai/flows/generate-documentation-flow';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { CONTRACT_TEMPLATES, type ContractTemplate } from '@/config/contracts';
 import { cn } from '@/lib/utils';
-import { Eraser, Puzzle, AlertTriangle, ArrowDownCircle, Wand2, Brain, Fuel, Beaker, FileText as FileTextIconLucide, Loader2 } from 'lucide-react';
 
 const MAX_FORGES_PER_DAY = 3;
 const LOCAL_STORAGE_USAGE_KEY = 'solidityForgeUsage';
@@ -33,7 +31,9 @@ interface UsageData {
 }
 
 export default function SolidityForgePage() {
-  const [selectedTemplate, setSelectedTemplate] = useState<ContractTemplate | undefined>(
+  // State for the selected template *used for the current generation/analysis context*
+  // ContractConfigForm will manage its own internal selection for display
+  const [activeTemplateForOutput, setActiveTemplateForOutput] = useState<ContractTemplate | undefined>(
     CONTRACT_TEMPLATES[0]
   );
   const [generatedCode, setGeneratedCode] = useState<string>('');
@@ -103,7 +103,7 @@ export default function SolidityForgePage() {
     setGeneratedTestCases('');
   }, []);
 
-  const handleGenerateCode = useCallback(async (template: ContractTemplate, formData: FormData) => {
+  const handleGenerateCode = useCallback(async (template: ContractTemplate, formData: ContractFormData) => {
     if (isForgeDisabledByLimit) {
       toast({
         variant: "destructive",
@@ -114,10 +114,10 @@ export default function SolidityForgePage() {
       return;
     }
 
-    setSelectedTemplate(template);
+    setActiveTemplateForOutput(template); // Set the template context for the output panel
     setIsGeneratingCode(true);
-    setGeneratedCode(''); // Clear previous code
-    resetAnalyses(); // Clear previous analyses
+    setGeneratedCode('');
+    resetAnalyses();
 
     if (!hasDeveloperAccess) {
       const newCount = usageData.count + 1;
@@ -130,20 +130,16 @@ export default function SolidityForgePage() {
     if (template.id === 'custom' && formData.customDescription) {
         description = formData.customDescription as string;
     } else {
-        description += `
-Parameters:`;
+        description += `\nParameters:`;
         for (const key in formData) {
           if (Object.prototype.hasOwnProperty.call(formData, key) && formData[key] !== undefined && formData[key] !== '') {
             const paramConfig = template.parameters.find(p => p.name === key);
-            description += `
-- ${paramConfig?.label || key}: ${formData[key]}`;
+            description += `\n- ${paramConfig?.label || key}: ${formData[key]}`;
           }
         }
     }
     if(template.aiPromptEnhancement) {
-        description += `
-
-Specific guidance: ${template.aiPromptEnhancement}`;
+        description += `\n\nSpecific guidance: ${template.aiPromptEnhancement}`;
     }
 
     try {
@@ -164,10 +160,10 @@ Specific guidance: ${template.aiPromptEnhancement}`;
     } finally {
       setIsGeneratingCode(false);
     }
-  }, [isForgeDisabledByLimit, toast, hasDeveloperAccess, usageData, resetAnalyses, getTodayDateString]);
+  }, [isForgeDisabledByLimit, toast, hasDeveloperAccess, usageData, resetAnalyses]);
 
-  const handleGetAISuggestions = useCallback(async (template: ContractTemplate, formData: FormData) => {
-    if (!generatedCode || !template) {
+  const handleGetAISuggestions = useCallback(async () => {
+    if (!generatedCode || !activeTemplateForOutput) {
       toast({
         variant: "destructive",
         title: "Patience, Architect!",
@@ -179,19 +175,12 @@ Specific guidance: ${template.aiPromptEnhancement}`;
     setAiSuggestions([]);
     setSecurityScore(null);
 
-    // Note: formData passed here might be stale if not careful.
-    // For this action, we usually analyze the existing 'generatedCode',
-    // and 'formData' might be for context if the AI needs it.
-    // Here, we are assuming 'formData' from ContractConfigForm is not directly needed for existing code analysis.
-    // If it were for re-generation or specific parameter-related suggestions, it would be critical.
-    // For now, we'll pass an empty object or relevant context from selectedTemplate.
-    const paramsForAI = template.id === 'custom' ? { customDescription: 'Custom Contract Analysis' } : { contractType: template.name };
-
+    const paramsForAI = activeTemplateForOutput.id === 'custom' ? { customDescription: 'Custom Contract Analysis' } : { contractType: activeTemplateForOutput.name };
 
     try {
       const result = await suggestErrorPrevention({
-        contractType: template.name,
-        parameters: paramsForAI, // Pass minimal context or structure as needed by the flow
+        contractType: activeTemplateForOutput.name,
+        parameters: paramsForAI,
         code: generatedCode,
       });
       setAiSuggestions(result.suggestions || []);
@@ -210,7 +199,7 @@ Specific guidance: ${template.aiPromptEnhancement}`;
     } finally {
       setIsGettingSuggestions(false);
     }
-  }, [generatedCode, toast]);
+  }, [generatedCode, activeTemplateForOutput, toast]);
 
   const handleEstimateGasCosts = useCallback(async () => {
     if (!generatedCode) {
@@ -244,7 +233,7 @@ Specific guidance: ${template.aiPromptEnhancement}`;
   }, [generatedCode, toast]);
 
   const handleGenerateTestCases = useCallback(async () => {
-    if (!generatedCode || !selectedTemplate) {
+    if (!generatedCode || !activeTemplateForOutput) {
       toast({
         variant: "destructive",
         title: "Testing the Void?",
@@ -255,7 +244,7 @@ Specific guidance: ${template.aiPromptEnhancement}`;
     setIsGeneratingTestCases(true);
     setGeneratedTestCases('');
     try {
-      const result = await generateTestCases({ code: generatedCode, contractName: selectedTemplate.name });
+      const result = await generateTestCases({ code: generatedCode, contractName: activeTemplateForOutput.name });
       setGeneratedTestCases(result.testCasesCode);
       toast({
         title: "Test Blueprints Rendered!",
@@ -271,10 +260,10 @@ Specific guidance: ${template.aiPromptEnhancement}`;
     } finally {
       setIsGeneratingTestCases(false);
     }
-  }, [generatedCode, selectedTemplate, toast]);
+  }, [generatedCode, activeTemplateForOutput, toast]);
 
   const handleRefineCode = useCallback(async (request: string) => {
-    if (!generatedCode || !selectedTemplate) {
+    if (!generatedCode || !activeTemplateForOutput) {
       toast({
         variant: "destructive",
         title: "Refining Air?",
@@ -292,13 +281,13 @@ Specific guidance: ${template.aiPromptEnhancement}`;
     }
 
     setIsRefiningCode(true);
-    resetAnalyses(); // Reset previous analyses before showing refined code
+    resetAnalyses();
 
     try {
       const result = await refineSmartContractCode({
         currentCode: generatedCode,
         refinementRequest: request,
-        contractContext: `Contract type: ${selectedTemplate.name}`,
+        contractContext: `Contract type: ${activeTemplateForOutput.name}`,
       });
       setGeneratedCode(result.refinedCode);
       toast({
@@ -315,7 +304,7 @@ Specific guidance: ${template.aiPromptEnhancement}`;
     } finally {
       setIsRefiningCode(false);
     }
-  }, [generatedCode, selectedTemplate, toast, resetAnalyses]);
+  }, [generatedCode, activeTemplateForOutput, toast, resetAnalyses]);
 
   const handleGenerateDocumentation = useCallback(async () => {
     if (!generatedCode) {
@@ -327,7 +316,7 @@ Specific guidance: ${template.aiPromptEnhancement}`;
       return;
     }
     setIsGeneratingDocumentation(true);
-    resetAnalyses(); // Reset other analyses as documentation might change perception
+    resetAnalyses();
 
     try {
       const result = await generateDocumentation({ code: generatedCode });
@@ -395,8 +384,6 @@ Specific guidance: ${template.aiPromptEnhancement}`;
   const handleResetForge = useCallback(() => {
     setGeneratedCode('');
     resetAnalyses();
-    // Optionally reset selectedTemplate or other form-related states if desired
-    // setSelectedTemplate(CONTRACT_TEMPLATES[0]); // This would reset the form to default
     toast({
         title: "Forge Cleared!",
         description: "The slate is clean. Ready for your next grand design (or happy accident)."
@@ -422,12 +409,12 @@ Specific guidance: ${template.aiPromptEnhancement}`;
                 )}
               style={{ animationDelay: '0.1s' }}
             >
-              <CardContent className="p-0 h-full">
+              <CardContent className="p-0 h-full flex flex-col"> {/* Ensure CardContent can flex its children */}
                 <ContractConfigForm
                   templates={CONTRACT_TEMPLATES}
                   onGenerateCode={handleGenerateCode}
                   isGeneratingCode={isGeneratingCode}
-                  selectedTemplateProp={selectedTemplate}
+                  selectedTemplateProp={CONTRACT_TEMPLATES[0]} // Initial template for the form
                   isForgeDisabledByLimit={isForgeDisabledByLimit}
                   onNavigateToDevAccess={handleNavigateToDevAccess}
                   onResetForge={handleResetForge}
@@ -446,6 +433,7 @@ Specific guidance: ${template.aiPromptEnhancement}`;
               )}
               style={{ animationDelay: '0.3s' }}
             >
+              {/* CodeDisplay itself is always rendered, its internal content is conditional */}
               <CodeDisplay
                 code={generatedCode}
                 suggestions={aiSuggestions}
@@ -459,7 +447,7 @@ Specific guidance: ${template.aiPromptEnhancement}`;
                 isRefiningCode={isRefiningCode}
                 isGeneratingDocumentation={isGeneratingDocumentation}
                 onRefineCode={handleRefineCode}
-                selectedTemplate={selectedTemplate}
+                selectedTemplate={activeTemplateForOutput} // Pass the template used for generation
                 anySubActionLoading={anySubActionLoading}
                 onGetAISuggestions={handleGetAISuggestions}
                 onEstimateGasCosts={handleEstimateGasCosts}
