@@ -197,7 +197,7 @@ const ContractConfigForm = React.memo(({
           ))}
       </div>
     ) : (
-      <div className="pt-1 border-t border-border/30 flex-grow min-h-0 flex flex-col">
+      <div className="pt-2 border-t border-border/30 flex-grow min-h-0 flex flex-col">
         <Tabs
           orientation="vertical"
           value={activeTabValue}
@@ -221,7 +221,7 @@ const ContractConfigForm = React.memo(({
           </TabsList>
           
           <div className="flex-grow min-w-0 rounded-md mt-2 md:mt-0 flex flex-col min-h-0">
-            <ScrollArea className="h-full max-h-[calc(100vh-30rem)] md:max-h-[calc(100vh-25rem)] lg:max-h-[calc(100vh-22rem)] pr-1 flex-grow">
+            <ScrollArea className="h-full max-h-[calc(100vh-34rem)] md:max-h-[calc(100vh-28rem)] lg:max-h-[calc(100vh-25rem)] pr-1 flex-grow">
                 {parameterGroups.map(group => {
                 const tabValue = group.title.toLowerCase().replace(/\s+/g, '-');
                 return (
@@ -321,7 +321,7 @@ const ContractConfigForm = React.memo(({
         </div>
 
         {currentFormTemplate.id !== 'custom' && currentFormTemplate.parameters.length > 0 && (
-          <div className="py-2 flex items-center justify-center space-x-3 border-y border-border/20">
+          <div className="py-3 px-2 border border-border/30 rounded-md flex items-center justify-center space-x-3 my-2">
             <Label htmlFor="mode-switch" className="text-sm font-medium text-muted-foreground">Basic</Label>
             <Switch
               id="mode-switch"
@@ -430,3 +430,4 @@ const ContractConfigForm = React.memo(({
 
 ContractConfigForm.displayName = "ContractConfigForm";
 export { ContractConfigForm };
+

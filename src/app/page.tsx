@@ -19,9 +19,9 @@ import { refineSmartContractCode } from '@/ai/flows/refine-smart-contract-code';
 import { generateDocumentation } from '@/ai/flows/generate-documentation-flow';
 import { Card, CardContent } from '@/components/ui/card';
 import { CONTRACT_TEMPLATES, type ContractTemplate } from '@/config/contracts';
-import { Puzzle } from 'lucide-react';
+import { Puzzle, Loader2 } from 'lucide-react';
 
-const MAX_FORGES_PER_DAY = 5; // Increased slightly for testing
+const MAX_FORGES_PER_DAY = 5; 
 const LOCAL_STORAGE_USAGE_KEY = 'solidityForgeUsage';
 const LOCAL_STORAGE_DEV_ACCESS_KEY = 'solidityForgeDevAccess';
 
@@ -176,8 +176,7 @@ export default function SolidityForgePage() {
       setSecurityScore(result.securityScore);
       toast({ title: "AI Insights Revealed", description: "Suggestions and security score are now available." });
     } catch (error) {
-      console.error("Error getting AI suggestions:", error);
-      toast({ variant: "destructive", title: "AI Suggestion Error", description: (error as Error).message || "Could not retrieve AI suggestions." });
+      toast({ variant: "destructive", title: "AI Suggestion Failed", description: (error as Error).message || "Could not retrieve AI suggestions." });
     } finally {
       setIsGettingSuggestions(false);
     }
@@ -195,8 +194,7 @@ export default function SolidityForgePage() {
       setGasEstimation(result);
       toast({ title: "Gas Estimation Complete", description: "Analysis of gas consumption is ready." });
     } catch (error) {
-      console.error("Error estimating gas costs:", error);
-      toast({ variant: "destructive", title: "Gas Estimation Error", description: (error as Error).message || "Failed to estimate gas costs." });
+      toast({ variant: "destructive", title: "Gas Estimation Failed", description: (error as Error).message || "Failed to estimate gas costs." });
     } finally {
       setIsEstimatingGas(false);
     }
@@ -215,8 +213,7 @@ export default function SolidityForgePage() {
       setGeneratedTestCases(result.testCasesCode);
       toast({ title: "Test Cases Generated", description: "A basic Hardhat test suite has been created." });
     } catch (error) {
-      console.error("Error generating test cases:", error);
-      toast({ variant: "destructive", title: "Test Generation Error", description: (error as Error).message || "Could not generate test cases." });
+      toast({ variant: "destructive", title: "Test Generation Failed", description: (error as Error).message || "Could not generate test cases." });
     } finally {
       setIsGeneratingTestCases(false);
     }
@@ -242,8 +239,7 @@ export default function SolidityForgePage() {
       setGeneratedCode(result.refinedCode); 
       toast({ title: "Code Refined Successfully", description: "Your contract code has been updated as per your instructions." });
     } catch (error) {
-      console.error("Error refining code:", error);
-      toast({ variant: "destructive", title: "Refinement Error", description: (error as Error).message || "Failed to refine the code." });
+      toast({ variant: "destructive", title: "Refinement Failed", description: (error as Error).message || "Failed to refine the code." });
     } finally {
       setIsRefiningCode(false);
     }
@@ -261,8 +257,7 @@ export default function SolidityForgePage() {
       setGeneratedCode(result.documentedCode); 
       toast({ title: "Documentation Generated", description: "NatSpec comments have been added to your code." });
     } catch (error) {
-      console.error("Error generating documentation:", error);
-      toast({ variant: "destructive", title: "Documentation Error", description: (error as Error).message || "Failed to generate documentation." });
+      toast({ variant: "destructive", title: "Documentation Failed", description: (error as Error).message || "Failed to generate documentation." });
     } finally {
       setIsGeneratingDocumentation(false);
     }
@@ -278,15 +273,13 @@ export default function SolidityForgePage() {
     try {
       const result = await getKnownLiquidityPoolInfo({ query });
       setAddressResults(result);
-      // Toast is handled by KnownAddressesFinder or here if more detail is needed
       if (!result.results || result.results.length === 0) {
           toast({ title: "Address Search", description: result.summary || "No specific addresses found for your query."});
       } else {
           toast({ title: "Address Search Complete", description: result.summary || "Known addresses fetched." });
       }
     } catch (error) {
-      console.error("Error finding addresses:", error);
-      toast({ variant: "destructive", title: "Address Search Error", description: (error as Error).message || "Failed to fetch known addresses." });
+      toast({ variant: "destructive", title: "Address Search Failed", description: (error as Error).message || "Failed to fetch known addresses." });
     } finally {
       setIsFindingAddresses(false);
     }
@@ -322,18 +315,43 @@ export default function SolidityForgePage() {
       <main className="flex-grow container mx-auto px-4 py-6 md:py-8 flex flex-col items-stretch gap-6 md:gap-8">
         
         <Card className="border shadow-sm">
-          <ContractConfigForm
-            templates={CONTRACT_TEMPLATES}
-            onGenerateCode={handleGenerateCode}
-            isGeneratingCode={isGeneratingCode}
-            selectedTemplateProp={CONTRACT_TEMPLATES[0]} 
-            isForgeDisabledByLimit={isForgeDisabledByLimit}
-            onNavigateToDevAccess={handleNavigateToDevAccess}
-            onResetForge={handleResetForge}
-            hasGeneratedCode={!!generatedCode}
-          />
+            <ContractConfigForm
+                templates={CONTRACT_TEMPLATES}
+                onGenerateCode={handleGenerateCode}
+                isGeneratingCode={isGeneratingCode}
+                selectedTemplateProp={CONTRACT_TEMPLATES[0]} 
+                isForgeDisabledByLimit={isForgeDisabledByLimit}
+                onNavigateToDevAccess={handleNavigateToDevAccess}
+                onResetForge={handleResetForge}
+                hasGeneratedCode={!!generatedCode}
+            />
         </Card>
 
+        {isGeneratingCode && !generatedCode && (
+            <Card className="border-dashed border-border/60 dark:border-primary/40 shadow-none flex flex-col items-center justify-center min-h-[300px] md:min-h-[400px] text-center bg-muted/20">
+                <CardContent className="text-muted-foreground p-6 md:p-8">
+                    <Loader2 className="w-16 h-16 md:w-20 md:h-20 text-primary/40 mx-auto mb-4 animate-spin" />
+                    <p className="text-lg md:text-xl font-medium text-foreground mb-1">The Alchemist is Working...</p>
+                    <p className="text-sm md:text-base">
+                        Your smart contract is being forged by the AI. Please wait a moment.
+                    </p>
+                </CardContent>
+            </Card>
+        )}
+
+        {!isGeneratingCode && !generatedCode && (
+           <Card className="border-dashed border-border/60 dark:border-primary/40 shadow-none flex flex-col items-center justify-center min-h-[300px] md:min-h-[400px] text-center bg-muted/20">
+            <CardContent className="text-muted-foreground p-6 md:p-8">
+                <Puzzle className="w-16 h-16 md:w-20 md:h-20 text-primary/40 mx-auto mb-4" />
+                <p className="text-lg md:text-xl font-medium text-foreground mb-1">Ready to Forge?</p>
+                <p className="text-sm md:text-base">
+                    Configure your desired smart contract parameters using the form above.
+                    Once you click "Review & Forge," your generated code and analysis tools will appear in this section.
+                </p>
+            </CardContent>
+          </Card>
+        )}
+        
         {generatedCode && activeTemplateForOutput && (
           <div ref={outputSectionRef} className="w-full">
             <Card className="border shadow-sm">
@@ -360,32 +378,6 @@ export default function SolidityForgePage() {
             </Card>
           </div>
         )}
-
-        {!generatedCode && !isGeneratingCode && (
-           <Card className="border-dashed border-border/50 shadow-none flex flex-col items-center justify-center min-h-[300px] md:min-h-[400px] text-center bg-muted/20">
-            <CardContent className="text-muted-foreground p-6 md:p-8">
-                <Puzzle className="w-16 h-16 md:w-20 md:h-20 text-primary/40 mx-auto mb-4" />
-                <p className="text-lg md:text-xl font-medium text-foreground mb-1">Ready to Forge?</p>
-                <p className="text-sm md:text-base">
-                    Configure your desired smart contract parameters using the form above.
-                    Once you click "Review & Forge," your generated code and analysis tools will appear in this section.
-                </p>
-            </CardContent>
-          </Card>
-        )}
-        
-        {isGeneratingCode && !generatedCode && (
-             <Card className="border-dashed border-border/50 shadow-none flex flex-col items-center justify-center min-h-[300px] md:min-h-[400px] text-center bg-muted/20">
-                <CardContent className="text-muted-foreground p-6 md:p-8">
-                    <Puzzle className="w-16 h-16 md:w-20 md:h-20 text-primary/40 mx-auto mb-4 animate-pulse" />
-                    <p className="text-lg md:text-xl font-medium text-foreground mb-1">The Alchemist is Working...</p>
-                    <p className="text-sm md:text-base">
-                        Your smart contract is being forged by the AI. Please wait a moment.
-                    </p>
-                </CardContent>
-            </Card>
-        )}
-
 
         <Card className="border shadow-sm">
           <CardContent className="p-4 md:p-6">
