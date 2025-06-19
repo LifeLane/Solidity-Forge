@@ -1,6 +1,6 @@
 
 import type { LucideIcon } from 'lucide-react';
-import { Coins, GitFork, ArrowRightLeft, Landmark, FileJson, Puzzle, ShieldCheck, Edit, CircleDollarSign, Gem, Scale, Lock, Unlock, Settings2, Info as InfoIcon, Link as LinkIcon, Image as ImageIcon, FileText as FileTextIcon, Database, SlidersHorizontal, Palette } from 'lucide-react'; // Added more icons
+import { Coins, GitFork, ArrowRightLeft, Landmark, FileJson, Puzzle, ShieldCheck, Edit, CircleDollarSign, Gem, Scale, Lock, Settings2, Info as InfoIcon, Link as LinkIcon, Image as ImageIcon, FileText as FileTextIcon, Database, SlidersHorizontal, Palette, Percent, Users, Briefcase, Clock, BarChartBig, ShieldEllipsis, KeyRound, Blocks } from 'lucide-react';
 
 export type ParameterType = 'string' | 'number' | 'boolean' | 'address' | 'select' | 'textarea';
 export type ParameterCategory = 'core' | 'metadata' | 'feature' | 'control' | 'economics';
@@ -10,16 +10,16 @@ export interface ContractParameter {
   name: string;
   label: string;
   type: ParameterType;
-  category?: ParameterCategory; // For grouping in UI
+  category?: ParameterCategory;
   defaultValue?: string | number | boolean;
   options?: { value: string; label: string }[];
   placeholder?: string;
   description?: string;
-  rows?: number; 
-  advancedOnly?: boolean; 
-  dependsOn?: string; 
-  dependsOnValue?: any; 
-  icon?: LucideIcon; 
+  rows?: number;
+  advancedOnly?: boolean;
+  dependsOn?: string;
+  dependsOnValue?: any;
+  icon?: LucideIcon;
 }
 
 export interface ContractTemplate {
@@ -28,20 +28,13 @@ export interface ContractTemplate {
   description: string;
   icon: LucideIcon;
   parameters: ContractParameter[];
-  aiPromptEnhancement?: string; 
+  aiPromptEnhancement?: string;
 }
-
-const COMMON_EVM_TOKEN_ADDRESSES_ETH_MAINNET = {
-  WETH: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-  USDC: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-  USDT: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
-  DAI: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
-};
 
 const WETH_ADDRESSES_BY_NETWORK = {
   ETH_MAINNET: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-  BNB_CHAIN: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c', 
-  POLYGON: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270', 
+  BNB_CHAIN: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
+  POLYGON: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
   ARBITRUM: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
   OPTIMISM: '0x4200000000000000000000000000000000000006',
 };
@@ -54,105 +47,186 @@ export const CONTRACT_TEMPLATES: ContractTemplate[] = [
     description: 'A standard fungible token contract (e.g., for cryptocurrencies) with optional advanced features and metadata.',
     icon: Coins,
     parameters: [
-      // Core Details Group
-      { name: 'tokenName', label: 'Token Name', type: 'string', placeholder: 'My Awesome Token', description: 'The full name of your token.', icon: InfoIcon, category: 'core' },
-      { name: 'tokenSymbol', label: 'Token Symbol', type: 'string', placeholder: 'MAT', description: 'The ticker symbol for your token (e.g., ETH).', icon: Gem, category: 'core' },
-      { name: 'initialSupply', label: 'Initial Supply', type: 'number', placeholder: '1000000', description: 'Total tokens minted at deployment. If mintable & 0, none initially.', icon: CircleDollarSign, category: 'core' },
-      { name: 'decimals', label: 'Decimals', type: 'number', defaultValue: 18, description: 'Number of decimal places (typically 18).', advancedOnly: true, icon: Scale, category: 'core' },
-      
-      // Project & Social Links Group / Metadata
-      { name: 'projectDescription', label: 'Project Description', type: 'textarea', rows: 3, placeholder: 'Brief description of your token project...', description: 'Short summary for on-chain metadata.', icon: FileTextIcon, category: 'metadata' },
-      { name: 'logoUrl', label: 'Logo URL', type: 'string', placeholder: 'https://example.com/logo.png', description: 'Direct HTTPS URL to the project/token logo.', icon: ImageIcon, category: 'metadata', advancedOnly: true },
-      { name: 'websiteUrl', label: 'Website URL', type: 'string', placeholder: 'https://example.com', description: 'Official project website.', icon: LinkIcon, category: 'metadata', advancedOnly: true },
-      { name: 'twitterHandle', label: 'X (Twitter) Handle', type: 'string', placeholder: '@MyTokenProject', description: 'Official X (Twitter) handle, including @.', icon: LinkIcon, category: 'metadata', advancedOnly: true },
-      { name: 'telegramLink', label: 'Telegram Link', type: 'string', placeholder: 'https://t.me/MyTokenProject', description: 'Official Telegram group/channel link.', icon: LinkIcon, category: 'metadata', advancedOnly: true },
+      { name: 'tokenName', label: 'Token Name', type: 'string', placeholder: 'Epic Token', description: 'The full, human-readable name of your token (e.g., "EpicToken").', icon: Palette, category: 'core' },
+      { name: 'tokenSymbol', label: 'Token Symbol', type: 'string', placeholder: 'EPIC', description: 'The abbreviated ticker symbol for your token (e.g., "EPIC").', icon: Gem, category: 'core' },
+      { name: 'initialSupply', label: 'Initial Supply', type: 'number', placeholder: '1000000000', description: 'Total tokens minted at deployment. If mintable & 0, no initial minting. Amount in full units (not wei).', icon: CircleDollarSign, category: 'core' },
+      { name: 'decimals', label: 'Decimals', type: 'number', defaultValue: 18, placeholder: '18', description: 'Number of decimal places for token divisibility (18 is standard).', advancedOnly: true, icon: Scale, category: 'core' },
 
-      // Features Group
-      { name: 'accessControl', label: 'Access Control Model', type: 'select', options: [{ value: 'None', label: 'None (Public if applicable)' },{ value: 'Ownable', label: 'Ownable (OpenZeppelin)' },{ value: 'Roles', label: 'Roles (AccessControl)' },], defaultValue: 'Ownable', description: 'Mechanism for admin functions (minting, pausing).', icon: ShieldCheck, category: 'feature' },
-      { name: 'mintable', label: 'Enable Minting', type: 'boolean', defaultValue: false, description: 'Allows new token creation post-deployment. Requires Access Control.', icon: Edit, category: 'feature' },
-      { name: 'burnable', label: 'Enable Burning', type: 'boolean', defaultValue: false, description: 'Allows tokens to be destroyed.', advancedOnly: true, icon: Edit, category: 'feature' },
-      { name: 'pausable', label: 'Enable Pausable', type: 'boolean', defaultValue: false, description: 'Allows pausing token transfers. Requires Access Control.', advancedOnly: true, icon: Lock, category: 'feature' },
+      { name: 'projectDescription', label: 'Project Description', type: 'textarea', rows: 3, placeholder: 'A revolutionary token for the new digital economy...', description: 'Brief description of the token and its project for on-chain metadata.', icon: FileTextIcon, category: 'metadata' },
+      { name: 'logoUrl', label: 'Logo URL', type: 'string', placeholder: 'https://example.com/logo.png', description: 'HTTPS URL to the project/token logo image (PNG, SVG preferred).', icon: ImageIcon, category: 'metadata', advancedOnly: true },
+      { name: 'websiteUrl', label: 'Website URL', type: 'string', placeholder: 'https://epictoken.xyz', description: 'Official project or token website URL.', icon: LinkIcon, category: 'metadata', advancedOnly: true },
+      { name: 'twitterHandle', label: 'X (Twitter) Handle', type: 'string', placeholder: '@EpicToken', description: 'Official X (Twitter) handle, including the "@" symbol.', icon: Users, category: 'metadata', advancedOnly: true },
+      { name: 'telegramLink', label: 'Telegram Link', type: 'string', placeholder: 'https://t.me/EpicTokenOfficial', description: 'Official Telegram group or channel link.', icon: Users, category: 'metadata', advancedOnly: true },
+
+      { name: 'accessControl', label: 'Access Control Model', type: 'select', options: [{ value: 'None', label: 'None (Public if applicable)' },{ value: 'Ownable', label: 'Ownable (Single Owner)' },{ value: 'Roles', label: 'Roles (AccessControl)' },], defaultValue: 'Ownable', description: 'Mechanism for administrative functions (minting, pausing, upgrades).', icon: ShieldCheck, category: 'feature' },
+      { name: 'mintable', label: 'Enable Minting', type: 'boolean', defaultValue: false, description: 'Allows creation of new tokens after deployment. Requires appropriate Access Control.', icon: Edit, category: 'feature' },
+      { name: 'burnable', label: 'Enable Burning', type: 'boolean', defaultValue: false, description: 'Allows tokens to be permanently destroyed by holders or approved accounts.', advancedOnly: true, icon: Edit, category: 'feature' },
+      { name: 'pausable', label: 'Enable Pausable Transfers', type: 'boolean', defaultValue: false, description: 'Allows pausing all token transfers in emergencies. Requires appropriate Access Control.', advancedOnly: true, icon: Lock, category: 'feature' },
       
-      // Economics Group
-      { name: 'transactionFeePercent', label: 'Transaction Fee (%)', type: 'number', defaultValue: 0, placeholder: '0.5', description: 'Percentage fee on transfers (0-100). Max 2 decimals (e.g., 0.25).', advancedOnly: true, icon: CircleDollarSign, category: 'economics' },
-      { name: 'feeRecipientAddress', label: 'Fee Recipient Address', type: 'address', placeholder: '0x...', description: 'Address for transaction fees. Required if Fee > 0.', advancedOnly: true, dependsOn: 'transactionFeePercent', dependsOnValue: (val: number) => val > 0, icon: Landmark, category: 'economics' },
-      { name: 'maxTransactionAmount', label: 'Max Tx Amount', type: 'number', defaultValue: 0, placeholder: '10000', description: 'Max tokens per transaction. 0 for no limit.', advancedOnly: true, icon: Scale, category: 'economics' },
+      { name: 'transactionFeePercent', label: 'Transaction Fee (%)', type: 'number', defaultValue: 0, placeholder: '0.5', description: 'Percentage fee on transfers (0-10). Use up to 2 decimals (e.g., 0.25 for 0.25%).', advancedOnly: true, icon: Percent, category: 'economics' },
+      { name: 'feeRecipientAddress', label: 'Fee Recipient Address', type: 'address', placeholder: '0xRecipientAddress...', description: 'Address to receive transaction fees. Required if fee > 0.', advancedOnly: true, dependsOn: 'transactionFeePercent', dependsOnValue: (val: number) => val > 0, icon: Landmark, category: 'economics' },
+      { name: 'maxTransactionAmount', label: 'Max Transaction Amount', type: 'number', defaultValue: 0, placeholder: '1000000', description: 'Maximum tokens allowed per single transaction. 0 for no limit. Amount in full units.', advancedOnly: true, icon: BarChartBig, category: 'economics' },
       
-      // Control & Upgrades Group
-      { name: 'upgradable', label: 'Upgradability Model', type: 'select', options: [{ value: 'None', label: 'Immutable' },{ value: 'UUPS', label: 'UUPS Proxy (OpenZeppelin)' },], defaultValue: 'None', description: 'Makes contract upgradable (UUPS recommended).', advancedOnly: true, icon: Settings2, category: 'control' },
+      { name: 'upgradable', label: 'Upgradability Model', type: 'select', options: [{ value: 'None', label: 'Immutable (Not Upgradable)' },{ value: 'UUPS', label: 'UUPS Proxy (Recommended)' },], defaultValue: 'None', description: 'Allows the contract logic to be updated post-deployment. UUPS is generally preferred.', advancedOnly: true, icon: Settings2, category: 'control' },
     ],
-    aiPromptEnhancement: `Generate a feature-rich ERC20 token. Use OpenZeppelin contracts extensively. Default to Solidity pragma ^0.8.20;
-- **Standard Compliance**: Strictly adhere to ERC20 standards. Implement ERC20Metadata.
-- **Metadata Fields**:
-  - If \`projectDescription\` is provided, add \`string public projectDescription;\` and \`function getProjectDescription() public view returns (string memory) { return projectDescription; }\`.
-  - If \`logoUrl\` is provided, add \`string public logoURL;\` and \`function getLogoURL() public view returns (string memory) { return logoURL; }\`.
-  - If \`websiteUrl\` is provided, add \`string public websiteURL;\` and \`function getWebsiteURL() public view returns (string memory) { return websiteURL; }\`.
-  - If \`twitterHandle\` is provided, add \`string public twitterHandle;\` and \`function getTwitterHandle() public view returns (string memory) { return twitterHandle; }\`.
-  - If \`telegramLink\` is provided, add \`string public telegramLink;\` and \`function getTelegramLink() public view returns (string memory) { return telegramLink; }\`.
-  - These metadata fields should be set in the constructor or initializer. Include NatSpec comments for them.
-- **Access Control**:
-  - If 'accessControl' is 'Ownable', use OpenZeppelin's Ownable. The deployer becomes the owner.
-  - If 'accessControl' is 'Roles', use OpenZeppelin's AccessControl. Define MINTER_ROLE, PAUSER_ROLE, UPGRADER_ROLE (if upgradable and UUPS), and ADMIN_ROLE. Grant all roles to the deployer initially. The ADMIN_ROLE should be able to grant/revoke roles.
-  - If 'accessControl' is 'None', features like minting/pausing should either be public (dangerous, add strong warnings in comments) or disabled if they inherently require admin control.
-- **Initial Supply & Decimals**: Use \`tokenName\`, \`tokenSymbol\`, \`initialSupply\`, and \`decimals\` as provided.
-  - If \`mintable\` is false, the \`initialSupply\` is minted to the contract deployer during construction/initialization and becomes the fixed total supply.
-  - If \`mintable\` is true: if \`initialSupply\` > 0, mint this amount to the deployer. If \`initialSupply\` is 0, no tokens are minted initially.
-- **Mintable**: If \`mintable\` is true, provide a \`mint(address to, uint256 amount)\` function.
-  - If 'Ownable', restrict with \`onlyOwner\`.
-  - If 'Roles', restrict with \`onlyRole(MINTER_ROLE)\`.
-  - If 'None', make it public only if safe and sensible; otherwise, this feature should be considered disabled or requires Ownable/Roles.
-- **Burnable**: If \`burnable\` is true, use OpenZeppelin's ERC20Burnable. This provides \`burn(uint256 amount)\` (users burn their own) and \`burnFrom(address account, uint256 amount)\`.
-- **Pausable**: If \`pausable\` is true, use OpenZeppelin's Pausable. Key functions (\`transfer\`, \`transferFrom\`, \`approve\`, \`mint\`, \`burn\`) must be guarded by \`whenNotPaused\`. The pause/unpause functions must be restricted:
-  - If 'Ownable', restrict with \`onlyOwner\`.
-  - If 'Roles', restrict with \`onlyRole(PAUSER_ROLE)\`.
-- **Upgradability**:
-  - If \`upgradable\` is 'UUPS', use OpenZeppelin Contracts UUPS (\`UUPSUpgradeable\`). The contract must inherit \`Initializable\`. Replace constructor with an \`initializer\` function that takes necessary parameters (name, symbol, initial supply owner, and all metadata fields like projectDescription, logoUrl, etc.). The \`_authorizeUpgrade\` function must be implemented and restricted:
-    - If 'Ownable', restrict with \`onlyOwner\`.
-    - If 'Roles', restrict with \`onlyRole(UPGRADER_ROLE)\`.
-- **Transaction Fee**: If \`transactionFeePercent\` > 0:
-  - The fee is a percentage of the transaction amount. Example: \`transactionFeePercent\` = 0.5 means 0.5%. Store and calculate fees precisely (e.g., use basis points: 50 for 0.5%).
-  - Transfer fees to \`feeRecipientAddress\`. If not provided or address(0), fees should be burned.
-  - Override \`_update\` or \`_transfer\` from OpenZeppelin's ERC20. Ensure sender's balance decreases by X, recipient gets X - Fee, fee recipient gets Fee.
-  - Optionally exclude fees for minting/burning operations, or for transfers involving specific addresses (e.g., owner, feeRecipientAddress itself). State such exclusions in comments.
-- **Max Transaction Amount**: If \`maxTransactionAmount\` > 0, add a check in transfers (\`_update\` or \`_transfer\`) that \`amount\` <= \`maxTransactionAmount\`. This limit might not apply to deployer/owner, minting/burning.
-- **Clarity & Security**: Ensure NatSpec comments for all public interfaces. Use Checks-Effects-Interactions.
-- **Constructor/Initializer**: If UUPS, the initializer: \`function initialize(string memory _name, string memory _symbol, uint256 _supplyToMint, address _initialOwner, string memory _projectDesc, string memory _logo, string memory _website, string memory _twitter, string memory _telegram) public initializer { ... }\`. If not upgradable, use a constructor. The \`_initialOwner\` receives the initial supply and Ownable/Admin roles. Initialize all metadata fields in the constructor/initializer.
+    aiPromptEnhancement: `Generate a Solidity smart contract for an ERC20 token.
+**Solidity Version**: Use \\\`pragma solidity ^0.8.20;\\\`
+
+**Core ERC20 Implementation**:
+- Use OpenZeppelin contracts. If not upgradable, import from \\\`@openzeppelin/contracts/token/ERC20/ERC20.sol\\\`, \\\`@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol\\\` (if burnable), \\\`@openzeppelin/contracts/access/Ownable.sol\\\` (if Ownable).
+- If UUPS upgradable, import from \\\`@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol\\\`, \\\`@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol\\\` (if burnable), \\\`@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol\\\` (if Ownable), and \\\`@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol\\\`, \\\`@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol\\\`.
+- Contract name should be \\\`{{tokenName}}\\\` (e.g., "EpicToken" -> contract EpicToken is ...).
+
+**Constructor / Initializer**:
+- **If NOT upgradable (\\\`upgradable\\\` is 'None')**:
+    - Use a \\\`constructor(string memory _name, string memory _symbol, uint256 _initialSupply, address _ownerOrDeployer, string memory _projectDesc, string memory _logo, string memory _website, string memory _twitter, string memory _telegram)\\\`.
+    - Initialize \\\`ERC20(_name, _symbol)\\\`.
+    - If \\\`initialSupply\\\` > 0, mint \\\`_initialSupply * (10**decimals())\\\` to \\\`_ownerOrDeployer\\\`.
+    - If 'Ownable' access control, set \\\`_ownerOrDeployer\\\` as the initial owner.
+    - If 'Roles' access control, grant \\\`DEFAULT_ADMIN_ROLE\\\` and all other applicable roles (MINTER_ROLE, PAUSER_ROLE) to \\\`_ownerOrDeployer\\\`.
+- **If UUPS upgradable (\\\`upgradable\\\` is 'UUPS')**:
+    - The contract MUST inherit \\\`Initializable\\\`, \\\`ERC20Upgradeable\\\`, relevant extensions (like \\\`ERC20BurnableUpgradeable\\\`), access control (like \\\`OwnableUpgradeable\\\` or \\\`AccessControlUpgradeable\\\`), and \\\`UUPSUpgradeable\\\`.
+    - Create an \\\`initializer(string memory _name, string memory _symbol, uint8 _decimals, uint256 _initialSupply, address _initialAdmin, string memory _projectDesc, string memory _logo, string memory _website, string memory _twitter, string memory _telegram) public initializer\\\` function.
+    - Inside, call initializers for all parent contracts: \\\`__ERC20_init(_name, _symbol, _decimals);\\\`, \\\`__Ownable_init(_initialAdmin);\\\` or \\\`__AccessControl_init();\\\`, \\\`__UUPSUpgradeable_init();\\\`.
+    - If \\\`_initialSupply\\\` > 0, mint \\\`_initialSupply * (10**_decimals)\\\` to \\\`_initialAdmin\\\`.
+    - If 'Roles' access control, grant \\\`DEFAULT_ADMIN_ROLE\\\` and other roles to \\\`_initialAdmin\\\` using \\\`_grantRole(DEFAULT_ADMIN_ROLE, _initialAdmin)\\\`, etc.
+- **Metadata Fields**: Store \\\`projectDescription\\\`, \\\`logoUrl\\\`, \\\`websiteUrl\\\`, \\\`twitterHandle\\\`, \\\`telegramLink\\\` in public string state variables if provided. These should be set in the constructor/initializer. Include public getter functions for each. For example: \\\`string public projectDescription;\\\` and \\\`function getProjectDescription() public view returns (string memory) { return projectDescription; }\\\`.
+
+**Parameters Implementation**:
+- **\\\`tokenName\\\`**: Pass to ERC20 constructor/initializer.
+- **\\\`tokenSymbol\\\`**: Pass to ERC20 constructor/initializer.
+- **\\\`decimals\\\`**: Pass to ERC20 constructor/initializer if upgradable. If not upgradable, OpenZeppelin's ERC20.sol has a virtual \\\`decimals()\\\` function that returns 18 by default, which can be overridden if needed (but usually default is fine).
+- **\\\`initialSupply\\\`**: Convert to wei using \\\`decimals\\\` (\\\`initialSupply * (10**_decimals)\\\`) before minting.
+
+**Access Control (\\\`accessControl\\\` parameter)**:
+- **If 'Ownable'**: Inherit \\\`Ownable\\\` or \\\`OwnableUpgradeable\\\`. Functions requiring restriction (mint, pause, unpause, _authorizeUpgrade) use the \\\`onlyOwner\\\` modifier.
+- **If 'Roles'**: Inherit \\\`AccessControl\\\` or \\\`AccessControlUpgradeable\\\`.
+    - Define bytes32 public constant roles: \\\`MINTER_ROLE\\\`, \\\`PAUSER_ROLE\\\`, \\\`UPGRADER_ROLE\\\` (if UUPS).
+    - Grant these roles to the initial admin/owner in the constructor/initializer.
+    - \\\`DEFAULT_ADMIN_ROLE\\\` can grant/revoke roles.
+    - Restricted functions use \\\`onlyRole(SPECIFIC_ROLE)\\\` modifier.
+- **If 'None'**: Features requiring admin control (mint, pause, upgrade) should effectively be disabled or made immutable if they can't be public. This is generally not recommended for features like minting.
+
+**Features**:
+- **\\\`mintable\\\`**:
+    - If true, include \\\`function mint(address to, uint256 amount) public\\\`.
+    - Restrict with \\\`onlyOwner\\\` or \\\`onlyRole(MINTER_ROLE)\\\`.
+    - Amount should be in wei (\\\`amount * (10**decimals())\\\`).
+- **\\\`burnable\\\`**:
+    - If true, inherit \\\`ERC20Burnable\\\` or \\\`ERC20BurnableUpgradeable\\\`. This provides \\\`burn(uint256 amount)\\\` and \\\`burnFrom(address account, uint256 amount)\\\`.
+- **\\\`pausable\\\`**:
+    - If true, inherit \\\`Pausable\\\` or \\\`PausableUpgradeable\` from OpenZeppelin.
+    - Override \\\`_update\\\`, \\\`_mint\\\`, \\\`_burn\\\` (or \\\`_beforeTokenTransfer\\\` if preferred for simplicity) to be guarded by \\\`whenNotPaused\\\`.
+    - Provide \\\`pause()\\\` and \\\`unpause()\\\` functions restricted by \\\`onlyOwner\\\` or \\\`onlyRole(PAUSER_ROLE)\\\`.
+
+**Economics**:
+- **\\\`transactionFeePercent\\\`**:
+    - If > 0, implement fee logic. Store fee percentage (e.g., as basis points: if user enters 0.5, store 50).
+    - Override \\\`_update(address from, address to, uint256 amount)\\\` (or \\\`_transfer\\\` if simpler).
+    - Calculate fee: \\\`uint256 fee = (amount * feePercentInBasisPoints) / 10000;\\\`.
+    - Ensure \\\`from\\\`'s balance decreases by \\\`amount\\\`.
+    - \\\`to\\\` receives \\\`amount - fee\\\`.
+    - Transfer \\\`fee\\\` to \\\`feeRecipientAddress\\\`. If \\\`feeRecipientAddress\\\` is address(0) or not provided, burn the fee.
+    - Add NatSpec comments explaining fee logic.
+- **\\\`maxTransactionAmount\\\`**:
+    - If > 0, add a \\\`require(amount <= maxTransactionAmount * (10**decimals()), "Max transaction limit exceeded");\\\` check within \\\`_update\\\` or \\\`_transfer\\\`. This might not apply to mint/burn or transfers by owner/admin.
+
+**Upgradability (\\\`upgradable\\\` parameter)**:
+- **If 'UUPS'**:
+    - Inherit \\\`UUPSUpgradeable\\\`.
+    - Implement \\\`function _authorizeUpgrade(address newImplementation) internal override restricted_modifier {}\\\`.
+    - Restriction: \\\`onlyOwner\\\` or \\\`onlyRole(UPGRADER_ROLE)\\\`.
+
+**General**:
+- Add comprehensive NatSpec comments for all public functions, state variables, events, and custom errors.
+- Use custom errors over require strings where gas effective: \\\`error MyCustomError(uint amount); ... revert MyCustomError(amount);\\\`
+- Follow Checks-Effects-Interactions pattern.
 `,
   },
   {
     id: 'liquidityPool',
     name: 'Liquidity Pool Pair',
-    description: 'A Uniswap V2-style pair contract for providing liquidity between two specific ERC20 tokens.',
+    description: 'A Uniswap V2-style pair contract for providing liquidity between two ERC20 tokens.',
     icon: GitFork,
     parameters: [
-      { name: 'poolName', label: 'Pool Name (LP Token)', type: 'string', placeholder: 'TokenA/TokenB LP', description: 'Descriptive name for the liquidity pool token.', icon: Palette, category: 'core' },
-      { name: 'poolSymbol', label: 'Pool Symbol (LP Token)', type: 'string', placeholder: 'LP-AB', description: 'Symbol for the liquidity pool token.', icon: Palette, category: 'core' },
-      { name: 'tokenA_Address', label: 'Token A Address', type: 'address', defaultValue: '0x...', placeholder: 'Contract address for Token A', description: 'Contract address of the first ERC20 token.', icon: Database, category: 'core' },
-      { name: 'tokenB_Address', label: 'Token B Address', type: 'address', defaultValue: '0x...', placeholder: 'Contract address for Token B', description: 'Contract address of the second ERC20 token.', icon: Database, category: 'core' },
-      { name: 'feeBps', label: 'Swap Fee (Basis Points)', type: 'number', defaultValue: 30, placeholder: '30', description: 'Swap fee in basis points (e.g., 30 for 0.30%). Accrues to LPs.', advancedOnly: true, icon: CircleDollarSign, category: 'economics' },
-      { name: 'accessControl', label: 'Access Control (Admin)', type: 'select', options: [{ value: 'None', label: 'None' },{ value: 'Ownable', label: 'Ownable (Fee changes, etc.)' },], defaultValue: 'Ownable', description: 'Controls admin functions like fee changes. Does not affect LP provision.', advancedOnly: true, icon: ShieldCheck, category: 'control' },
-      { name: 'upgradable', label: 'Upgradability', type: 'select', options: [{ value: 'None', label: 'Immutable' },{ value: 'UUPS', label: 'UUPS Proxy' },], defaultValue: 'None', description: 'Makes the contract upgradable (UUPS recommended for pairs).', advancedOnly: true, icon: Settings2, category: 'control' },
+      { name: 'poolName', label: 'LP Token Name', type: 'string', placeholder: 'TokenA/TokenB LP', description: 'Name for the liquidity pool (LP) token (e.g., "My DEX LP Token").', icon: Palette, category: 'core' },
+      { name: 'poolSymbol', label: 'LP Token Symbol', type: 'string', placeholder: 'MDLP', description: 'Symbol for the liquidity pool (LP) token (e.g., "MDLP").', icon: Gem, category: 'core' },
+      { name: 'tokenA_Address', label: 'Token A Address', type: 'address', placeholder: '0xTokenA_Address...', description: 'Contract address of the first ERC20 token in the pair.', icon: Database, category: 'core' },
+      { name: 'tokenB_Address', label: 'Token B Address', type: 'address', placeholder: '0xTokenB_Address...', description: 'Contract address of the second ERC20 token in the pair.', icon: Database, category: 'core' },
+      { name: 'feeBps', label: 'Swap Fee (Basis Points)', type: 'number', defaultValue: 30, placeholder: '30 (for 0.3%)', description: 'Swap fee in basis points (e.g., 30 for 0.30%). Accrues to LPs.', advancedOnly: true, icon: Percent, category: 'economics' },
+      { name: 'accessControl', label: 'Admin Access Control', type: 'select', options: [{ value: 'None', label: 'None' },{ value: 'Ownable', label: 'Ownable (For Fee Changes)' },], defaultValue: 'Ownable', description: 'Controls admin functions like changing swap fees. Does not affect LP provision.', advancedOnly: true, icon: ShieldCheck, category: 'control' },
+      { name: 'upgradable', label: 'Upgradability (Pair Contract)', type: 'select', options: [{ value: 'None', label: 'Immutable' },{ value: 'UUPS', label: 'UUPS Proxy (Recommended)' },], defaultValue: 'None', description: 'Makes the pair contract logic upgradable.', advancedOnly: true, icon: Settings2, category: 'control' },
     ],
-    aiPromptEnhancement: `Generate a Uniswap V2-style Pair contract for two specific ERC20 tokens. Default to Solidity pragma ^0.8.20;
-- **Pair Definition**: The contract will be for a single pair defined by \`tokenA_Address\` and \`tokenB_Address\`. These should be initialized in the constructor (or an \`initialize\` function if upgradable) and determine \`token0\` and \`token1\` (sorted by address).
-- **LP Token**: The contract itself IS an ERC20 token representing liquidity provider shares. Use \`poolName\` and \`poolSymbol\` for its metadata. It should inherit from OpenZeppelin's ERC20 (or ERC20Upgradeable if UUPS).
-- **Core Logic**: Implement a constant product AMM (k = x*y).
-- **Interfaces**: Use \`IERC20\` for interacting with \`tokenA_Address\` and \`tokenB_Address\`.
-- **Key Functions**:
-    - \`constructor(address _tokenA, address _tokenB)\` (or \`initialize(address _tokenA, address _tokenB)\` if UUPS): Sets up \`token0\` and \`token1\`.
-    - \`mint(address to) external returns (uint liquidity)\`: Mints LP tokens to \`to\` after liquidity providers transfer underlying tokens to the pair. Calculates liquidity based on current reserves and amounts transferred. Must be protected by a reentrancy guard and lock.
-    - \`burn(address to) external returns (uint amount0, uint amount1)\`: Burns LP tokens (transferred to the pair beforehand) from \`msg.sender\` (or an approved source, but typically LP tokens are sent to pair first) and sends back the underlying \`token0\` and \`token1\` to the \`to\` address. Must be protected by a reentrancy guard and lock.
-    - \`swap(uint amount0Out, uint amount1Out, address to, bytes calldata data) external\`: Executes swaps. Requires tokens to be sent to the pair first (unless \`data\` is used for a flash-loan-like callback). Must be protected by a reentrancy guard and lock. Implements the swap fee (\`feeBps\`) by leaving a portion of input tokens in reserves.
-    - \`skim(address to) external\`: Recovers any excess tokens sent to the pair.
-    - \`sync() external\`: Updates reserves to match current balances if they diverge.
-- **View Functions**: \`getReserves() returns (uint112 _reserve0, uint112 _reserve1, uint32 _blockTimestampLast)\`, \`token0()\`, \`token1()\`, \`kLast()\`, \`price0CumulativeLast()\`, \`price1CumulativeLast()\`.
-- **Fees**:
-    - The swap fee is specified by \`feeBps\` (e.g., 30 for 0.3%). This fee is collected by liquidity providers by remaining in the pool, effectively increasing the value of their LP shares over time. The fee is applied during swaps.
-    - If 'Ownable' access control is chosen, provide a function \`setFee(uint16 newFeeBps)\` restricted to the owner to update the swap fee.
-- **Upgradability**: If \`upgradable\` is 'UUPS', use OpenZeppelin's \`UUPSUpgradeable\` and \`Initializable\`. The \`_authorizeUpgrade\` function must be implemented and restricted (e.g., by \`onlyOwner\` if Ownable).
-- **Access Control**: If 'Ownable', use OpenZeppelin's Ownable. The deployer becomes owner. This owner can call admin functions like \`setFee\`.
-- **Security**: Use SafeMath/Solidity >0.8.0 checks. Implement reentrancy guard (lock modifier) on \`mint\`, \`burn\`, \`swap\`. Follow Checks-Effects-Interactions.
-- **Clarity**: NatSpec comments for all public functions and state variables.
+    aiPromptEnhancement: `Generate a Uniswap V2-style Pair smart contract.
+**Solidity Version**: Use \\\`pragma solidity ^0.8.20;\\\`
+
+**Core Structure**:
+- The contract itself IS an ERC20 token representing liquidity provider shares.
+- If NOT upgradable: Inherit from a base UniswapV2Pair.sol-like contract (you'll need to define its key components) and OpenZeppelin's \\\`ERC20.sol\\\`.
+- If UUPS upgradable: Inherit from \\\`Initializable\\\`, a base UniswapV2PairUpgradeable.sol-like contract, \\\`ERC20Upgradeable.sol\\\`, and \\\`UUPSUpgradeable.sol\\\`.
+- Contract name can be dynamic based on symbols, e.g., \\\`Pair_{{tokenA_Symbol}}_{{tokenB_Symbol}}\\\` or just use \\\`{{poolName}}\\\`.
+
+**Interfaces**:
+- \\\`IERC20\\\` (or \\\`IERC20Upgradeable\\\`) for \\\`tokenA_Address\\\` and \\\`tokenB_Address\\\`.
+- \\\`IUniswapV2Factory\\\` (or a generic \\\`IPairFactory\\\`) might be referenced if the pair needs to register with a factory, but for a standalone pair, it's not strictly necessary for generation, though a factory address might be passed to constructor for information.
+
+**State Variables**:
+- \\\`address public token0;\\\`
+- \\\`address public token1;\\\`
+- \\\`uint112 private reserve0;\\\`
+- \\\`uint112 private reserve1;\\\`
+- \\\`uint32 private blockTimestampLast;\\\`
+- \\\`uint public kLast; // For reference\\\`
+- \\\`uint private unlocked = 1;\\\` (Reentrancy guard)
+- \\\`uint256 public constant MINIMUM_LIQUIDITY = 10**3;\\\`
+- \\\`uint16 public feeBps = {{feeBps}};\\\` (e.g., 30 for 0.3%)
+
+**Constructor / Initializer**:
+- **If NOT upgradable**: \\\`constructor(string memory _name, string memory _symbol, address _tokenA, address _tokenB)\\\`
+    - Initialize \\\`ERC20(_name, _symbol)\\\`.
+    - Sort \\\`_tokenA\\\` and \\\`_tokenB\\\` to determine \\\`token0\\\` and \\\`token1\\\` (\\\`token0\\\` < \\\`token1\\\`).
+- **If UUPS upgradable**: \\\`initializer(string memory _name, string memory _symbol, address _tokenA, address _tokenB, address _initialAdmin)\\\`
+    - Call \\\`__ERC20_init(_name, _symbol, 18);\\\` (LP tokens typically have 18 decimals).
+    - Call \\\`__UUPSUpgradeable_init();\\\`
+    - If 'Ownable' access, call \\\`__Ownable_init(_initialAdmin);\\\`.
+    - Sort \\\`_tokenA\\\` and \\\`_tokenB\\\` to determine \\\`token0\\\` and \\\`token1\\\`.
+    - Set initial fee from \\\`{{feeBps}}\\\`.
+
+**Key Functions**:
+- **Modifiers**: \\\`modifier lock() { require(unlocked == 1, 'Pair: LOCKED'); unlocked = 0; _; unlocked = 1; }\\\`
+- **\\\`_update(uint balance0, uint balance1, uint112 _reserve0, uint112 _reserve1)\\\`**: Updates reserves and \\\`blockTimestampLast\\\`.
+- **\\\`getReserves() public view returns (uint112 _reserve0, uint112 _reserve1, uint32 _blockTimestampLast)\\\`**.
+- **\\\`mint(address to) external lock returns (uint liquidity)\\\`**:
+    - Transfers \\\`token0\\\` and \\\`token1\\\` from \\\`msg.sender\\\` to the pair.
+    - Calculates liquidity based on current reserves and amounts transferred. Handles initial liquidity provision carefully (mints MINIMUM_LIQUIDITY to address(0) to lock it).
+    - Mints LP tokens to \\\`to\\\`.
+- **\\\`burn(address to) external lock returns (uint amount0, uint amount1)\\\`**:
+    - LP tokens must be sent to the pair contract first.
+    - Burns LP tokens from the pair's balance (representing \\\`msg.sender\\\`'s share or an approved amount).
+    - Sends corresponding \\\`token0\\\` and \\\`token1\\\` to \\\`to\\\`.
+- **\\\`swap(uint amount0Out, uint amount1Out, address to, bytes calldata data) external lock\\\`**:
+    - Requires \\\`amount0Out > 0\\\` or \\\`amount1Out > 0\\\`.
+    - Transfers input tokens from \\\`msg.sender\\\` to the pair.
+    - Calculates input amount based on output amount and reserves, considering the \\\`feeBps\\\`.
+    - Sends output tokens to \\\`to\\\`.
+    - Implements the swap fee by effectively leaving a portion of the input tokens in the reserves, which benefits LPs. (e.g., amountInWithFee = amountIn * 10000 / (10000 - feeBps)).
+    - Optionally call \\\`IUniswapV2Callee(to).uniswapV2Call()\\\` if \\\`data.length > 0\\\`.
+- **\\\`skim(address to) external lock\\\`**: Recovers excess tokens.
+- **\\\`sync() external lock\\\`**: Updates reserves to match current balances.
+
+**Fees**:
+- **\\\`feeBps\\\`**: Set in constructor/initializer. Used in swap calculations.
+- **\\\`setFee(uint16 _newFeeBps) public\\\`**:
+    - If 'Ownable' access, restrict with \\\`onlyOwner\\\`.
+    - Allows updating \\\`feeBps\\\`. Ensure it's within a reasonable range (e.g., 0 to 100 for 0% to 1%).
+
+**Upgradability (\\\`upgradable\\\` parameter)**:
+- **If 'UUPS'**: Implement \\\`_authorizeUpgrade(address newImplementation) internal override onlyOwner_or_correctRole {}\\\`.
+
+**General**:
+- Use OpenZeppelin's SafeERC20 for token transfers.
+- NatSpec comments for all public interfaces.
+- Custom errors for common reverts.
 `,
   },
   {
@@ -161,97 +235,150 @@ export const CONTRACT_TEMPLATES: ContractTemplate[] = [
     description: 'A router contract for facilitating swaps across multiple liquidity pools (Uniswap V2 style).',
     icon: ArrowRightLeft,
     parameters: [
-      { name: 'routerName', label: 'Router Name', type: 'string', placeholder: 'MySwap Router', description: 'Name for your swap router contract.', icon: Palette, category: 'core' },
-      { name: 'factoryAddress', label: 'Pair Factory Address', type: 'address', placeholder: '0x...', description: 'Address of the factory creating liquidity pairs.', icon: Database, category: 'core' },
-      { name: 'wethAddress', label: 'WETH Address (Network)', type: 'select', defaultValue: WETH_ADDRESSES_BY_NETWORK.ETH_MAINNET, options: [ { label: "WETH (Ethereum Mainnet)", value: WETH_ADDRESSES_BY_NETWORK.ETH_MAINNET },{ label: "WBNB (BNB Chain)", value: WETH_ADDRESSES_BY_NETWORK.BNB_CHAIN },{ label: "WMATIC (Polygon)", value: WETH_ADDRESSES_BY_NETWORK.POLYGON },{ label: "WETH (Arbitrum One)", value: WETH_ADDRESSES_BY_NETWORK.ARBITRUM },{ label: "WETH (Optimism)", value: WETH_ADDRESSES_BY_NETWORK.OPTIMISM },], description: 'Wrapped Native Token address for your target network.', icon: Database, category: 'core' },
-      { name: 'accessControl', label: 'Access Control (Admin)', type: 'select', options: [{ value: 'None', label: 'None' },{ value: 'Ownable', label: 'Ownable (Pausing, etc.)' },], defaultValue: 'Ownable', description: 'Controls admin functions if any (e.g., pausing).', advancedOnly: true, icon: ShieldCheck, category: 'control' },
-      { name: 'upgradable', label: 'Upgradability', type: 'select', options: [{ value: 'None', label: 'Immutable' },{ value: 'UUPS', label: 'UUPS Proxy' },], defaultValue: 'None', description: 'Makes the router contract upgradable.', advancedOnly: true, icon: Settings2, category: 'control' },
+      { name: 'routerName', label: 'Router Contract Name', type: 'string', placeholder: 'MySuperRouter', description: 'Name for your swap router contract (e.g., "MySuperRouter").', icon: Palette, category: 'core' },
+      { name: 'factoryAddress', label: 'Pair Factory Address', type: 'address', placeholder: '0xFactoryAddress...', description: 'Address of the factory contract that creates/manages liquidity pairs.', icon: Database, category: 'core' },
+      { name: 'wethAddress', label: 'Wrapped Native Token (WETH/WBNB/etc.)', type: 'select', defaultValue: WETH_ADDRESSES_BY_NETWORK.ETH_MAINNET, options: [ { label: "WETH (Ethereum Mainnet)", value: WETH_ADDRESSES_BY_NETWORK.ETH_MAINNET },{ label: "WBNB (BNB Chain)", value: WETH_ADDRESSES_BY_NETWORK.BNB_CHAIN },{ label: "WMATIC (Polygon)", value: WETH_ADDRESSES_BY_NETWORK.POLYGON },{ label: "WETH (Arbitrum One)", value: WETH_ADDRESSES_BY_NETWORK.ARBITRUM },{ label: "WETH (Optimism)", value: WETH_ADDRESSES_BY_NETWORK.OPTIMISM },], description: 'Address of the Wrapped Native Token for the target network (e.g., WETH on Ethereum).', icon: Blocks, category: 'core' },
+      { name: 'accessControl', label: 'Admin Access Control', type: 'select', options: [{ value: 'None', label: 'None' },{ value: 'Ownable', label: 'Ownable (For Pausing, etc.)' },], defaultValue: 'Ownable', description: 'Controls admin functions if any (e.g., pausing router, updating parameters).', advancedOnly: true, icon: ShieldCheck, category: 'control' },
+      { name: 'upgradable', label: 'Upgradability (Router Contract)', type: 'select', options: [{ value: 'None', label: 'Immutable' },{ value: 'UUPS', label: 'UUPS Proxy (Recommended)' },], defaultValue: 'None', description: 'Makes the router contract logic upgradable.', advancedOnly: true, icon: Settings2, category: 'control' },
     ],
-    aiPromptEnhancement: `Generate a Uniswap V2-style Router contract. Default to Solidity pragma ^0.8.20;
-- **Core Functionality**: The router facilitates swaps by interacting with liquidity pair contracts created by the \`factoryAddress\`. It must handle ETH directly by wrapping/unwrapping it using the \`wethAddress\` selected by the user (which corresponds to the wrapped native token of the target chain).
-- **Interfaces**:
-    - \`IUniswapV2Factory\` (or a generic \`IPairFactory\`) with a \`getPair(address tokenA, address tokenB) external view returns (address pair)\` function.
-    - \`IUniswapV2Pair\` (or a generic \`ILiquidityPair\`) with \`swap(uint amount0Out, uint amount1Out, address to, bytes calldata data)\`, \`token0()\`, \`token1()\`, \`getReserves()\` functions.
-    - \`IWETH\` (matching the selected \`wethAddress\`) with \`deposit() payable\`, \`withdraw(uint wad)\`, \`transfer(address to, uint value)\`.
-    - \`IERC20\` for general token interactions.
-- **Swap Functions (Implement all relevant variations)**:
-    - \`swapExactTokensForTokens(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)\`
-    - \`swapTokensForExactTokens(uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)\`
-    - \`swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline) payable\` (handles NativeCoin -> WETH -> Tokens)
-    - \`swapTokensForExactETH(uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)\` (handles Tokens -> WETH -> NativeCoin)
-    - \`swapExactTokensForETH(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)\` (handles Tokens -> WETH -> NativeCoin)
-    - \`swapETHForExactTokens(uint amountOut, address[] calldata path, address to, uint deadline) payable\` (handles NativeCoin -> WETH -> Tokens)
-    - Consider supporting \`swapExactTokensForTokensSupportingFeeOnTransferTokens\` and \`swapExactETHForTokensSupportingFeeOnTransferTokens\` / \`swapExactTokensForETHSupportingFeeOnTransferTokens\` if you want to handle fee-on-transfer tokens robustly (this is more advanced).
-- **Liquidity Functions**:
-    - \`addLiquidity(address tokenA, address tokenB, uint amountADesired, uint amountBDesired, uint amountAMin, uint amountBMin, address to, uint deadline)\`
-    - \`addLiquidityETH(address token, uint amountTokenDesired, uint amountTokenMin, uint amountETHMin, address to, uint deadline) payable\`
-    - \`removeLiquidity(address tokenA, address tokenB, uint liquidity, uint amountAMin, uint amountBMin, address to, uint deadline)\`
-    - \`removeLiquidityETH(address token, uint liquidity, uint amountTokenMin, uint amountETHMin, address to, uint deadline)\`
-    - \`removeLiquidityWithPermit\` and \`removeLiquidityETHWithPermit\` (advanced, requires EIP-2612 permit signature).
-- **Helper Functions**:
-    - Library for calculating pair addresses if needed (e.g., UniswapV2Library's \`pairFor\` and \`sortTokens\`).
-    - Library for safe math and safe ERC20 transfers.
-- **Path Handling**: Swaps along a \`path\` of token addresses. The router must iterate through pairs, calculate amounts, and make sequential swaps.
-- **Deadline**: All user-facing functions should include a \`deadline\` parameter to protect against front-running / long-pending transactions.
-- **Security**:
-    - Use reentrancy guards if appropriate (though routers are typically less stateful than pairs).
-    - Ensure correct handling of token approvals and transfers (\`safeTransferFrom\`, \`safeApprove\`).
-    - Validate paths and amounts.
-- **Access Control**: If 'Ownable', use OpenZeppelin's Ownable. The deployer becomes owner. Admin functions could include pausing all router activity or updating critical parameters (though less common for V2-style routers).
-- **Upgradability**: If \`upgradable\` is 'UUPS', use OpenZeppelin's \`UUPSUpgradeable\` and \`Initializable\`. The initializer should take \`factoryAddress\` and \`wethAddress\`. The \`_authorizeUpgrade\` function must be restricted.
-- **Clarity**: NatSpec comments for all public functions.
+    aiPromptEnhancement: `Generate a Uniswap V2-style Router smart contract named \\\`{{routerName}}\\\`.
+**Solidity Version**: Use \\\`pragma solidity ^0.8.20;\\\`
+
+**Core Dependencies**:
+- \\\`factoryAddress\\\`: \\\`{{factoryAddress}}\\\`
+- \\\`wethAddress\\\`: \\\`{{wethAddress}}\\\` (This is the Wrapped Native Token address)
+
+**Interfaces**:
+- \\\`IUniswapV2Factory { function getPair(address tokenA, address tokenB) external view returns (address pair); }\\\` (or a similar generic IPairFactory)
+- \\\`IUniswapV2Pair { function swap(uint amount0Out, uint amount1Out, address to, bytes calldata data) external; function token0() external view returns (address); function token1() external view returns (address); function getReserves() external view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast); }\\\` (or ILiquidityPair)
+- \\\`IWETH { function deposit() external payable; function withdraw(uint wad) external; function transfer(address to, uint value) external returns (bool); }\\\` (for the \\\`wethAddress\\\`)
+- \\\`IERC20\\\` for general token interactions.
+
+**Libraries**:
+- Use OpenZeppelin's \\\`SafeERC20\\\` for all token transfers.
+- Consider including or defining helper functions from UniswapV2Library for \\\`sortTokens\\\`, \\\`pairFor\\\`, \\\`getReserves\\\`, \\\`quote\\\`, \\\`getAmountOut\\\`, \\\`getAmountIn\\\`.
+
+**Constructor / Initializer**:
+- **If NOT upgradable**: \\\`constructor(address _factory, address _weth)\\\`. Store \\\`_factory\\\` and \\\`_weth\\\`.
+- **If UUPS upgradable**: Inherit \\\`Initializable\\\`, \\\`UUPSUpgradeable\\\`, and access control (e.g., \\\`OwnableUpgradeable\\\`).
+  - \\\`initializer(address _factory, address _weth, address _initialAdmin) public initializer\\\`.
+  - Call \\\`__UUPSUpgradeable_init();\\\`, \\\`__Ownable_init(_initialAdmin);\\\`. Store \\\`_factory\\\` and \\\`_weth\\\`.
+
+**Key Swap Functions (Implement all variations ensuring deadline checks and ETH handling)**:
+- Ensure all functions take a \\\`deadline\\\` parameter (\\\`require(block.timestamp <= deadline, 'EXPIRED');\\\`).
+- For ETH inputs, use \\\`msg.value\\\`, wrap ETH to WETH using \\\`IWETH(wethAddress).deposit{value: msg.value}();\\\`.
+- For ETH outputs, swap to WETH, then unwrap using \\\`IWETH(wethAddress).withdraw(wethAmount);\\\`, and transfer ETH to recipient.
+- **Exact Input Swaps**:
+    - \\\`swapExactTokensForTokens(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)\\\`
+    - \\\`swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline) payable\\\`
+    - \\\`swapExactTokensForETH(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)\\\`
+- **Exact Output Swaps**:
+    - \\\`swapTokensForExactTokens(uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)\\\`
+    - \\\`swapETHForExactTokens(uint amountOut, address[] calldata path, address to, uint deadline) payable\\\`
+    - \\\`swapTokensForExactETH(uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)\\\`
+- *Optional*: Implement versions supporting fee-on-transfer tokens (e.g., \\\`swapExactTokensForTokensSupportingFeeOnTransferTokens\\\`).
+
+**Liquidity Management Functions**:
+- \\\`addLiquidity(address tokenA, address tokenB, uint amountADesired, uint amountBDesired, uint amountAMin, uint amountBMin, address to, uint deadline)\\\`
+- \\\`addLiquidityETH(address token, uint amountTokenDesired, uint amountTokenMin, uint amountETHMin, address to, uint deadline) payable\\\`
+- \\\`removeLiquidity(address tokenA, address tokenB, uint liquidity, uint amountAMin, uint amountBMin, address to, uint deadline)\\\`
+- \\\`removeLiquidityETH(address token, uint liquidity, uint amountTokenMin, uint amountETHMin, address to, uint deadline)\\\`
+- *Optional*: Implement \\\`removeLiquidityWithPermit\\\` and \\\`removeLiquidityETHWithPermit\\\` using EIP-2612.
+
+**Access Control (\\\`accessControl\\\` parameter)**:
+- **If 'Ownable'**: Inherit \\\`Ownable\\\` or \\\`OwnableUpgradeable\\\`. Admin functions (e.g., pausing, parameter updates if any) use \\\`onlyOwner\\\`.
+- **Upgradability (\\\`upgradable\\\` parameter)**:
+- **If 'UUPS'**: Implement \\\`_authorizeUpgrade(address newImplementation) internal override onlyOwner_or_correctRole {}\\\`.
+
+**General**:
+- NatSpec comments for all public functions.
+- Custom errors for reverts.
+- Ensure paths are validated (length >= 2).
 `,
   },
   {
     id: 'dao',
     name: 'DAO (Basic Governance)',
-    description: 'A basic DAO for voting on proposals using OpenZeppelin Governor.',
+    description: 'A basic DAO for voting on proposals using OpenZeppelin Governor contracts.',
     icon: Landmark,
     parameters: [
-      { name: 'daoName', label: 'DAO Name', type: 'string', placeholder: 'My Governance DAO', description: 'Name of your DAO (for Governor contract).', icon: Palette, category: 'core' },
-      { name: 'proposalTokenAddress', label: 'Governance Token (ERC20Votes)', type: 'address', placeholder: '0x...', description: 'ERC20Votes-compatible token for voting power.', icon: Database, category: 'core' },
-      { name: 'votingDelay', label: 'Voting Delay (Blocks)', type: 'number', defaultValue: 1, description: 'Delay in blocks after proposal before voting starts (e.g., 1 block).', advancedOnly: true, icon: SlidersHorizontal, category: 'feature' },
-      { name: 'votingPeriod', label: 'Voting Period (Blocks)', type: 'number', defaultValue: '17280', description: 'Duration in blocks for voting (e.g., 17280 for ~3 days).', icon: SlidersHorizontal, category: 'feature' },
-      { name: 'proposalThreshold', label: 'Proposal Threshold (Tokens)', type: 'number', defaultValue: 0, description: 'Min governance tokens to create a proposal. 0 for any holder.', advancedOnly: true, icon: SlidersHorizontal, category: 'feature' },
-      { name: 'quorumNumerator', label: 'Quorum Numerator (%)', type: 'number', defaultValue: 4, placeholder: '4', description: 'Percentage of total voting power needed (e.g., 4 for 4%).', advancedOnly: true, icon: Scale, category: 'feature' },
-      { name: 'upgradable', label: 'Upgradability (Governor)', type: 'select', options: [{ value: 'None', label: 'Immutable' },{ value: 'UUPS', label: 'UUPS Proxy' },], defaultValue: 'None', description: 'Makes Governor contract upgradable (UUPS recommended).', advancedOnly: true, icon: Settings2, category: 'control' },
+      { name: 'daoName', label: 'DAO Name', type: 'string', placeholder: 'My DAO', description: 'The human-readable name for your Decentralized Autonomous Organization.', icon: Palette, category: 'core' },
+      { name: 'proposalTokenAddress', label: 'Governance Token Address (ERC20Votes)', type: 'address', placeholder: '0xTokenAddress...', description: 'Address of the ERC20Votes-compatible token used for voting power.', icon: Database, category: 'core' },
+      { name: 'timelockAddress', label: 'Timelock Controller Address', type: 'address', placeholder: '0xTimelockAddress... (Optional)', description: 'Address of the Timelock contract that will execute proposals (recommended for security).', icon: Clock, category: 'core', advancedOnly: true },
+      { name: 'votingDelay', label: 'Voting Delay (Blocks)', type: 'number', defaultValue: 1, placeholder: '1', description: 'Delay in blocks from proposal creation until voting starts (e.g., 1 block for immediate).', icon: SlidersHorizontal, category: 'feature' },
+      { name: 'votingPeriod', label: 'Voting Period (Blocks)', type: 'number', defaultValue: '17280', placeholder: '17280 (approx 3 days)', description: 'Duration in blocks for which voting on a proposal is open.', icon: Clock, category: 'feature' },
+      { name: 'proposalThreshold', label: 'Proposal Threshold (Tokens)', type: 'number', defaultValue: 0, placeholder: '1000', description: 'Minimum governance tokens required for an account to create a proposal. 0 for no threshold. (Amount in full units).', icon: BarChartBig, category: 'feature' },
+      { name: 'quorumNumerator', label: 'Quorum Numerator (%)', type: 'number', defaultValue: 4, placeholder: '4 (for 4%)', description: 'Percentage of total voting power that must participate for a proposal to be valid (e.g., 4 for 4%).', advancedOnly: true, icon: Percent, category: 'feature' },
+      { name: 'upgradable', label: 'Upgradability (Governor)', type: 'select', options: [{ value: 'None', label: 'Immutable' },{ value: 'UUPS', label: 'UUPS Proxy (Recommended)' },], defaultValue: 'None', description: 'Makes the Governor contract logic upgradable.', advancedOnly: true, icon: Settings2, category: 'control' },
     ],
-    aiPromptEnhancement: `Generate a DAO governance contract using OpenZeppelin Governor. Default to Solidity pragma ^0.8.20;
-- **Base Contracts**: The main contract should inherit from:
-    - \`Governor\`
-    - \`GovernorSettings\` (for votingDelay, votingPeriod, proposalThreshold)
-    - \`GovernorCountingSimple\` (for simple yes/no/abstain votes)
-    - \`GovernorVotes\` (to use an ERC20Votes token for vote accounting)
-    - \`GovernorVotesQuorumFraction\` (for quorum based on a percentage of total supply)
-    - Optionally \`GovernorTimelockControl\` if a Timelock contract is also to be used (outside scope of this basic setup, but mention its role).
-- **ERC20Votes Token**: The \`proposalTokenAddress\` MUST be an ERC20Votes compatible token. The Governor will use this token's \`getPastVotes\` function.
-- **Constructor/Initializer**:
-    - If NOT upgradable: The constructor should initialize the Governor with:
-        - \`_name\`: \`daoName\`
-        - \`_token\`: The \`IVotes\` instance of \`proposalTokenAddress\`.
-        - \`_votingDelay\`: \`votingDelay\` parameter.
-        - \`_votingPeriod\`: \`votingPeriod\` parameter.
-        - \`_proposalThreshold\`: \`proposalThreshold\` parameter.
-        - \`_quorumNumerator\`: \`quorumNumerator\` parameter (for \`GovernorVotesQuorumFraction\`).
-    - If \`upgradable\` is 'UUPS':
-        - The contract must inherit \`Initializable\` and \`UUPSUpgradeable\`.
-        - An \`initialize\` function should take these parameters.
-        - The \`_authorizeUpgrade\` function must be implemented and restricted (e.g., to the DAO itself via a proposal, or to a specific admin role if one exists outside the Governor).
-- **Core Parameters Implementation**:
-    - \`name()\`: Should return \`daoName\`.
-    - \`votingDelay()\`: Should return \`votingDelay\`.
-    - \`votingPeriod()\`: Should return \`votingPeriod\`.
-    - \`proposalThreshold()\`: Should return \`proposalThreshold\`.
-    - \`quorumNumerator()\`: Part of \`GovernorVotesQuorumFraction\` setup. The \`quorum(uint256 blockNumber)\` view function will then use this.
-- **Proposal Lifecycle**: The contract will inherently support:
-    - \`propose(address[] memory targets, uint256[] memory values, bytes[] memory calldatas, string memory description)\`
-    - \`castVote(uint256 proposalId, uint8 support)\` (support: 0=Against, 1=For, 2=Abstain)
-    - \`execute(address[] memory targets, uint256[] memory values, bytes[] memory calldatas, bytes32 descriptionHash)\`
-- **Security & Clarity**:
-    - Ensure NatSpec comments for all public interfaces and important functions.
-    - The contract primarily relies on OpenZeppelin's audited components.
-- **Admin/Executor Roles**: The Governor itself is the primary executor. By default, any account can propose if they meet the \`proposalThreshold\`. The DAO (via successful proposals) can grant/revoke roles on other contracts or execute arbitrary transactions.
-- **Timelock Recommendation**: Mention in comments that for serious DAOs, proposals should typically be executed via a Timelock contract for added security and review period, and that \`GovernorTimelockControl\` would be used for this.
+    aiPromptEnhancement: `Generate a DAO governance contract using OpenZeppelin Governor, named \\\`{{daoName}}Governor\\\`.
+**Solidity Version**: Use \\\`pragma solidity ^0.8.20;\\\`
+
+**Base OpenZeppelin Contracts**:
+- **If NOT upgradable**:
+    - Inherit: \\\`Governor\\\`, \\\`GovernorSettings\\\`, \\\`GovernorCountingSimple\\\`, \\\`GovernorVotes\\\`, \\\`GovernorVotesQuorumFraction\\\`.
+    - If \\\`timelockAddress\\\` is provided and non-zero: Inherit \\\`GovernorTimelockControl\\\`.
+- **If UUPS upgradable (\\\`upgradable\\\` is 'UUPS')**:
+    - Inherit: \\\`Initializable\\\`, \\\`GovernorUpgradeable\\\`, \\\`GovernorSettingsUpgradeable\\\`, \\\`GovernorCountingSimpleUpgradeable\\\`, \\\`GovernorVotesUpgradeable\\\`, \\\`GovernorVotesQuorumFractionUpgradeable\\\`, \\\`UUPSUpgradeable\\\`.
+    - If \\\`timelockAddress\\\` is provided and non-zero: Inherit \\\`GovernorTimelockControlUpgradeable\\\`.
+
+**Key Addresses**:
+- \\\`governanceToken\\\`: \\\`{{proposalTokenAddress}}\\\` (must be an IVotes/ERC20Votes compatible token)
+- \\\`timelock\\\`: \\\`{{timelockAddress}}\\\` (if provided)
+
+**Constructor / Initializer**:
+- **If NOT upgradable**:
+  \\\`constructor(IVotes _token, TimelockController _timelock, string memory _name, uint256 _votingDelay, uint256 _votingPeriod, uint256 _proposalThreshold, uint256 _quorumNumerator)
+       Governor(_name)
+       GovernorSettings(_votingDelay, _votingPeriod, _proposalThreshold)
+       GovernorVotes(_token)
+       GovernorVotesQuorumFraction(_quorumNumerator)
+       GovernorTimelockControl(_timelock) // Only if timelock is used
+   {}\\\`
+   (Pass \\\`address(0)\\\` for \\\`_timelock\\\` if not used. Adjust parameter list accordingly).
+- **If UUPS upgradable**:
+  \\\`function initialize(
+       IVotes _token,
+       TimelockControllerUpgradeable _timelock,
+       string memory _name,
+       uint256 _votingDelay,
+       uint256 _votingPeriod,
+       uint256 _proposalThreshold,
+       uint256 _quorumNumerator
+       // address _initialAdmin // For UUPS _authorizeUpgrade admin if not DAO itself
+   ) public initializer {
+       __Governor_init(_name);
+       __GovernorSettings_init(_votingDelay, _votingPeriod, _proposalThreshold);
+       __GovernorVotes_init(_token);
+       __GovernorVotesQuorumFraction_init(_quorumNumerator);
+       // if timelock: __GovernorTimelockControl_init(_timelock);
+       __UUPSUpgradeable_init();
+       // _grantRole(DEFAULT_ADMIN_ROLE, _initialAdmin); // Example if UUPS admin is separate
+   }\\\`
+   (Pass \\\`address(0)\\\` for \\\`_timelock\\\` if not used. The \\\`_initialAdmin\\\` for UUPS roles needs careful consideration - often the DAO itself should be the upgrader).
+
+**Parameters Implementation**:
+- **\\\`daoName\\\`**: Passed as \\\`_name\\\` to Governor/GovernorUpgradeable initializer.
+- **\\\`proposalTokenAddress\\\`**: Passed as \\\`_token\\\` (IVotes instance).
+- **\\\`timelockAddress\\\`**: Passed as \\\`_timelock\\\` (TimelockController instance). If not provided, the Governor executes proposals directly.
+- **\\\`votingDelay\\\`**: Passed to GovernorSettings.
+- **\\\`votingPeriod\\\`**: Passed to GovernorSettings.
+- **\\\`proposalThreshold\\\`**: Passed to GovernorSettings. Convert from full units to wei if token has decimals: \\\`_proposalThreshold * (10**IVotes(_token).decimals())\\\`.
+- **\\\`quorumNumerator\\\`**: Passed to GovernorVotesQuorumFraction.
+
+**Upgradability (\\\`upgradable\\\` parameter)**:
+- **If 'UUPS'**:
+    - Implement \\\`_authorizeUpgrade(address newImplementation) internal override\\\`.
+    - This MUST be restricted. Typically, only the DAO itself (via a proposal) should be able to authorize an upgrade. E.g., \\\`require(msg.sender == address(this), "Governor: only self");\\\` or controlled by a specific role.
+
+**Proposal Execution**:
+- If \\\`timelockAddress\\\` is used, proposals are queued in the Timelock and then executed by it. The Governor becomes a proposer on the Timelock.
+- If no Timelock, the Governor executes proposals directly. This is less secure.
+
+**General**:
+- NatSpec comments for all public functions and key state variables.
+- The contract will expose standard Governor functions: \\\`propose\\\`, \\\`castVote\\\`, \\\`execute\\\`, \\\`state\\\`, etc.
+- Ensure the governance token (\\\`proposalTokenAddress\\\`) properly implements \\\`getPastVotes\\\` for vote counting.
 `,
   },
   {
@@ -260,8 +387,41 @@ export const CONTRACT_TEMPLATES: ContractTemplate[] = [
     description: 'Input custom directives for the AI to synthesize unique contract logic.',
     icon: Puzzle,
     parameters: [
-      { name: 'customDescription', label: 'Contract Directives', type: 'textarea', rows: 6, placeholder: 'e.g., A decentralized oracle system for off-chain data verification with staking and dispute resolution mechanisms...', description: 'Detailed description of contract functionality, features, and specific requirements.', category: 'core', icon: FileJson },
+      { name: 'customContractName', label: 'Contract Name', type: 'string', placeholder: 'MyUniqueContract', description: 'The primary name for your custom smart contract.', category: 'core', icon: Palette },
+      { name: 'customDescription', label: 'Contract Directives & Features', type: 'textarea', rows: 8, placeholder: 'Describe your contract in detail. e.g., "A decentralized oracle system for off-chain data verification with staking and dispute resolution mechanisms. Users can stake tokens to become validators. Data requesters pay fees. Validators vote on data validity. Implement slashing for malicious validators..."', description: 'Detailed description of contract functionality, features, state variables, key functions, events, and specific requirements.', category: 'core', icon: FileJson },
+      { name: 'customAccessControl', label: 'Preferred Access Control', type: 'select', options: [{ value: 'None', label: 'None / Public' },{ value: 'Ownable', label: 'Ownable' },{ value: 'Roles', label: 'Role-Based Access Control' },], defaultValue: 'Ownable', description: 'Preferred access control mechanism if admin functions are needed.', category: 'control', icon: ShieldCheck, advancedOnly: true },
+      { name: 'customUpgradable', label: 'Preferred Upgradability', type: 'select', options: [{ value: 'None', label: 'Immutable' },{ value: 'UUPS', label: 'UUPS Proxy' },], defaultValue: 'None', description: 'Preferred upgradability pattern if contract logic might need updates.', category: 'control', icon: Settings2, advancedOnly: true },
     ],
-    aiPromptEnhancement: "The user will provide custom directives. Generate the Solidity code based on this description. Pay close attention to the details and requirements mentioned by the user. If details are sparse, make reasonable assumptions or create a flexible base. If OpenZeppelin contracts can be used for common patterns (Ownable, Pausable, ReentrancyGuard, ERC standards), please incorporate them. Default to Solidity pragma ^0.8.20;",
+    aiPromptEnhancement: `Generate a custom Solidity smart contract named \\\`{{customContractName}}\\\` based on the user's directives.
+**Solidity Version**: Use \\\`pragma solidity ^0.8.20;\\\`
+
+**User Directives**:
+{{{customDescription}}}
+
+**Access Control Preference (\\\`customAccessControl\\\` parameter)**:
+- If 'Ownable' is preferred and admin functions are described: Use OpenZeppelin's \\\`Ownable.sol\\\` (or \\\`OwnableUpgradeable.sol\\\` if upgradable).
+- If 'Roles' is preferred: Use OpenZeppelin's \\\`AccessControl.sol\\\` (or \\\`AccessControlUpgradeable.sol\\\`). Define roles as implied by the user's description.
+- If 'None', make functions public unless security dictates otherwise.
+
+**Upgradability Preference (\\\`customUpgradable\\\` parameter)**:
+- If 'UUPS' is preferred:
+    - Inherit \\\`Initializable.sol\\\` and \\\`UUPSUpgradeable.sol\\\` from OpenZeppelin.
+    - Use an \\\`initializer\\\` function instead of a constructor.
+    - Implement \\\`_authorizeUpgrade(address newImplementation) internal override\\\`, restricting it appropriately (e.g., \\\`onlyOwner\\\` or a specific admin role).
+- If 'None', use a standard constructor.
+
+**General Instructions**:
+- **Clarity and Readability**: Write clean, well-commented code.
+- **Security**: Implement robust security patterns. Avoid common vulnerabilities (reentrancy, integer overflow/underflow, etc.). Use Checks-Effects-Interactions.
+- **OpenZeppelin**: Where applicable for standard patterns (like ERC implementations if requested, safety utilities, access control), import and use OpenZeppelin contracts.
+- **NatSpec Comments**: Provide comprehensive NatSpec documentation for all public functions, state variables, events, and custom errors.
+- **Custom Errors**: Use custom errors for revert conditions to save gas and provide better error information.
+- **Events**: Emit events for significant state changes.
+- **State Variables**: Define state variables as required by the contract logic.
+- **Functions**: Implement all functions described by the user, with appropriate visibility (public, external, internal, private) and logic.
+
+Interpret the user's \\\`customDescription\\\` to the best of your ability. If critical details are missing for a core feature, make reasonable, secure assumptions and state them in comments, or create a flexible placeholder function.
+Prioritize fulfilling the user's explicit requests.
+`,
   }
 ];
