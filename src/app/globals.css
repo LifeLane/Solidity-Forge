@@ -44,7 +44,7 @@
     
     --ring-rgb: var(--primary-rgb); /* Cyan for focus rings */
 
-    --radius: 0.5rem; /* Keep existing radius for consistency */
+    --radius: 0.5rem; /* Keep existing radius for consistency, spec says 16px for sections, 10px for buttons */
 
     /* Chart colors - can be adapted if charts are used */
     --chart-1-rgb: var(--primary-rgb);
@@ -113,7 +113,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 0; 
+    z-index: -1; /* Ensure it's behind all content */
     /* background-color: transparent; */ /* Let body gradient show through */
   }
 
@@ -125,10 +125,10 @@
   .font-cli { @apply font-space-mono text-base; }
 }
 
-/* Section Container Styles */
+/* Section Container Styles (renamed from .section to .glass-section to avoid conflict) */
 @layer components {
   .glass-section {
-    @apply rounded-2xl border border-[hsla(var(--card-border-rgb),var(--card-border-alpha))] p-8 md:p-12 lg:p-16; /* padding from spec: 80px 48px adjusted */
+    @apply rounded-2xl border border-[hsla(var(--card-border-rgb),var(--card-border-alpha))] p-8 md:p-12 lg:p-16; /* padding from spec: 80px 48px adjusted for md, lg */
     backdrop-filter: blur(12px);
     background: hsla(var(--card-background-rgb), var(--card-background-alpha));
     animation: pulse-border 6s linear infinite;
@@ -158,7 +158,7 @@
 /* Simplified Tab Styling - Can be refined for futuristic look */
 @layer utilities {
   .param-tab-trigger {
-    @apply justify-start text-left font-medium transition-colors;
+    @apply justify-start text-left font-medium transition-colors w-full; /* Ensure full width for vertical tabs */
     @apply px-3 py-2.5 text-base rounded-md; 
   }
 

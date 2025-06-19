@@ -36,53 +36,57 @@ export default {
         'body-cli': ['1rem', { lineHeight: '1.5' }], // CLI Text: 16px
       },
       colors: {
-        border: 'hsla(var(--border-rgb) / var(--border-alpha, 1))',
+        border: 'hsla(var(--border-rgb) / var(--border-alpha, 1))', // Can also be hsl(var(--border)) if defined in globals
         input: {
-          DEFAULT: 'hsl(var(--input-background-rgb))',
-          border: 'hsl(var(--border-rgb))', // Default input border
+          DEFAULT: 'hsl(var(--input))', // References HSL var from globals.css
+          border: 'hsl(var(--border))',
         },
-        ring: 'hsl(var(--ring-rgb))',
-        background: 'hsl(var(--background-rgb))', // Single color, gradient handled in body
-        foreground: 'hsl(var(--foreground-rgb))',
+        ring: 'hsl(var(--ring))', // References HSL var
+        background: 'hsl(var(--background))', // References HSL var
+        foreground: 'hsl(var(--foreground))', // References HSL var
         primary: {
-          DEFAULT: 'hsl(var(--primary-rgb))',
-          foreground: 'hsl(var(--primary-foreground-rgb))',
+          DEFAULT: 'hsl(var(--primary))', // References HSL var
+          foreground: 'hsl(var(--primary-foreground))', // References HSL var
         },
         secondary: {
-          DEFAULT: 'hsl(var(--secondary-rgb))',
-          foreground: 'hsl(var(--secondary-foreground-rgb))',
+          DEFAULT: 'hsl(var(--secondary))', // References HSL var
+          foreground: 'hsl(var(--secondary-foreground))', // References HSL var
         },
         destructive: {
-          DEFAULT: 'hsl(var(--destructive-rgb))',
-          foreground: 'hsl(var(--destructive-foreground-rgb))',
+          DEFAULT: 'hsl(var(--destructive))', // References HSL var
+          foreground: 'hsl(var(--destructive-foreground))', // References HSL var
         },
         muted: {
-          DEFAULT: 'hsl(var(--muted-rgb))',
-          foreground: 'hsl(var(--muted-foreground-rgb))',
+          DEFAULT: 'hsl(var(--muted))', // References HSL var
+          foreground: 'hsl(var(--muted-foreground))', // References HSL var
         },
         accent: {
-          DEFAULT: 'hsl(var(--accent-rgb))',
-          foreground: 'hsl(var(--accent-foreground-rgb))',
+          DEFAULT: 'hsl(var(--accent))', // References HSL var
+          foreground: 'hsl(var(--accent-foreground))', // References HSL var
         },
         popover: {
-          DEFAULT: 'hsl(var(--popover-background-rgb))',
-          foreground: 'hsl(var(--popover-foreground-rgb))',
+          DEFAULT: 'hsl(var(--popover))', // References HSL var
+          foreground: 'hsl(var(--popover-foreground))', // References HSL var
         },
         card: {
-          DEFAULT: 'hsla(var(--card-background-rgb) / var(--card-background-alpha, 1))',
-          foreground: 'hsl(var(--card-foreground-rgb))',
+          DEFAULT: 'hsl(var(--card))', // References HSL var for card background (with alpha)
+          foreground: 'hsl(var(--card-foreground))', // References HSL var
         },
-        'glass-section-border': 'hsla(var(--card-border-rgb) / var(--card-border-alpha, 1))',
-        'cyan': 'hsl(var(--primary-rgb))',
-        'magenta': 'hsl(var(--accent-rgb))',
-        'bg-start': 'rgb(var(--background-start-rgb))',
-        'bg-end': 'rgb(var(--background-end-rgb))',
-        chart: {
-          '1': 'hsl(var(--chart-1-rgb))',
-          '2': 'hsl(var(--chart-2-rgb))',
-          '3': 'hsl(var(--chart-3-rgb))',
-          '4': 'hsl(var(--chart-4-rgb))',
-          '5': 'hsl(var(--chart-5-rgb))',
+        'glass-section-border': 'hsla(var(--card-border-rgb) / var(--card-border-alpha, 1))', // Keep direct RGB for this one if it's specifically for the border visual
+        
+        // Direct color names for utility classes if needed, referencing the HSL versions for consistency
+        'cyan': 'hsl(var(--primary))',
+        'magenta': 'hsl(var(--accent))',
+        
+        'bg-start': 'rgb(var(--background-start-rgb))', // Used for direct gradient
+        'bg-end': 'rgb(var(--background-end-rgb))',     // Used for direct gradient
+        
+        chart: { // These should reference their HSL counterparts from globals.css
+          '1': 'hsl(var(--chart-1))',
+          '2': 'hsl(var(--chart-2))',
+          '3': 'hsl(var(--chart-3))',
+          '4': 'hsl(var(--chart-4))',
+          '5': 'hsl(var(--chart-5))',
         },
       },
       borderRadius: {
@@ -105,7 +109,7 @@ export default {
           to: { height: '0' },
         },
         'pulse-border': {
-          '0%, 100%': { boxShadow: '0 0 0px hsla(var(--primary-rgb), 0)' },
+          '0%, 100%': { boxShadow: '0 0 0px hsla(var(--primary-rgb), 0)' }, // Uses primary-rgb for the glow color
           '50%': { boxShadow: '0 0 12px 2px hsla(var(--primary-rgb), 0.15), 0 0 6px 1px hsla(var(--primary-rgb), 0.1)' },
         },
         'glitch-flicker': {
