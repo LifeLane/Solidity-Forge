@@ -8,7 +8,9 @@
     /* Base dark theme colors from the spec */
     --background-start-rgb: 12, 12, 26; /* #0c0c1a */
     --background-end-rgb: 0, 0, 0;     /* #000000 */
-    --background-rgb: 12, 12, 26; /* Default to start of gradient */
+    
+    /* Fallback if --background-rgb is not specifically set elsewhere for a single color bg */
+    --background-rgb: 12, 12, 26; 
 
     --foreground-rgb: 220, 220, 240; /* Light grey/off-white for text */
     
@@ -21,30 +23,29 @@
     --accent-rgb: 255, 0, 255;       /* Magenta #f0f */
     --accent-foreground-rgb: 255, 255, 255; /* White text on accent */
 
-    /* Glassmorphic section styles (converted to RGB for consistency) */
-    --card-background-rgb: 255, 255, 255; /* Base for rgba(255,255,255,0.02) */
+    --card-background-rgb: 255, 255, 255; 
     --card-background-alpha: 0.02;
-    --card-border-rgb: 255, 255, 255;    /* Base for rgba(255,255,255,0.05) */
+    --card-border-rgb: 255, 255, 255;    
     --card-border-alpha: 0.05;
     --card-foreground-rgb: var(--foreground-rgb);
 
-    --popover-background-rgb: 30, 30, 50; /* Darker popover */
+    --popover-background-rgb: 30, 30, 50; 
     --popover-foreground-rgb: var(--foreground-rgb);
 
     --muted-rgb: 40, 40, 60;
     --muted-foreground-rgb: 180, 180, 200;
 
-    --destructive-rgb: 255, 50, 50; /* A brighter red for destructive */
+    --destructive-rgb: 255, 50, 50; 
     --destructive-foreground-rgb: 255, 255, 255;
 
-    --border-rgb: var(--card-border-rgb); /* Default border for inputs etc. */
-    --border-alpha: 0.1; /* Slightly more opaque than card border */
+    --border-rgb: var(--card-border-rgb); 
+    --border-alpha: 0.1; 
     --input-background-rgb: 20, 20, 35;
-    --input-border-rgb: var(--primary-rgb); /* Cyan border for inputs on focus */
+    --input-border-rgb: var(--primary-rgb); 
     
-    --ring-rgb: var(--primary-rgb); /* Cyan for focus rings */
+    --ring-rgb: var(--primary-rgb);
 
-    --radius: 0.5rem; /* Keep existing radius for consistency, spec says 16px for sections, 10px for buttons */
+    --radius: 0.5rem; 
 
     /* Chart colors - can be adapted if charts are used */
     --chart-1-rgb: var(--primary-rgb);
@@ -52,57 +53,75 @@
     --chart-3-rgb: 0, 200, 200;
     --chart-4-rgb: 200, 0, 200;
     --chart-5-rgb: 150, 150, 255;
+
+    /* --- Pre-calculated HSL values for ShadCN components --- */
+    /* Derived from the RGB values above. Adjust saturation/lightness as needed for aesthetics. */
+    /* For --background-rgb: 12, 12, 26; */
+    --background: 240 38% 7%; /* Approx HSL: hsl(240, 38%, 7.5%) */
+    /* For --foreground-rgb: 220, 220, 240; */
+    --foreground: 240 25% 90%; /* Approx HSL: hsl(240, 25%, 90.2%) */
+    
+    /* For --primary-rgb: 0, 255, 255; */
+    --primary: 180 100% 50%;
+    /* For --primary-foreground-rgb: 0, 0, 0; */
+    --primary-foreground: 0 0% 0%;
+    
+    /* For --secondary-rgb: 50, 50, 70; */
+    --secondary: 240 17% 24%; /* Approx HSL: hsl(240, 16.7%, 23.5%) */
+    /* For --secondary-foreground-rgb: 200, 200, 220; */
+    --secondary-foreground: 240 18% 82%; /* Approx HSL: hsl(240, 18.2%, 82.4%) */
+    
+    /* For --accent-rgb: 255, 0, 255; */
+    --accent: 300 100% 50%;
+    /* For --accent-foreground-rgb: 255, 255, 255; */
+    --accent-foreground: 0 0% 100%;
+    
+    /* For card: rgba(255,255,255,0.02) -> hsla(0, 0%, 100%, 0.02) */
+    --card: 0 0% 100% / 0.02; 
+    /* For card-foreground: --foreground-rgb */
+    --card-foreground: var(--foreground); 
+    
+    /* For popover-background-rgb: 30, 30, 50; */
+    --popover: 240 25% 16%; /* Approx HSL: hsl(240, 25%, 15.7%) */
+    /* For popover-foreground-rgb: var(--foreground-rgb) */
+    --popover-foreground: var(--foreground);
+    
+    /* For --muted-rgb: 40, 40, 60; */
+    --muted: 240 20% 20%; /* Approx HSL: hsl(240, 20%, 19.6%) */
+    /* For --muted-foreground-rgb: 180, 180, 200; */
+    --muted-foreground: 240 14% 75%; /* Approx HSL: hsl(240, 14.3%, 74.5%) */
+    
+    /* For --destructive-rgb: 255, 50, 50; */
+    --destructive: 0 100% 60%; /* Approx HSL: hsl(0, 100%, 59.8%) */
+    /* For --destructive-foreground-rgb: 255, 255, 255; */
+    --destructive-foreground: 0 0% 100%;
+    
+    /* For border: rgba(255,255,255,0.1) */
+    --border: 0 0% 100% / 0.1; 
+    /* For input-background-rgb: 20, 20, 35; */
+    --input: 240 29% 11%; /* Approx HSL: hsl(240, 28.6%, 10.8%) */
+    
+    /* For --ring-rgb: var(--primary-rgb) -> hsl(180, 100%, 50%) */
+    --ring: 180 100% 50%;
+
+    /* For chart colors HSL */
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: 180 100% 39%; /* from 0, 200, 200 */
+    --chart-4: 300 100% 39%; /* from 200, 0, 200 */
+    --chart-5: 240 100% 80%; /* from 150, 150, 255 */
   }
-
-  /* Generate HSL versions for ShadCN components compatibility */
-  :root {
-    --background: hsl(from rgb(var(--background-rgb)) h s l);
-    --foreground: hsl(from rgb(var(--foreground-rgb)) h s l);
-    --primary: hsl(from rgb(var(--primary-rgb)) h s l);
-    --primary-foreground: hsl(from rgb(var(--primary-foreground-rgb)) h s l);
-    --secondary: hsl(from rgb(var(--secondary-rgb)) h s l);
-    --secondary-foreground: hsl(from rgb(var(--secondary-foreground-rgb)) h s l);
-    --accent: hsl(from rgb(var(--accent-rgb)) h s l);
-    --accent-foreground: hsl(from rgb(var(--accent-foreground-rgb)) h s l);
-    
-    --card: hsla(from rgb(var(--card-background-rgb)) h s l / var(--card-background-alpha));
-    --card-foreground: hsl(from rgb(var(--card-foreground-rgb)) h s l);
-    
-    --popover: hsl(from rgb(var(--popover-background-rgb)) h s l);
-    --popover-foreground: hsl(from rgb(var(--popover-foreground-rgb)) h s l);
-    
-    --muted: hsl(from rgb(var(--muted-rgb)) h s l);
-    --muted-foreground: hsl(from rgb(var(--muted-foreground-rgb)) h s l);
-    
-    --destructive: hsl(from rgb(var(--destructive-rgb)) h s l);
-    --destructive-foreground: hsl(from rgb(var(--destructive-foreground-rgb)) h s l);
-    
-    --border: hsla(from rgb(var(--border-rgb)) h s l / var(--border-alpha));
-    --input: hsl(from rgb(var(--input-background-rgb)) h s l); /* Input specific bg */
-    /* Input border will be handled by Tailwind focus variants or component styles */
-    --ring: hsl(from rgb(var(--ring-rgb)) h s l);
-
-    --chart-1: hsl(from rgb(var(--chart-1-rgb)) h s l);
-    --chart-2: hsl(from rgb(var(--chart-2-rgb)) h s l);
-    --chart-3: hsl(from rgb(var(--chart-3-rgb)) h s l);
-    --chart-4: hsl(from rgb(var(--chart-4-rgb)) h s l);
-    --chart-5: hsl(from rgb(var(--chart-5-rgb)) h s l);
-  }
-
-  /* Force dark theme as per spec - remove .dark class dependency for these vars */
-  /* body {
-    --background: hsl(from rgb(var(--background-rgb)) h s l); 
-    --foreground: hsl(from rgb(var(--foreground-rgb)) h s l);
-  } */
 }
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-border; /* Uses HSL --border */
   }
   body {
-    @apply bg-gradient-to-b from-[rgb(var(--background-start-rgb))] to-[rgb(var(--background-end-rgb))];
-    color: hsl(var(--foreground)); /* Explicitly set text color */
+    /* Direct CSS for background gradient using RGB variables */
+    background: linear-gradient(180deg, rgb(var(--background-start-rgb)) 0%, rgb(var(--background-end-rgb)) 100%);
+    /* Direct CSS for foreground color using RGB variable */
+    color: rgb(var(--foreground-rgb));
     font-family: var(--font-inter), sans-serif;
     overflow-x: hidden;
     min-height: 100vh;
@@ -116,26 +135,33 @@
     z-index: -1; /* Ensure it's behind all content */
   }
 
-  h1 { @apply font-orbitron text-5xl sm:text-6xl md:text-7xl font-bold; } 
-  h2 { @apply font-space-mono text-4xl sm:text-5xl font-bold; } 
-  h3 { @apply font-inter text-2xl sm:text-3xl font-semibold; } 
-  p, span, div, li, label, button, input, select, textarea { @apply font-inter text-lg; } 
-  .font-cli { @apply font-space-mono text-base; }
+  /* Base typography from spec, using Tailwind's responsive array syntax for font sizes */
+  h1 { @apply text-4xl font-bold sm:text-5xl md:text-[64px] lg:text-[72px] font-orbitron; } /* 64-72px desktop, 42-48px mobile (approx) */
+  h2 { @apply text-3xl font-bold sm:text-4xl md:text-[42px] lg:text-[56px] font-space-mono; } /* 42-56px desktop, 32-36px mobile (approx) */
+  h3 { @apply text-2xl font-semibold sm:text-[28px] md:text-[32px] font-inter; } /* 28-32px desktop, 24px mobile (approx) */
+  
+  p, span, div, li, label, button, input, select, textarea { 
+    @apply text-lg font-inter; /* Default Body: 18-20px */
+  } 
+  
+  .font-cli { @apply font-space-mono text-base; } /* CLI Text: 16px */
 }
 
 /* Section Container Styles */
 @layer components {
   .glass-section {
-    @apply rounded-2xl border border-[hsla(var(--card-border-rgb),var(--card-border-alpha))] p-8 md:p-12 lg:p-16; 
+    @apply rounded-2xl border p-8 md:p-12 lg:p-16; 
+    border-color: hsla(var(--card-border-rgb), var(--card-border-alpha)); /* Uses RGB and alpha */
     backdrop-filter: blur(12px);
-    background: hsla(var(--card-background-rgb), var(--card-background-alpha));
+    background: hsla(var(--card-background-rgb), var(--card-background-alpha)); /* Uses RGB and alpha */
     animation: pulse-border 6s linear infinite;
   }
 }
 
+/* Animations & Effects */
 @keyframes pulse-border {
   0%, 100% {
-    box-shadow: 0 0 0px hsla(var(--primary-rgb), 0);
+    box-shadow: 0 0 0px hsla(var(--primary-rgb), 0); /* Uses primary-rgb for glow */
   }
   50% {
     box-shadow: 0 0 12px 2px hsla(var(--primary-rgb), 0.15), 0 0 6px 1px hsla(var(--primary-rgb), 0.1);
@@ -152,25 +178,24 @@
   animation: glitch-flicker 1.5s infinite alternate;
 }
 
-
-/* Simplified Tab Styling */
+/* Simplified Tab Styling for ContractConfigForm Vertical Tabs */
 @layer utilities {
   .param-tab-trigger {
-    @apply justify-start text-left font-medium transition-colors w-full;
-    @apply px-3 py-2.5 text-base rounded-md; 
+    @apply justify-start text-left font-medium transition-colors w-full text-base rounded-md;
+    @apply px-3 py-2.5; 
   }
 
   .param-tab-trigger[data-state="active"] {
-    @apply bg-[hsla(var(--primary-rgb),0.1)] text-primary; 
-    border-color: hsl(var(--primary));
+    @apply bg-primary/10 text-primary shadow-md border-primary/30; /* Uses HSL --primary */
+    border-color: hsl(var(--primary)); /* Explicitly use HSL --primary */
   }
   
   .param-tab-trigger:not([data-state="active"]):hover {
-     @apply bg-[hsla(var(--muted-rgb),0.5)] text-foreground;
+     @apply bg-muted/50 text-foreground; /* Uses HSL --muted and --foreground */
   }
 
   .gradient-text-cyan-magenta {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent;
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent; /* Uses HSL --primary and --accent */
   }
 
   .terminal-cursor::after {
@@ -184,49 +209,19 @@
     50% { @apply opacity-0; }
   }
 
-  /* CTA Button Styles */
-  .btn-primary-cta {
-    @apply w-full sm:w-auto font-space-mono uppercase text-sm sm:text-base font-bold text-[rgb(var(--primary-foreground-rgb))] rounded-lg px-8 py-4 transition-all duration-300 ease-in-out;
-    background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--accent)));
-  }
-  .btn-primary-cta:hover {
-    transform: scale(1.03);
-    box-shadow: 0 0 12px 2px hsla(var(--primary-rgb), 0.5), 0 0 24px 4px hsla(var(--accent-rgb), 0.3);
-  }
-
-  .btn-terminal-cta {
-    @apply font-cli text-base text-primary px-4 py-2 border border-primary rounded-md relative overflow-hidden;
-    background: transparent;
-  }
-  .btn-terminal-cta::after { 
-    content: "_";
-    @apply absolute opacity-0 transition-opacity duration-100;
-    bottom: 6px; 
-    right: 8px;
-  }
-  .btn-terminal-cta:hover::after {
-    animation: blink 1s step-end infinite;
-    @apply opacity-100;
-  }
-
-  .btn-minimal-cta {
-    @apply font-inter text-base text-primary px-6 py-3 border border-primary rounded-lg relative overflow-hidden transition-all duration-300;
-    background: transparent;
-  }
-  .btn-minimal-cta:hover {
-    border-color: transparent;
-    background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--accent)));
-    background-size: 200% 200%;
-    animation: gradient-border-pulse 3s linear infinite, text-to-white 0.3s forwards;
-    color: hsl(var(--primary-foreground));
-  }
+  /* CTA Button Styles (Applied via buttonVariants in button.tsx) */
+  /* .btn-primary-cta defined in tailwind.config.ts variants */
+  /* .btn-terminal-cta defined in tailwind.config.ts variants */
+  /* .btn-minimal-cta defined in tailwind.config.ts variants */
 
   @keyframes gradient-border-pulse {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
   }
-  @keyframes text-to-white {
+  @keyframes text-to-white { /* Renamed from text-to-primary-foreground if not always white */
     to { color: hsl(var(--primary-foreground)); }
   }
 }
+
+    
