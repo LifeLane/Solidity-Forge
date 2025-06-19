@@ -90,11 +90,10 @@
   }
 
   /* Force dark theme as per spec - remove .dark class dependency for these vars */
-  body {
-    --background: hsl(from rgb(var(--background-rgb)) h s l); /* Use start of gradient */
+  /* body {
+    --background: hsl(from rgb(var(--background-rgb)) h s l); 
     --foreground: hsl(from rgb(var(--foreground-rgb)) h s l);
-    /* ... repeat for all other relevant HSL variables if they were previously in .dark selector */
-  }
+  } */
 }
 
 @layer base {
@@ -102,7 +101,8 @@
     @apply border-border;
   }
   body {
-    @apply bg-gradient-to-b from-[rgb(var(--background-start-rgb))] to-[rgb(var(--background-end-rgb))] text-foreground;
+    @apply bg-gradient-to-b from-[rgb(var(--background-start-rgb))] to-[rgb(var(--background-end-rgb))];
+    color: hsl(var(--foreground)); /* Explicitly set text color */
     font-family: var(--font-inter), sans-serif;
     overflow-x: hidden;
     min-height: 100vh;
@@ -114,21 +114,19 @@
     width: 100%;
     height: 100%;
     z-index: -1; /* Ensure it's behind all content */
-    /* background-color: transparent; */ /* Let body gradient show through */
   }
 
-  h1 { @apply font-orbitron text-5xl sm:text-6xl md:text-7xl font-bold; } /* Adjusted sizes based on spec */
-  h2 { @apply font-space-mono text-4xl sm:text-5xl font-bold; } /* Adjusted */
-  h3 { @apply font-inter text-2xl sm:text-3xl font-semibold; } /* Adjusted */
-  p, span, div, li, label, button, input, select, textarea { @apply font-inter text-lg; } /* Default body text size */
-
+  h1 { @apply font-orbitron text-5xl sm:text-6xl md:text-7xl font-bold; } 
+  h2 { @apply font-space-mono text-4xl sm:text-5xl font-bold; } 
+  h3 { @apply font-inter text-2xl sm:text-3xl font-semibold; } 
+  p, span, div, li, label, button, input, select, textarea { @apply font-inter text-lg; } 
   .font-cli { @apply font-space-mono text-base; }
 }
 
-/* Section Container Styles (renamed from .section to .glass-section to avoid conflict) */
+/* Section Container Styles */
 @layer components {
   .glass-section {
-    @apply rounded-2xl border border-[hsla(var(--card-border-rgb),var(--card-border-alpha))] p-8 md:p-12 lg:p-16; /* padding from spec: 80px 48px adjusted for md, lg */
+    @apply rounded-2xl border border-[hsla(var(--card-border-rgb),var(--card-border-alpha))] p-8 md:p-12 lg:p-16; 
     backdrop-filter: blur(12px);
     background: hsla(var(--card-background-rgb), var(--card-background-alpha));
     animation: pulse-border 6s linear infinite;
@@ -146,25 +144,25 @@
 
 @keyframes glitch-flicker {
   0%, 100% { opacity: 1; transform: skewX(0deg); }
-  25% { opacity: 0.8; transform: skewX(-1deg); }
-  50% { opacity: 1; transform: skewX(1deg); }
-  75% { opacity: 0.9; transform: skewX(0.5deg); }
+  25% { opacity: 0.8; transform: skewX(-0.5deg) translateY(-1px); }
+  50% { opacity: 1; transform: skewX(0.5deg) translateY(1px); }
+  75% { opacity: 0.9; transform: skewX(0.25deg); }
 }
 .animate-glitch-flicker {
   animation: glitch-flicker 1.5s infinite alternate;
 }
 
 
-/* Simplified Tab Styling - Can be refined for futuristic look */
+/* Simplified Tab Styling */
 @layer utilities {
   .param-tab-trigger {
-    @apply justify-start text-left font-medium transition-colors w-full; /* Ensure full width for vertical tabs */
+    @apply justify-start text-left font-medium transition-colors w-full;
     @apply px-3 py-2.5 text-base rounded-md; 
   }
 
   .param-tab-trigger[data-state="active"] {
     @apply bg-[hsla(var(--primary-rgb),0.1)] text-primary; 
-    border-color: hsl(var(--primary)); /* Example active border */
+    border-color: hsl(var(--primary));
   }
   
   .param-tab-trigger:not([data-state="active"]):hover {
@@ -200,7 +198,7 @@
     @apply font-cli text-base text-primary px-4 py-2 border border-primary rounded-md relative overflow-hidden;
     background: transparent;
   }
-  .btn-terminal-cta::after { /* Blinking underscore on hover */
+  .btn-terminal-cta::after { 
     content: "_";
     @apply absolute opacity-0 transition-opacity duration-100;
     bottom: 6px; 
@@ -231,5 +229,4 @@
   @keyframes text-to-white {
     to { color: hsl(var(--primary-foreground)); }
   }
-
 }
