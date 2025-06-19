@@ -3,13 +3,12 @@
 
 import React, { useState, useCallback } from 'react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+// Using a dark theme that fits the new aesthetic. `vscDarkPlus` is okay, or `oneDark`
+import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Skeleton } from "@/components/ui/skeleton";
-import { ExternalLink, Lightbulb, Copy, Check, ShieldAlert, Zap, Wrench, Info, Fuel, Coins, Beaker, Sparkles, Loader2, Code2, Brain, FileText as FileTextIconLucide, AlertCircle, PackageSearch, Frown } from 'lucide-react';
-import { CardTitle, CardDescription, CardHeader, CardContent as ShadCNCardContent } from '@/components/ui/card'; 
+import { ExternalLink, Lightbulb, Copy, Check, ShieldAlert, Zap, Wrench, Info, Fuel, Coins, Beaker, Sparkles, Loader2, Code2, Brain, FileText as FileTextIconLucide, AlertCircle, PackageSearch, Frown, Terminal } from 'lucide-react';
 import { Badge, type BadgeProps } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
@@ -81,11 +80,11 @@ export function CodeDisplay({
     if (!textToCopy) return;
     navigator.clipboard.writeText(textToCopy).then(() => {
       setCopiedStates(prev => ({ ...prev, [type]: true }));
-      toast({ title: `${type} Copied!`, description: `${type} copied to clipboard.` });
+      toast({ title: `${type} Vector Copied`, description: `${type} data stream replicated to clipboard.` });
       setTimeout(() => setCopiedStates(prev => ({ ...prev, [type]: false })), 2000);
     }).catch(err => {
       console.error(`Failed to copy ${type}: `, err);
-      toast({ variant: "destructive", title: "Copy Failed!", description: `Could not copy ${type}.` });
+      toast({ variant: "destructive", title: "Copy Sequence Failed!", description: `Could not replicate ${type} data.` });
     });
   }, [toast]);
 
@@ -101,15 +100,15 @@ export function CodeDisplay({
         window.open(remixURL, '_blank');
         toast({
             variant: "destructive",
-            title: "Remix Link Encoding Note",
-            description: "Used standard Base64 encoding. If issues arise in Remix, copy-paste the code manually.",
+            title: "Remix Transmit Anomaly",
+            description: "Standard Base64 encoding initiated. If Remix interface shows discrepancies, manually transfer the artifact code.",
         });
     }
   }, [code, toast]);
 
   const handleRefineCodeSubmit = useCallback(async () => {
     if (!refinementInput.trim()) {
-      toast({ variant: "destructive", title: "Empty Request", description: "Provide instructions to refine the code." });
+      toast({ variant: "destructive", title: "Refinement Matrix Empty", description: "Provide directives to refine the artifact." });
       return;
     }
     await onRefineCode(refinementInput);
@@ -120,11 +119,11 @@ export function CodeDisplay({
     if (score === null) return null;
     let variant: BadgeProps["variant"] = "default"; 
     let text = `Audit Readiness: ${score}`;
-     if (score >= 90) { variant = "default"; text = `Excellent: ${score}`; } 
-     else if (score >= 70) { variant = "secondary"; text = `Good: ${score}`; } 
-     else if (score >= 50) { variant = "outline"; text = `Fair: ${score}`; } 
-     else { variant = "destructive"; text = `Needs Review: ${score}`; } 
-    return <Badge variant={variant} className="text-xs px-2 py-1">{text}</Badge>;
+     if (score >= 90) { variant = "default"; text = `Threat Level Minimal: ${score}`; } 
+     else if (score >= 70) { variant = "secondary"; text = `Caution Advised: ${score}`; } 
+     else if (score >= 50) { variant = "outline"; text = `High Alert: ${score}`; } 
+     else { variant = "destructive"; text = `System Compromised: ${score}`; } 
+    return <Badge variant={variant} className="text-xs px-2 py-1 font-share-tech-mono">{text}</Badge>;
   };
 
   const getSeverityBadgeVariant = (severity: AISuggestionSeverity): BadgeProps["variant"] => {
@@ -139,215 +138,217 @@ export function CodeDisplay({
   const getTypeIcon = (type: AISuggestionType) => {
     const iconProps = { className: "h-4 w-4 shrink-0 mt-0.5" };
     switch (type) {
-      case 'security': return <ShieldAlert {...iconProps} color="hsl(var(--destructive))" />;
-      case 'optimization': return <Zap {...iconProps} color="hsl(var(--chart-1))" />; 
-      case 'gas_saving': return <Coins {...iconProps} color="hsl(var(--chart-4))" />;
-      case 'best_practice': return <Wrench {...iconProps} color="hsl(var(--chart-2))" />;
-      case 'informational': return <Info {...iconProps} color="hsl(var(--muted-foreground))" />;
-      default: return <Lightbulb {...iconProps} color="hsl(var(--primary))" />; 
+      case 'security': return <ShieldAlert {...iconProps} className="text-destructive" />;
+      case 'optimization': return <Zap {...iconProps} className="text-primary" />; 
+      case 'gas_saving': return <Fuel {...iconProps} className="text-green-400" />; // Distinct color for gas
+      case 'best_practice': return <Wrench {...iconProps} className="text-blue-400" />; // Distinct color
+      case 'informational': return <Info {...iconProps} className="text-muted-foreground" />;
+      default: return <Lightbulb {...iconProps} className="text-primary" />; 
     }
   };
 
-  const customSyntaxHighlighterStyle = {
-    ...vscDarkPlus,
+  const futuristicSyntaxHighlighterStyle = {
+    ...oneDark, // Or another dark theme like vscDarkPlus, materialDark, etc.
     'pre[class*="language-"]': {
-      ...vscDarkPlus['pre[class*="language-"]'],
-      backgroundColor: 'hsl(var(--muted)/0.3)', 
+      ...oneDark['pre[class*="language-"]'],
+      background: 'rgba(10, 10, 20, 0.7)', // Dark, slightly transparent
       margin: 0, 
-      padding: '0.75rem 1rem', 
-      fontSize: '0.85rem', 
-      fontFamily: 'var(--font-code)', 
-      lineHeight: '1.6',
+      padding: '1rem 1.5rem', 
+      fontSize: '0.9rem', // CLI text size
+      fontFamily: 'var(--font-cli)', 
+      lineHeight: '1.7',
       borderRadius: 'var(--radius)',
+      border: '1px solid hsla(var(--primary-rgb), 0.2)',
+      boxShadow: 'inset 0 0 10px hsla(var(--primary-rgb), 0.1)',
     },
     'code[class*="language-"]': {
-      ...vscDarkPlus['code[class*="language-"]'],
-       fontFamily: 'var(--font-code)', 
+      ...oneDark['code[class*="language-"]'],
+       fontFamily: 'var(--font-cli)', 
+    },
+    'lineNumber': {
+        color: 'hsla(var(--primary-rgb), 0.3)',
+        fontSize: '0.8em',
+        paddingRight: '1.5em',
+        opacity: 0.7,
     }
   };
   
-  // This placeholder is now handled by page.tsx for the whole Card
-  // if (isLoadingCode && !code && !isRefiningCode && !isGeneratingDocumentation) { ... }
-  // if (!code && !isLoadingCode) { ... }
-
-
   const renderEmptyState = (icon: React.ElementType, title: string, message: string) => (
-    <div className="p-6 text-center text-muted-foreground flex flex-col items-center justify-center h-full min-h-[200px]">
-      <icon className="w-12 h-12 mb-4 text-muted-foreground/30" />
-      <p className="text-sm font-medium text-foreground mb-1">{title}</p>
-      <p className="text-xs">{message}</p>
+    <div className="p-6 md:p-10 text-center text-muted-foreground flex flex-col items-center justify-center h-full min-h-[250px] font-uncut-sans">
+      <icon className="w-12 h-12 md:w-16 md:h-16 mb-4 text-primary/40" />
+      <p className="text-lg font-space-mono text-foreground mb-1.5">{title}</p>
+      <p className="text-sm">{message}</p>
     </div>
   );
 
   const renderLoadingState = (message: string) => (
-    <div className="p-6 text-center text-muted-foreground flex flex-col items-center justify-center h-full min-h-[200px]">
-      <Loader2 className="w-10 h-10 mb-3 text-primary animate-spin" />
-      <p className="text-sm">{message}</p>
+    <div className="p-6 md:p-10 text-center text-muted-foreground flex flex-col items-center justify-center h-full min-h-[250px] font-uncut-sans">
+      <Loader2 className="w-10 h-10 md:w-12 md:h-12 mb-4 text-primary animate-spin" />
+      <p className="text-base font-space-mono">{message}</p>
     </div>
   );
 
 
   return (
-    <div className="flex flex-col h-full p-3 md:p-4">
-      <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-3 gap-2 text-center sm:text-left">
+    <div className="flex flex-col h-full p-0"> {/* Padding handled by glass-section */}
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-4 gap-3 text-center sm:text-left">
         <div>
-            <CardTitle className="text-base md:text-lg font-semibold text-foreground">The Alchemist's Output</CardTitle>
-            <CardDescription className="text-xs text-muted-foreground mt-0.5">Review, refine, and analyze your smart contract.</CardDescription>
+            <h2 className="text-display-sm font-orbitron text-foreground">The <span className="gradient-text-cyan-magenta">Alchemist's Output</span></h2>
+            <p className="text-body-lg text-muted-foreground mt-0.5 font-uncut-sans">Inspect, refine, and analyze your forged artifact.</p>
         </div>
         {activeTab === "code" && code && !isPrimaryCodeActionLoading && (
-          <div className="flex gap-2 mt-2 sm:mt-0 self-center sm:self-auto">
-            <Button variant="outline" size="sm" onClick={() => handleCopyToClipboard(code, "Code")} aria-label="Copy code" disabled={isPrimaryCodeActionLoading} className="h-8 text-xs px-2.5">
-              {copiedStates['Code'] ? <Check className="h-3.5 w-3.5 mr-1" /> : <Copy className="h-3.5 w-3.5 mr-1" />}
-              {copiedStates['Code'] ? "Copied" : "Copy Code"}
+          <div className="flex gap-2.5 mt-2 sm:mt-0 self-center sm:self-auto">
+            <Button variant="outline" size="sm" onClick={() => handleCopyToClipboard(code, "Artifact Code")} aria-label="Copy code" disabled={isPrimaryCodeActionLoading} className="btn-minimal-cta text-xs h-auto py-2 px-3">
+              {copiedStates['Artifact Code'] ? <Check className="h-4 w-4 mr-1.5" /> : <Copy className="h-4 w-4 mr-1.5" />}
+              {copiedStates['Artifact Code'] ? "Copied" : "Copy Code"}
             </Button>
-            <Button variant="outline" size="sm" onClick={handleDeployToRemix} aria-label="Deploy to Remix" disabled={isPrimaryCodeActionLoading} className="h-8 text-xs px-2.5">
-              Deploy to Remix <ExternalLink className="h-3.5 w-3.5 ml-1" />
+            <Button variant="outline" size="sm" onClick={handleDeployToRemix} aria-label="Deploy to Remix" disabled={isPrimaryCodeActionLoading} className="btn-minimal-cta text-xs h-auto py-2 px-3">
+              Deploy to Remix <ExternalLink className="h-4 w-4 ml-1.5" />
             </Button>
           </div>
         )}
          {activeTab === "tests" && testCasesCode && !isPrimaryCodeActionLoading && (
-          <div className="flex gap-2 mt-2 sm:mt-0 self-center sm:self-auto">
-            <Button variant="outline" size="sm" onClick={() => handleCopyToClipboard(testCasesCode, "Test Cases")} aria-label="Copy test cases" disabled={isPrimaryCodeActionLoading} className="h-8 text-xs px-2.5">
-              {copiedStates['Test Cases'] ? <Check className="h-3.5 w-3.5 mr-1" /> : <Copy className="h-3.5 w-3.5 mr-1" />}
-              {copiedStates['Test Cases'] ? "Copied" : "Copy Tests"}
+          <div className="flex gap-2.5 mt-2 sm:mt-0 self-center sm:self-auto">
+            <Button variant="outline" size="sm" onClick={() => handleCopyToClipboard(testCasesCode, "Test Matrix")} aria-label="Copy test cases" disabled={isPrimaryCodeActionLoading} className="btn-minimal-cta text-xs h-auto py-2 px-3">
+              {copiedStates['Test Matrix'] ? <Check className="h-4 w-4 mr-1.5" /> : <Copy className="h-4 w-4 mr-1.5" />}
+              {copiedStates['Test Matrix'] ? "Copied" : "Copy Tests"}
             </Button>
           </div>
         )}
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-grow flex flex-col min-h-0">
-        <TabsList className="mb-2.5 grid w-full grid-cols-2 sm:grid-cols-4 gap-1 p-1 rounded-md bg-muted h-auto">
+        <TabsList className="mb-3 grid w-full grid-cols-2 sm:grid-cols-4 gap-1.5 p-1 rounded-lg bg-[rgba(var(--background-rgb),0.5)] border border-glass-section-border/20 h-auto">
           {[
-            { value: "code", label: "Contract Code", icon: Code2 },
+            { value: "code", label: "Artifact Code", icon: Code2 },
             { value: "suggestions", label: "AI Insights", icon: Brain },
             { value: "gas", label: "Gas Oracle", icon: Fuel },
-            { value: "tests", label: "Test Cases", icon: Beaker },
+            { value: "tests", label: "Test Matrix", icon: Beaker },
           ].map(tabItem => (
             <TabsTrigger 
               key={tabItem.value}
               value={tabItem.value} 
-              className="text-xs sm:text-sm py-1.5 px-2 data-[state=active]:bg-background data-[state=active]:shadow-sm h-full flex-1"
+              className="text-xs sm:text-sm py-2 px-2.5 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:shadow-md h-full flex-1 font-space-mono data-[state=active]:border-primary/30 border border-transparent"
               disabled={isPrimaryCodeActionLoading || (tabItem.value !== "code" && anySubActionLoading)}
             >
-                <tabItem.icon className="h-3.5 w-3.5 mr-1 sm:mr-1.5" /> {tabItem.label}
+                <tabItem.icon className="h-4 w-4 mr-1.5" /> {tabItem.label}
             </TabsTrigger>
           ))}
         </TabsList>
 
-        <TabsContent value="code" className="flex-grow flex flex-col overflow-hidden rounded-md border bg-muted/20">
-          <ScrollArea className="flex-grow" style={{maxHeight: 'calc(100vh - 32rem)'}}>
+        <TabsContent value="code" className="flex-grow flex flex-col overflow-hidden rounded-lg border border-glass-section-border/20 bg-[rgba(var(--background-rgb),0.3)]">
+          <ScrollArea className="flex-grow" style={{maxHeight: 'calc(100vh - 35rem)'}}> {/* Adjust max height as needed */}
             {isPrimaryCodeActionLoading ? ( 
-              renderLoadingState("Refining code or generating documentation...")
+              renderLoadingState("Modifying artifact structure...")
             ) : code ? ( 
-              <SyntaxHighlighter language="solidity" style={customSyntaxHighlighterStyle} showLineNumbers lineNumberStyle={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.75rem' }} wrapLines wrapLongLines>
+              <SyntaxHighlighter language="solidity" style={futuristicSyntaxHighlighterStyle} showLineNumbers lineNumberStyle={{ color: 'hsla(var(--primary-rgb), 0.3)', fontSize: '0.75em', userSelect: 'none' }} wrapLines={true} wrapLongLines={true}>
                 {code}
               </SyntaxHighlighter>
             ) : (
-              renderEmptyState(Code2, "No Code Generated", "Forge a contract to see the code here.")
+              renderEmptyState(Code2, "No Artifact Generated", "Initiate forging sequence to materialize code.")
             )}
           </ScrollArea>
           {code && !isPrimaryCodeActionLoading && (
-            <div className="p-3 border-t border-border/30 bg-card/50 mt-auto">
-              <Label htmlFor="refinementRequest" className="text-xs font-medium flex items-center gap-1.5 mb-1.5">
-                <Sparkles className="h-3.5 w-3.5 text-primary" />
-                Refine Code (AI Assist):
+            <div className="p-3 md:p-4 border-t border-glass-section-border/20 bg-[rgba(var(--input-background-rgb),0.5)] mt-auto">
+              <Label htmlFor="refinementRequest" className="text-sm font-space-mono flex items-center gap-1.5 mb-1.5 text-primary">
+                <Sparkles className="h-4 w-4" />
+                Refine Artifact (AI Directive):
               </Label>
               <Textarea
                 id="refinementRequest"
                 value={refinementInput}
                 onChange={(e) => setRefinementInput(e.target.value)}
-                placeholder="e.g., 'Add NatSpec comments for all functions...' or 'Optimize the transfer function for gas efficiency...'"
+                placeholder="e.g., 'Implement EIP-2612 permit functionality...' or 'Optimize storage access in transfer functions...'"
                 rows={2}
-                className="mb-2 bg-background/70 focus:bg-background text-xs p-2"
+                className="mb-2 bg-input border-border focus:border-primary text-sm p-2.5 font-share-tech-mono min-h-[5rem]"
                 disabled={isPrimaryCodeActionLoading || anySubActionLoading}
               />
               <Button 
                 onClick={handleRefineCodeSubmit} 
                 disabled={isPrimaryCodeActionLoading || anySubActionLoading || !refinementInput.trim()}
-                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 text-xs py-2"
-                size="sm"
+                className="btn-terminal-cta w-full"
               >
-                {isRefiningCode ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <Sparkles className="mr-2 h-3.5 w-3.5" />}
-                Execute Refinement
+                {isRefiningCode ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Terminal className="mr-2 h-4 w-4" />}
+                Execute Refinement Directive
               </Button>
             </div>
           )}
         </TabsContent>
 
-        <TabsContent value="suggestions" className="flex-grow flex flex-col overflow-hidden rounded-md border bg-muted/20">
-          <ScrollArea className="h-full flex-grow p-1" style={{maxHeight: 'calc(100vh - 28rem)'}}>
+        <TabsContent value="suggestions" className="flex-grow flex flex-col overflow-hidden rounded-lg border border-glass-section-border/20 bg-[rgba(var(--background-rgb),0.3)]">
+          <ScrollArea className="h-full flex-grow p-1" style={{maxHeight: 'calc(100vh - 30rem)'}}>
             {isLoadingSuggestions ? (
-               renderLoadingState("Fetching AI insights...")
+               renderLoadingState("Accessing AI Oracle for Insights...")
             ) : suggestions.length > 0 || securityScore !== null ? (
-              <div className="p-3 md:p-4 space-y-3">
+              <div className="p-3 md:p-4 space-y-3.5">
                 {securityScore !== null && (
-                  <div className="flex items-center justify-between p-2.5 bg-card/50 rounded-md shadow-sm mb-3 border border-border/30">
-                    <h3 className="text-sm font-semibold text-primary flex items-center gap-1.5"><ShieldAlert className="h-4 w-4"/>Overall Audit Readiness</h3>
+                  <div className="flex items-center justify-between p-3 bg-[rgba(var(--input-background-rgb),0.5)] rounded-md shadow-md mb-3 border border-glass-section-border/30">
+                    <h3 className="text-base font-space-mono text-primary flex items-center gap-2"><ShieldAlert className="h-5 w-5"/>Overall Threat Assessment</h3>
                     {getSecurityScoreBadge(securityScore)}
                   </div>
                 )}
-                {suggestions.length > 0 && <Separator className="my-3 bg-border/30"/>}
-                {suggestions.length > 0 && <h3 className="text-sm font-semibold mb-2 text-center text-primary">AI Suggestions:</h3>}
-                <ul className="space-y-2.5">
+                {suggestions.length > 0 && <Separator className="my-3 bg-glass-section-border/30"/>}
+                {suggestions.length > 0 && <h3 className="text-base font-space-mono mb-2.5 text-center text-primary">AI Oracle Pronouncements:</h3>}
+                <ul className="space-y-3">
                   {suggestions.map((suggestion) => (
-                    <li key={suggestion.id} className="p-2.5 bg-card/50 rounded-md text-sm space-y-1.5 border border-border/30 shadow-sm">
-                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    <li key={suggestion.id} className="p-3 bg-[rgba(var(--input-background-rgb),0.4)] rounded-md text-sm space-y-2 border border-glass-section-border/20 shadow-sm font-uncut-sans">
+                      <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                         {getTypeIcon(suggestion.type)}
-                        <Badge variant={getSeverityBadgeVariant(suggestion.severity)} className="capitalize px-2 py-0.5 text-xs">{suggestion.severity}</Badge>
-                        <Badge variant="outline" className="capitalize px-2 py-0.5 text-xs">{suggestion.type.replace('_', ' ')}</Badge>
+                        <Badge variant={getSeverityBadgeVariant(suggestion.severity)} className="capitalize px-2 py-0.5 text-xs font-share-tech-mono">{suggestion.severity}</Badge>
+                        <Badge variant="outline" className="capitalize px-2 py-0.5 text-xs font-share-tech-mono border-primary/30 text-primary/90 bg-primary/10">{suggestion.type.replace('_', ' ')}</Badge>
                       </div>
-                      <p className="text-muted-foreground text-xs leading-normal">{suggestion.description}</p>
+                      <p className="text-muted-foreground text-sm leading-relaxed">{suggestion.description}</p>
                     </li>
                   ))}
                 </ul>
-                 {suggestions.length === 0 && securityScore !== null && renderEmptyState(PackageSearch, "No Specific Suggestions", "The AI reviewed the code but found no specific items to flag for this category at this time.")}
+                 {suggestions.length === 0 && securityScore !== null && renderEmptyState(PackageSearch, "No Specific Pronouncements", "The AI Oracle reviewed the artifact but found no specific anomalies to flag at this time.")}
               </div>
-            ) : ( renderEmptyState(Brain, "No AI Insights Yet", "Click 'AI Scrutiny' below to analyze the contract code.") )}
+            ) : ( renderEmptyState(Brain, "AI Oracle Dormant", "Invoke 'AI Scrutiny' below to analyze the artifact.") )}
           </ScrollArea>
         </TabsContent>
 
-        <TabsContent value="gas" className="flex-grow flex flex-col overflow-hidden rounded-md border bg-muted/20">
-          <ScrollArea className="h-full flex-grow p-1" style={{maxHeight: 'calc(100vh - 28rem)'}}>
+        <TabsContent value="gas" className="flex-grow flex flex-col overflow-hidden rounded-lg border border-glass-section-border/20 bg-[rgba(var(--background-rgb),0.3)]">
+          <ScrollArea className="h-full flex-grow p-1" style={{maxHeight: 'calc(100vh - 30rem)'}}>
             {isLoadingGasEstimation ? (
-              renderLoadingState("Estimating gas consumption...")
+              renderLoadingState("Querying Gas Consumption Matrix...")
             ) : gasEstimation ? (
-              <div className="p-3 md:p-4 space-y-3">
-                <div className="bg-card/50 rounded-md shadow-sm border border-border/30">
-                  <CardHeader className="p-3 pb-1.5"> <CardTitle className="text-base flex items-center gap-2 text-primary"><Fuel className="w-4 h-4"/>Gas Estimation</CardTitle> </CardHeader>
-                  <ShadCNCardContent className="space-y-2.5 p-3 pt-1">
-                    <div> <h4 className="font-medium text-sm text-foreground mb-1">Estimated Gas Range:</h4> <p className="text-xs whitespace-pre-line ml-1 text-muted-foreground">{gasEstimation.estimatedGasRange}</p> </div>
-                    <Separator className="my-2.5 bg-border/30" />
-                    <div> <h4 className="font-medium text-sm text-foreground mb-1">Explanation:</h4> <p className="text-xs whitespace-pre-line ml-1 text-muted-foreground">{gasEstimation.explanation}</p> </div>
-                  </ShadCNCardContent>
+              <div className="p-3 md:p-4 space-y-3.5">
+                <div className="bg-[rgba(var(--input-background-rgb),0.5)] rounded-md shadow-md border border-glass-section-border/30">
+                  <div className="p-3 pb-2 border-b border-glass-section-border/20"> <h3 className="text-base font-space-mono flex items-center gap-2 text-primary"><Fuel className="w-5 h-5"/>Gas Consumption Analysis</h3> </div>
+                  <div className="space-y-3 p-3 font-uncut-sans">
+                    <div> <h4 className="font-bold text-sm text-foreground mb-1">Estimated Gas Range:</h4> <p className="text-sm whitespace-pre-line ml-1 text-muted-foreground font-share-tech-mono">{gasEstimation.estimatedGasRange}</p> </div>
+                    <Separator className="my-2.5 bg-glass-section-border/30" />
+                    <div> <h4 className="font-bold text-sm text-foreground mb-1">Explanation:</h4> <p className="text-sm whitespace-pre-line ml-1 text-muted-foreground">{gasEstimation.explanation}</p> </div>
+                  </div>
                 </div>
               </div>
-            ) : ( renderEmptyState(Fuel, "Gas Oracle Awaiting Query", "Click 'Query Gas Oracle' below to estimate gas costs.") )}
+            ) : ( renderEmptyState(Fuel, "Gas Oracle Awaiting Query", "Invoke 'Query Gas Oracle' below to estimate consumption.") )}
           </ScrollArea>
         </TabsContent>
 
-        <TabsContent value="tests" className="flex-grow flex flex-col overflow-hidden rounded-md border bg-muted/20">
-          <ScrollArea className="h-full flex-grow" style={{maxHeight: 'calc(100vh - 28rem)'}}>
+        <TabsContent value="tests" className="flex-grow flex flex-col overflow-hidden rounded-lg border border-glass-section-border/20 bg-[rgba(var(--background-rgb),0.3)]">
+          <ScrollArea className="h-full flex-grow" style={{maxHeight: 'calc(100vh - 30rem)'}}>
             {isLoadingTestCases ? (
-              renderLoadingState("Conjuring test cases...")
+              renderLoadingState("Conjuring Test Matrix...")
             ) : testCasesCode ? (
-              <SyntaxHighlighter language="javascript" style={customSyntaxHighlighterStyle} showLineNumbers lineNumberStyle={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.75rem' }} wrapLines wrapLongLines>
+              <SyntaxHighlighter language="javascript" style={futuristicSyntaxHighlighterStyle} showLineNumbers lineNumberStyle={{ color: 'hsla(var(--primary-rgb), 0.3)', fontSize: '0.75em', userSelect: 'none' }} wrapLines={true} wrapLongLines={true}>
                 {testCasesCode}
               </SyntaxHighlighter>
-            ) : ( renderEmptyState(Beaker, "Test Suite Not Generated", "Click 'Conjure Test Suite' below to generate basic test cases.") )}
+            ) : ( renderEmptyState(Beaker, "Test Matrix Unmaterialized", "Invoke 'Conjure Test Matrix' below to generate validation sequences.") )}
           </ScrollArea>
         </TabsContent>
       </Tabs>
 
       {code && !isPrimaryCodeActionLoading && (
-         <div className="pt-3 mt-2.5 space-y-2.5 border-t border-border/30">
-          <h3 className="text-center text-sm font-medium text-foreground mb-1.5">
-            Post-Forge Analysis & Augmentation
+         <div className="pt-4 mt-3 space-y-3 border-t border-glass-section-border/30">
+          <h3 className="text-center text-base font-space-mono text-primary mb-2">
+            Post-Forge Augmentation Matrix
           </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {[
               { handler: onGetAISuggestions, isLoading: isLoadingSuggestions, icon: Brain, label: "AI Scrutiny", key: "sug" },
               { handler: onEstimateGasCosts, isLoading: isLoadingGasEstimation, icon: Fuel, label: "Query Gas Oracle", key: "gas" },
-              { handler: onGenerateTestCases, isLoading: isLoadingTestCases, icon: Beaker, label: "Conjure Test Suite", key: "test" },
+              { handler: onGenerateTestCases, isLoading: isLoadingTestCases, icon: Beaker, label: "Conjure Test Matrix", key: "test" },
               { handler: onGenerateDocumentation, isLoading: isGeneratingDocumentation, icon: FileTextIconLucide, label: "Scribe Docs (NatSpec)", key: "doc" },
             ].map(action => (
               <Button
@@ -357,12 +358,12 @@ export function CodeDisplay({
                 size="sm"
                 onClick={action.handler}
                 disabled={anySubActionLoading || isPrimaryCodeActionLoading || (action.key === "sug" && !selectedTemplate)}
-                className="w-full text-xs sm:text-sm py-2 h-auto"
+                className="btn-minimal-cta w-full text-xs sm:text-sm py-2.5 h-auto"
               >
                 {action.isLoading ? (
-                  <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
-                  <action.icon className="mr-2 h-3.5 w-3.5" />
+                  <action.icon className="mr-2 h-4 w-4" />
                 )}
                 {action.label}
               </Button>

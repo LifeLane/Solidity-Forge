@@ -3,16 +3,15 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+// Card component will now primarily be a wrapper. Styling will come from .glass-section.
 const Card = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn(
-      "rounded-lg border bg-card text-card-foreground shadow-sm", // Default shadow-sm
-      className
-    )}
+    // Removed default Card styling, expecting .glass-section or other classes to define appearance
+    className={cn(className)} 
     {...props}
   />
 ))
@@ -24,7 +23,7 @@ const CardHeader = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex flex-col space-y-1 p-4 md:p-6", className)} // Adjusted default padding
+    className={cn("flex flex-col space-y-1.5 p-0", className)} // Reduced default padding, specific sections will control more
     {...props}
   />
 ))
@@ -36,8 +35,9 @@ const CardTitle = React.forwardRef<
 >(({ className, children, ...props }, ref) => ( 
   <h3 
     ref={ref}
-    className={cn(
-      "text-xl font-semibold leading-none tracking-tight", // Default size xl
+    // Font styling will come from global H1/H2/H3 or specific component usage
+    className={cn( 
+      "font-semibold leading-none tracking-tight",
       className
     )}
     {...props}
@@ -53,7 +53,7 @@ const CardDescription = React.forwardRef<
 >(({ className, children, ...props }, ref) => ( 
   <p 
     ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
+    className={cn("text-sm text-muted-foreground", className)} // Keep muted-foreground for contrast
     {...props}
   >
     {children}
@@ -65,7 +65,7 @@ const CardContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("p-4 md:p-6 pt-0", className)} {...props} /> // Adjusted default padding
+  <div ref={ref} className={cn("p-0", className)} {...props} /> // Reduced default padding
 ))
 CardContent.displayName = "CardContent"
 
@@ -75,7 +75,7 @@ const CardFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex items-center p-4 md:p-6 pt-0", className)} // Adjusted default padding
+    className={cn("flex items-center p-0 pt-4", className)} // Reduced default padding, added top padding
     {...props}
   />
 ))

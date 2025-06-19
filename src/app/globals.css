@@ -5,77 +5,95 @@
 
 @layer base {
   :root {
-    --background: 0 0% 98%; /* Softer than pure white */
-    --foreground: 240 10% 3.9%;
+    /* Base dark theme colors from the spec */
+    --background-start-rgb: 12, 12, 26; /* #0c0c1a */
+    --background-end-rgb: 0, 0, 0;     /* #000000 */
+    --background-rgb: 12, 12, 26; /* Default to start of gradient */
 
-    --card: 0 0% 100%; /* Pure white for cards */
-    --card-foreground: 240 10% 3.9%;
+    --foreground-rgb: 220, 220, 240; /* Light grey/off-white for text */
+    
+    --primary-rgb: 0, 255, 255;      /* Cyan #0ff */
+    --primary-foreground-rgb: 0, 0, 0; /* Black text on primary */
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
+    --secondary-rgb: 50, 50, 70; /* Darker subtle secondary */
+    --secondary-foreground-rgb: 200, 200, 220;
 
-    --primary: 145 60% 40%; /* Brighter Green for light mode */
-    --primary-foreground: 0 0% 100%; /* White text for on-primary elements */
+    --accent-rgb: 255, 0, 255;       /* Magenta #f0f */
+    --accent-foreground-rgb: 255, 255, 255; /* White text on accent */
 
-    --secondary: 240 6% 94%; /* Adjusted light gray */
-    --secondary-foreground: 240 5.9% 10%;
+    /* Glassmorphic section styles (converted to RGB for consistency) */
+    --card-background-rgb: 255, 255, 255; /* Base for rgba(255,255,255,0.02) */
+    --card-background-alpha: 0.02;
+    --card-border-rgb: 255, 255, 255;    /* Base for rgba(255,255,255,0.05) */
+    --card-border-alpha: 0.05;
+    --card-foreground-rgb: var(--foreground-rgb);
 
-    --muted: 240 6% 94%;
-    --muted-foreground: 240 3.8% 46.1%;
+    --popover-background-rgb: 30, 30, 50; /* Darker popover */
+    --popover-foreground-rgb: var(--foreground-rgb);
 
-    --accent: 0 70% 55%; /* Brighter Red for light mode */
-    --accent-foreground: 0 0% 100%;
+    --muted-rgb: 40, 40, 60;
+    --muted-foreground-rgb: 180, 180, 200;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive-rgb: 255, 50, 50; /* A brighter red for destructive */
+    --destructive-foreground-rgb: 255, 255, 255;
 
-    --border: 240 5% 88%; /* More defined light gray border */
-    --input: 240 5% 88%; 
-    --ring: 145 60% 45%; /* Adjusted ring for new light primary */
+    --border-rgb: var(--card-border-rgb); /* Default border for inputs etc. */
+    --border-alpha: 0.1; /* Slightly more opaque than card border */
+    --input-background-rgb: 20, 20, 35;
+    --input-border-rgb: var(--primary-rgb); /* Cyan border for inputs on focus */
+    
+    --ring-rgb: var(--primary-rgb); /* Cyan for focus rings */
 
-    --radius: 0.5rem;
+    --radius: 0.5rem; /* Keep existing radius for consistency */
 
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    /* Chart colors - can be adapted if charts are used */
+    --chart-1-rgb: var(--primary-rgb);
+    --chart-2-rgb: var(--accent-rgb);
+    --chart-3-rgb: 0, 200, 200;
+    --chart-4-rgb: 200, 0, 200;
+    --chart-5-rgb: 150, 150, 255;
   }
 
-  .dark {
-    --background: 240 10% 3.9%; /* Space Black (dark blueish black) */
-    --foreground: 0 0% 98%; /* Default light text on dark background */
-
-    --card: 240 10% 5.9%; /* Slightly lighter than background for cards */
-    --card-foreground: 0 0% 98%;
-
-    --popover: 240 10% 5.9%;
-    --popover-foreground: 0 0% 98%;
-
-    --primary: 145 60% 30%; /* Original Space Green for dark mode */
-    --primary-foreground: 145 10% 95%; /* Original light green for dark mode */
-
-    --secondary: 240 3.7% 15.9%; /* Darker gray for secondary elements */
-    --secondary-foreground: 0 0% 98%;
-
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 0 0% 63.9%;
-
-    --accent: 0 70% 50%; /* Original Fire Red for dark mode */
-    --accent-foreground: 0 0% 100%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 240 3.7% 15.9%; /* Darker border for dark mode */
-    --input: 240 3.7% 10.9%; /* Darker input border for dark mode */
-    --ring: 145 60% 40%; /* Original ring for dark mode */
+  /* Generate HSL versions for ShadCN components compatibility */
+  :root {
+    --background: hsl(from rgb(var(--background-rgb)) h s l);
+    --foreground: hsl(from rgb(var(--foreground-rgb)) h s l);
+    --primary: hsl(from rgb(var(--primary-rgb)) h s l);
+    --primary-foreground: hsl(from rgb(var(--primary-foreground-rgb)) h s l);
+    --secondary: hsl(from rgb(var(--secondary-rgb)) h s l);
+    --secondary-foreground: hsl(from rgb(var(--secondary-foreground-rgb)) h s l);
+    --accent: hsl(from rgb(var(--accent-rgb)) h s l);
+    --accent-foreground: hsl(from rgb(var(--accent-foreground-rgb)) h s l);
     
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    --card: hsla(from rgb(var(--card-background-rgb)) h s l / var(--card-background-alpha));
+    --card-foreground: hsl(from rgb(var(--card-foreground-rgb)) h s l);
+    
+    --popover: hsl(from rgb(var(--popover-background-rgb)) h s l);
+    --popover-foreground: hsl(from rgb(var(--popover-foreground-rgb)) h s l);
+    
+    --muted: hsl(from rgb(var(--muted-rgb)) h s l);
+    --muted-foreground: hsl(from rgb(var(--muted-foreground-rgb)) h s l);
+    
+    --destructive: hsl(from rgb(var(--destructive-rgb)) h s l);
+    --destructive-foreground: hsl(from rgb(var(--destructive-foreground-rgb)) h s l);
+    
+    --border: hsla(from rgb(var(--border-rgb)) h s l / var(--border-alpha));
+    --input: hsl(from rgb(var(--input-background-rgb)) h s l); /* Input specific bg */
+    /* Input border will be handled by Tailwind focus variants or component styles */
+    --ring: hsl(from rgb(var(--ring-rgb)) h s l);
+
+    --chart-1: hsl(from rgb(var(--chart-1-rgb)) h s l);
+    --chart-2: hsl(from rgb(var(--chart-2-rgb)) h s l);
+    --chart-3: hsl(from rgb(var(--chart-3-rgb)) h s l);
+    --chart-4: hsl(from rgb(var(--chart-4-rgb)) h s l);
+    --chart-5: hsl(from rgb(var(--chart-5-rgb)) h s l);
+  }
+
+  /* Force dark theme as per spec - remove .dark class dependency for these vars */
+  body {
+    --background: hsl(from rgb(var(--background-rgb)) h s l); /* Use start of gradient */
+    --foreground: hsl(from rgb(var(--foreground-rgb)) h s l);
+    /* ... repeat for all other relevant HSL variables if they were previously in .dark selector */
   }
 }
 
@@ -84,8 +102,10 @@
     @apply border-border;
   }
   body {
-    @apply text-foreground;
+    @apply bg-gradient-to-b from-[rgb(var(--background-start-rgb))] to-[rgb(var(--background-end-rgb))] text-foreground;
     font-family: var(--font-inter), sans-serif;
+    overflow-x: hidden;
+    min-height: 100vh;
   }
   #galaxy-background-canvas {
     position: fixed;
@@ -94,33 +114,122 @@
     width: 100%;
     height: 100%;
     z-index: 0; 
-    background-color: hsl(var(--background)); 
+    /* background-color: transparent; */ /* Let body gradient show through */
+  }
+
+  h1 { @apply font-orbitron text-5xl sm:text-6xl md:text-7xl font-bold; } /* Adjusted sizes based on spec */
+  h2 { @apply font-space-mono text-4xl sm:text-5xl font-bold; } /* Adjusted */
+  h3 { @apply font-inter text-2xl sm:text-3xl font-semibold; } /* Adjusted */
+  p, span, div, li, label, button, input, select, textarea { @apply font-inter text-lg; } /* Default body text size */
+
+  .font-cli { @apply font-space-mono text-base; }
+}
+
+/* Section Container Styles */
+@layer components {
+  .glass-section {
+    @apply rounded-2xl border border-[hsla(var(--card-border-rgb),var(--card-border-alpha))] p-8 md:p-12 lg:p-16; /* padding from spec: 80px 48px adjusted */
+    backdrop-filter: blur(12px);
+    background: hsla(var(--card-background-rgb), var(--card-background-alpha));
+    animation: pulse-border 6s linear infinite;
   }
 }
 
-/* Simplified Tab Styling */
+@keyframes pulse-border {
+  0%, 100% {
+    box-shadow: 0 0 0px hsla(var(--primary-rgb), 0);
+  }
+  50% {
+    box-shadow: 0 0 12px 2px hsla(var(--primary-rgb), 0.15), 0 0 6px 1px hsla(var(--primary-rgb), 0.1);
+  }
+}
+
+@keyframes glitch-flicker {
+  0%, 100% { opacity: 1; transform: skewX(0deg); }
+  25% { opacity: 0.8; transform: skewX(-1deg); }
+  50% { opacity: 1; transform: skewX(1deg); }
+  75% { opacity: 0.9; transform: skewX(0.5deg); }
+}
+.animate-glitch-flicker {
+  animation: glitch-flicker 1.5s infinite alternate;
+}
+
+
+/* Simplified Tab Styling - Can be refined for futuristic look */
 @layer utilities {
   .param-tab-trigger {
     @apply justify-start text-left font-medium transition-colors;
-    @apply px-3 py-2.5 text-sm md:text-base rounded-md; /* Ensure consistent padding and rounding */
+    @apply px-3 py-2.5 text-base rounded-md; 
   }
 
   .param-tab-trigger[data-state="active"] {
-    @apply bg-primary/10 text-primary; /* Example active state: subtle background and primary text */
-    /* border-left: 2px solid hsl(var(--primary)); */ /* Optional: active border */
+    @apply bg-[hsla(var(--primary-rgb),0.1)] text-primary; 
+    border-color: hsl(var(--primary)); /* Example active border */
   }
   
   .param-tab-trigger:not([data-state="active"]):hover {
-     @apply bg-muted/50 text-foreground;
+     @apply bg-[hsla(var(--muted-rgb),0.5)] text-foreground;
   }
 
-  /* Optional: Basic glow for primary interactive elements if desired, but keep it minimal */
-  .interactive-glow-primary {
-     box-shadow: 0 0 8px 1px hsl(var(--primary) / 0.3), 0 0 10px 2px hsl(var(--primary) / 0.2);
-     border-color: hsl(var(--primary) / 0.6);
+  .gradient-text-cyan-magenta {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent;
   }
-  .interactive-glow-primary:hover {
-    box-shadow: 0 0 12px 2px hsl(var(--primary) / 0.4), 0 0 16px 3px hsl(var(--primary) / 0.3);
-    border-color: hsl(var(--primary));
+
+  .terminal-cursor::after {
+    content: "_";
+    @apply opacity-100;
+    animation: blink 1s step-end infinite;
   }
+
+  @keyframes blink {
+    from, to { @apply opacity-100; }
+    50% { @apply opacity-0; }
+  }
+
+  /* CTA Button Styles */
+  .btn-primary-cta {
+    @apply w-full sm:w-auto font-space-mono uppercase text-sm sm:text-base font-bold text-[rgb(var(--primary-foreground-rgb))] rounded-lg px-8 py-4 transition-all duration-300 ease-in-out;
+    background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--accent)));
+  }
+  .btn-primary-cta:hover {
+    transform: scale(1.03);
+    box-shadow: 0 0 12px 2px hsla(var(--primary-rgb), 0.5), 0 0 24px 4px hsla(var(--accent-rgb), 0.3);
+  }
+
+  .btn-terminal-cta {
+    @apply font-cli text-base text-primary px-4 py-2 border border-primary rounded-md relative overflow-hidden;
+    background: transparent;
+  }
+  .btn-terminal-cta::after { /* Blinking underscore on hover */
+    content: "_";
+    @apply absolute opacity-0 transition-opacity duration-100;
+    bottom: 6px; 
+    right: 8px;
+  }
+  .btn-terminal-cta:hover::after {
+    animation: blink 1s step-end infinite;
+    @apply opacity-100;
+  }
+
+  .btn-minimal-cta {
+    @apply font-inter text-base text-primary px-6 py-3 border border-primary rounded-lg relative overflow-hidden transition-all duration-300;
+    background: transparent;
+  }
+  .btn-minimal-cta:hover {
+    border-color: transparent;
+    background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--accent)));
+    background-size: 200% 200%;
+    animation: gradient-border-pulse 3s linear infinite, text-to-white 0.3s forwards;
+    color: hsl(var(--primary-foreground));
+  }
+
+  @keyframes gradient-border-pulse {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  @keyframes text-to-white {
+    to { color: hsl(var(--primary-foreground)); }
+  }
+
 }

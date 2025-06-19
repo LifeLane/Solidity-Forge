@@ -10,14 +10,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from "@/components/ui/switch";
 import { Button } from '@/components/ui/button';
-import { Info } from 'lucide-react'; // Changed from Lightbulb
+import { Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface ParameterInputDisplayProps {
   param: ContractParameter;
   anyPrimaryActionLoading: boolean;
-  contractTypeName: string; // Retained for potential future use, though not directly used now
+  contractTypeName: string;
 }
 
 const ParameterInputDisplay = React.memo(({
@@ -38,7 +38,7 @@ const ParameterInputDisplay = React.memo(({
   }
   if (!showBasedOnDependency) return null;
 
-  const commonInputClass = "bg-background/70 focus:bg-background h-9 text-sm";
+  const commonInputClass = "bg-input border-border focus:border-primary text-base h-11 font-share-tech-mono"; // From Input component style
   const commonProps = {
     name: param.name,
     control: control,
@@ -46,28 +46,28 @@ const ParameterInputDisplay = React.memo(({
   };
 
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <Label htmlFor={param.name} className="text-sm font-medium text-foreground flex items-center gap-1.5">
-          {param.icon && <param.icon className="h-3.5 w-3.5 text-primary/80" />}
+        <Label htmlFor={param.name} className="text-base font-space-mono text-primary/90 flex items-center gap-2">
+          {param.icon && <param.icon className="h-4 w-4 text-primary/70" />}
           {param.label}
         </Label>
         {param.description && (
-          <TooltipProvider delayDuration={200}>
+          <TooltipProvider delayDuration={100}>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="h-6 w-6 text-muted-foreground hover:text-primary"
+                  className="h-7 w-7 text-muted-foreground hover:text-primary"
                   aria-label={`More information about ${param.label}`}
                   disabled={anyPrimaryActionLoading}
                 >
-                  <Info className="h-3.5 w-3.5" />
+                  <Info className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="top" align="end" className="max-w-xs text-xs p-2">
+              <TooltipContent side="top" align="end" className="max-w-sm text-sm p-2.5 bg-popover border-glass-section-border shadow-xl font-uncut-sans">
                 <p>{param.description}</p>
               </TooltipContent>
             </Tooltip>
@@ -84,9 +84,9 @@ const ParameterInputDisplay = React.memo(({
               <SelectTrigger id={param.name} className={cn(commonInputClass)}>
                 <SelectValue placeholder={param.placeholder || `Select ${param.label}`} />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-popover border-glass-section-border">
                 {param.options?.map(option => (
-                  <SelectItem key={option.value} value={option.value} className="text-sm">{option.label}</SelectItem>
+                  <SelectItem key={option.value} value={option.value} className="text-base py-2 font-share-tech-mono focus:bg-primary/20">{option.label}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -100,9 +100,9 @@ const ParameterInputDisplay = React.memo(({
             <Textarea
               id={param.name}
               placeholder={param.placeholder}
-              rows={param.rows || 2}
+              rows={param.rows || 3} // Slightly more rows
               {...field}
-              className={cn(commonInputClass, "min-h-[4rem]", "py-2 leading-relaxed")}
+              className={cn(commonInputClass, "min-h-[6rem]", "py-2.5 leading-relaxed")}
               disabled={anyPrimaryActionLoading}
             />
           )}
@@ -112,10 +112,16 @@ const ParameterInputDisplay = React.memo(({
           {...commonProps}
           defaultValue={param.defaultValue || false}
           render={({ field }) => (
-            <div className="flex items-center space-x-2 h-9">
-              <Switch id={param.name} checked={field.value} onCheckedChange={field.onChange} disabled={anyPrimaryActionLoading} />
-              <Label htmlFor={param.name} className="text-xs text-muted-foreground">
-                {field.value ? 'Enabled' : 'Disabled'}
+            <div className="flex items-center space-x-3 h-11">
+              <Switch 
+                id={param.name} 
+                checked={field.value} 
+                onCheckedChange={field.onChange} 
+                disabled={anyPrimaryActionLoading}
+                className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-muted"
+              />
+              <Label htmlFor={param.name} className="text-sm text-muted-foreground font-uncut-sans">
+                {field.value ? 'ACTIVE' : 'INACTIVE'}
               </Label>
             </div>
           )}
@@ -136,7 +142,7 @@ const ParameterInputDisplay = React.memo(({
           )}
         />
       )}
-      {errors[param.name] && <p className="text-xs text-destructive mt-0.5">{(errors[param.name] as any).message}</p>}
+      {errors[param.name] && <p className="text-sm text-destructive mt-1 font-uncut-sans">{(errors[param.name] as any).message}</p>}
     </div>
   );
 });

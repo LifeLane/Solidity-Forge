@@ -10,8 +10,10 @@ interface Particle {
   baseAlpha: number;
   currentAlpha: number;
   twinkleSpeed: number;
-  twinklePhase: number; // For sinusoidal twinkle
+  twinklePhase: number;
   color: string;
+  velocityX: number; // For drift
+  velocityY: number; // For drift
 }
 
 const GalaxyBackground: React.FC = () => {
@@ -19,21 +21,29 @@ const GalaxyBackground: React.FC = () => {
   const particlesArrayRef = useRef<Particle[]>([]);
   const animationFrameIdRef = useRef<number | null>(null);
 
+  // Futuristic Sentient UI Spec: Cyan neural points, opacity: 0.1, drift motion
   const particleColors = [
-    'rgba(255, 255, 255, 0.9)', // Bright White
-    'rgba(220, 220, 255, 0.8)', // Pale Blueish White
-    'rgba(255, 240, 230, 0.7)', // Faint Warm White
-    'rgba(200, 200, 200, 0.6)', // Dimmer White
+    'rgba(0, 255, 255, 0.7)', // Cyan base
+    'rgba(0, 220, 255, 0.6)', // Slightly less saturated cyan
+    'rgba(100, 255, 255, 0.8)', // Lighter cyan
   ];
 
   const createParticle = useCallback((canvas: HTMLCanvasElement): Particle => {
-    const size = Math.random() * 2 + 0.5; // Smaller, more star-like sizes
+    const size = Math.random() * 1.5 + 0.3; // Smaller, more point-like
     const x = Math.random() * canvas.width;
     const y = Math.random() * canvas.height;
-    const baseAlpha = Math.random() * 0.5 + 0.3; // Base transparency
+    // Spec: opacity: 0.1. Let's make baseAlpha around this, twinkle can vary it slightly.
+    const baseAlpha = Math.random() * 0.1 + 0.05; // Centered around 0.1
     const color = particleColors[Math.floor(Math.random() * particleColors.length)];
-    const twinkleSpeed = Math.random() * 0.02 + 0.005; // How fast it twinkles
-    const twinklePhase = Math.random() * Math.PI * 2; // Initial phase for twinkle
+    const twinkleSpeed = Math.random() * 0.015 + 0.003;
+    const twinklePhase = Math.random() * Math.PI * 2;
+    
+    // Drift motion
+    const angle = Math.random() * Math.PI * 2;
+    const speed = Math.random() * 0.1 + 0.02; // Slow drift
+    const velocityX = Math.cos(angle) * speed;
+    const velocityY = Math.sin(angle) * speed;
+
 
     return { 
       x, 
@@ -43,13 +53,16 @@ const GalaxyBackground: React.FC = () => {
       currentAlpha: baseAlpha,
       twinkleSpeed,
       twinklePhase,
-      color 
+      color,
+      velocityX,
+      velocityY
     };
   }, [particleColors]);
 
   const initParticles = useCallback((canvas: HTMLCanvasElement) => {
     particlesArrayRef.current = [];
-    const numberOfParticles = Math.floor((canvas.width * canvas.height) / 9000); // Adjust density for stars
+    // Adjust density: fewer, more subtle points for "neural" feel
+    const numberOfParticles = Math.floor((canvas.width * canvas.height) / 15000); 
     for (let i = 0; i < numberOfParticles; i++) {
       particlesArrayRef.current.push(createParticle(canvas));
     }
@@ -61,28 +74,28 @@ const GalaxyBackground: React.FC = () => {
     for (let i = 0; i < particlesArrayRef.current.length; i++) {
       const p = particlesArrayRef.current[i];
 
-      // Twinkling effect using a sine wave for smooth transition
       p.twinklePhase += p.twinkleSpeed;
-      const twinkleValue = (Math.sin(p.twinklePhase) + 1) / 2; // Normalize to 0-1
-      p.currentAlpha = p.baseAlpha * (0.5 + twinkleValue * 0.5); // Vary opacity from 50% to 100% of baseAlpha
+      const twinkleValue = (Math.sin(p.twinklePhase) + 1) / 2; 
+      // Keep opacity low, varying around the baseAlpha of ~0.1
+      p.currentAlpha = p.baseAlpha * (0.7 + twinkleValue * 0.6); // e.g. 0.07 to 0.13 if base is 0.1
 
-      // Optional: very slow drift for a subtle parallax effect (can be removed if pure static is preferred)
-      // p.x += (Math.random() - 0.5) * 0.05;
-      // p.y += (Math.random() - 0.5) * 0.05;
+      // Drift motion
+      p.x += p.velocityX;
+      p.y += p.velocityY;
 
-      // Wrap particles around screen edges if they drift
-      // if (p.x > canvas.width + p.size) p.x = -p.size;
-      // else if (p.x < -p.size) p.x = canvas.width + p.size;
-      // if (p.y > canvas.height + p.size) p.y = -p.size;
-      // else if (p.y < -p.size) p.y = canvas.height + p.size;
+      // Wrap particles for continuous drift
+      if (p.x > canvas.width + p.size) p.x = -p.size;
+      else if (p.x < -p.size) p.x = canvas.width + p.size;
+      if (p.y > canvas.height + p.size) p.y = -p.size;
+      else if (p.y < -p.size) p.y = canvas.height + p.size;
 
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-      // Apply currentAlpha to the particle's color
+      
       const colorParts = p.color.substring(p.color.indexOf('(') + 1, p.color.lastIndexOf(')')).split(',');
-      if (colorParts.length === 4) { // rgba
+      if (colorParts.length === 4) {
         ctx.fillStyle = `rgba(${colorParts[0]}, ${colorParts[1]}, ${colorParts[2]}, ${p.currentAlpha})`;
-      } else { // rgb (though unlikely with current setup)
+      } else {
          ctx.fillStyle = `rgba(${colorParts[0]}, ${colorParts[1]}, ${colorParts[2]}, ${p.currentAlpha})`;
       }
       ctx.fill();
@@ -99,18 +112,31 @@ const GalaxyBackground: React.FC = () => {
 
     const setCanvasDimensions = () => {
       canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      canvas.height = document.body.scrollHeight; // Ensure canvas covers full scrollable height
       initParticles(canvas);
     };
-
-    setCanvasDimensions();
     
+    // Initial setup
+    setCanvasDimensions();
     animationFrameIdRef.current = requestAnimationFrame(() => animateParticles(ctx, canvas));
     
-    window.addEventListener('resize', setCanvasDimensions);
+    // Handle resize and scroll
+    const handleResize = () => setCanvasDimensions();
+    // Recalculate on scroll if body height changes (dynamic content)
+    // This might be too performance intensive, consider debouncing or specific triggers
+    // For now, only resize.
+    // const handleScroll = () => {
+    //   if (document.body.scrollHeight !== canvas.height) {
+    //     setCanvasDimensions();
+    //   }
+    // };
+
+    window.addEventListener('resize', handleResize);
+    // window.addEventListener('scroll', handleScroll);
 
     return () => {
-      window.removeEventListener('resize', setCanvasDimensions);
+      window.removeEventListener('resize', handleResize);
+      // window.removeEventListener('scroll', handleScroll);
       if (animationFrameIdRef.current) {
         cancelAnimationFrame(animationFrameIdRef.current);
       }

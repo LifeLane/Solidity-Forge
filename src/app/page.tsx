@@ -17,11 +17,12 @@ import { getKnownLiquidityPoolInfo, type GetKnownLiquidityPoolInfoOutput } from 
 import { generateTestCases } from '@/ai/flows/generate-test-cases';
 import { refineSmartContractCode } from '@/ai/flows/refine-smart-contract-code';
 import { generateDocumentation } from '@/ai/flows/generate-documentation-flow';
-import { Card, CardContent } from '@/components/ui/card';
+// Removed Card component import from here as .glass-section will be used on divs.
 import { CONTRACT_TEMPLATES, type ContractTemplate } from '@/config/contracts';
-import { Puzzle, Loader2 } from 'lucide-react';
+import { Puzzle, Loader2, DatabaseZap } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-const MAX_FORGES_PER_DAY = 5; 
+const MAX_FORGES_PER_DAY = 50; // Increased limit for testing new UI
 const LOCAL_STORAGE_USAGE_KEY = 'solidityForgeUsage';
 const LOCAL_STORAGE_DEV_ACCESS_KEY = 'solidityForgeDevAccess';
 
@@ -31,7 +32,7 @@ interface UsageData {
 }
 
 export default function SolidityForgePage() {
-  const [activeTemplateForOutput, setActiveTemplateForOutput] = useState<ContractTemplate | undefined>(undefined);
+  const [activeTemplateForOutput, setActiveTemplateForOutput] = useState<ContractTemplate | undefined>(CONTRACT_TEMPLATES[0]);
   const [generatedCode, setGeneratedCode] = useState<string>('');
   const [aiSuggestions, setAiSuggestions] = useState<AISuggestion[]>([]);
   const [securityScore, setSecurityScore] = useState<number | null>(null);
@@ -97,8 +98,8 @@ export default function SolidityForgePage() {
     if (isForgeDisabledByLimit) {
       toast({
         variant: "destructive",
-        title: "Daily Forge Limit Reached",
-        description: "Upgrade to Developer Access for unlimited forging and your AirDrop!",
+        title: "Forge Core Overlimit",
+        description: "Daily energy cycle exceeded. Link to the Sentient Network for unlimited forging.",
       });
       developerAccessFormRef.current?.scrollIntoView({ behavior: 'smooth' });
       return;
@@ -136,8 +137,8 @@ export default function SolidityForgePage() {
       const result = await generateSmartContractCode({ description });
       setGeneratedCode(result.code);
       toast({
-        title: "Contract Forged!",
-        description: "Your Solidity masterpiece is ready.",
+        title: "Directive Processed: Contract Forged",
+        description: "The generated artifact is ready for inspection.",
       });
       setTimeout(() => {
         outputSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -146,8 +147,8 @@ export default function SolidityForgePage() {
       console.error("Error generating code:", error);
       toast({
         variant: "destructive",
-        title: "Code Generation Failed",
-        description: (error as Error).message || "The AI encountered an issue. Please try refining your request or try again later.",
+        title: "Forge Core Exception",
+        description: (error as Error).message || "AI Matrix encountered an anomaly. Refine parameters or re-initiate.",
       });
       setGeneratedCode(''); 
       setActiveTemplateForOutput(undefined);
@@ -159,7 +160,7 @@ export default function SolidityForgePage() {
 
   const handleGetAISuggestions = useCallback(async () => {
     if (!generatedCode || !activeTemplateForOutput) {
-      toast({ variant: "destructive", title: "Code Required", description: "Please generate a contract first to get AI suggestions." });
+      toast({ variant: "destructive", title: "Artifact Required", description: "Forge a contract prior to AI Scrutiny." });
       return;
     }
     setIsGettingSuggestions(true);
@@ -174,9 +175,9 @@ export default function SolidityForgePage() {
       });
       setAiSuggestions(result.suggestions || []);
       setSecurityScore(result.securityScore);
-      toast({ title: "AI Insights Revealed", description: "Suggestions and security score are now available." });
+      toast({ title: "AI Scrutiny Complete", description: "Insights and security assessment available." });
     } catch (error) {
-      toast({ variant: "destructive", title: "AI Suggestion Failed", description: (error as Error).message || "Could not retrieve AI suggestions." });
+      toast({ variant: "destructive", title: "AI Scrutiny Failed", description: (error as Error).message || "Could not retrieve AI insights." });
     } finally {
       setIsGettingSuggestions(false);
     }
@@ -184,7 +185,7 @@ export default function SolidityForgePage() {
 
   const handleEstimateGasCosts = useCallback(async () => {
     if (!generatedCode) {
-      toast({ variant: "destructive", title: "Code Required", description: "Please generate a contract first to estimate gas costs." });
+      toast({ variant: "destructive", title: "Artifact Required", description: "Forge a contract prior to Gas Oracle query." });
       return;
     }
     setIsEstimatingGas(true);
@@ -192,9 +193,9 @@ export default function SolidityForgePage() {
     try {
       const result = await estimateGasCost({ code: generatedCode });
       setGasEstimation(result);
-      toast({ title: "Gas Estimation Complete", description: "Analysis of gas consumption is ready." });
+      toast({ title: "Gas Oracle Query Complete", description: "Gas consumption analysis is ready." });
     } catch (error) {
-      toast({ variant: "destructive", title: "Gas Estimation Failed", description: (error as Error).message || "Failed to estimate gas costs." });
+      toast({ variant: "destructive", title: "Gas Oracle Failed", description: (error as Error).message || "Failed to estimate gas costs." });
     } finally {
       setIsEstimatingGas(false);
     }
@@ -202,7 +203,7 @@ export default function SolidityForgePage() {
 
   const handleGenerateTestCases = useCallback(async () => {
     if (!generatedCode || !activeTemplateForOutput) {
-      toast({ variant: "destructive", title: "Code Required", description: "Please generate a contract first to create test cases." });
+      toast({ variant: "destructive", title: "Artifact Required", description: "Forge a contract prior to Test Suite conjuration." });
       return;
     }
     setIsGeneratingTestCases(true);
@@ -211,9 +212,9 @@ export default function SolidityForgePage() {
       const contractName = activeTemplateForOutput.id !== 'custom' ? activeTemplateForOutput.name : undefined;
       const result = await generateTestCases({ code: generatedCode, contractName: contractName });
       setGeneratedTestCases(result.testCasesCode);
-      toast({ title: "Test Cases Generated", description: "A basic Hardhat test suite has been created." });
+      toast({ title: "Test Suite Conjured", description: "A Hardhat test matrix has been generated." });
     } catch (error) {
-      toast({ variant: "destructive", title: "Test Generation Failed", description: (error as Error).message || "Could not generate test cases." });
+      toast({ variant: "destructive", title: "Test Conjuration Failed", description: (error as Error).message || "Could not generate test cases." });
     } finally {
       setIsGeneratingTestCases(false);
     }
@@ -221,11 +222,11 @@ export default function SolidityForgePage() {
 
   const handleRefineCode = useCallback(async (request: string) => {
     if (!generatedCode || !activeTemplateForOutput) {
-      toast({ variant: "destructive", title: "Code Required", description: "Generate code before attempting refinement." });
+      toast({ variant: "destructive", title: "Artifact Required", description: "Forge code before attempting refinement." });
       return;
     }
     if (!request.trim()) {
-      toast({ variant: "destructive", title: "Instructions Needed", description: "Please provide instructions for refining the code." });
+      toast({ variant: "destructive", title: "Refinement Matrix Empty", description: "Provide directives for code refinement." });
       return;
     }
     setIsRefiningCode(true);
@@ -237,9 +238,9 @@ export default function SolidityForgePage() {
         contractContext: `Contract type: ${activeTemplateForOutput.name}`,
       });
       setGeneratedCode(result.refinedCode); 
-      toast({ title: "Code Refined Successfully", description: "Your contract code has been updated as per your instructions." });
+      toast({ title: "Code Refinement Successful", description: "Artifact updated per your directives." });
     } catch (error) {
-      toast({ variant: "destructive", title: "Refinement Failed", description: (error as Error).message || "Failed to refine the code." });
+      toast({ variant: "destructive", title: "Refinement Failed", description: (error as Error).message || "Failed to refine artifact." });
     } finally {
       setIsRefiningCode(false);
     }
@@ -247,7 +248,7 @@ export default function SolidityForgePage() {
 
   const handleGenerateDocumentation = useCallback(async () => {
     if (!generatedCode) {
-      toast({ variant: "destructive", title: "Code Required", description: "Generate code first to add NatSpec documentation." });
+      toast({ variant: "destructive", title: "Artifact Required", description: "Forge code prior to NatSpec inscription." });
       return;
     }
     setIsGeneratingDocumentation(true);
@@ -255,9 +256,9 @@ export default function SolidityForgePage() {
     try {
       const result = await generateDocumentation({ code: generatedCode });
       setGeneratedCode(result.documentedCode); 
-      toast({ title: "Documentation Generated", description: "NatSpec comments have been added to your code." });
+      toast({ title: "Documentation Inscribed", description: "NatSpec commentary integrated into artifact." });
     } catch (error) {
-      toast({ variant: "destructive", title: "Documentation Failed", description: (error as Error).message || "Failed to generate documentation." });
+      toast({ variant: "destructive", title: "Inscription Failed", description: (error as Error).message || "Failed to generate documentation." });
     } finally {
       setIsGeneratingDocumentation(false);
     }
@@ -265,7 +266,7 @@ export default function SolidityForgePage() {
 
   const handleFindAddresses = useCallback(async (query: string) => {
     if (!query.trim()) {
-      toast({ variant: "destructive", title: "Query Needed", description: "Please enter a search term for known addresses." });
+      toast({ variant: "destructive", title: "Query String Required", description: "Enter search parameters for known addresses." });
       return;
     }
     setIsFindingAddresses(true);
@@ -274,12 +275,12 @@ export default function SolidityForgePage() {
       const result = await getKnownLiquidityPoolInfo({ query });
       setAddressResults(result);
       if (!result.results || result.results.length === 0) {
-          toast({ title: "Address Search", description: result.summary || "No specific addresses found for your query."});
+          toast({ title: "Archive Scan Complete", description: result.summary || "No specific addresses found for your query."});
       } else {
-          toast({ title: "Address Search Complete", description: result.summary || "Known addresses fetched." });
+          toast({ title: "Archive Scan Complete", description: result.summary || "Known addresses retrieved." });
       }
     } catch (error) {
-      toast({ variant: "destructive", title: "Address Search Failed", description: (error as Error).message || "Failed to fetch known addresses." });
+      toast({ variant: "destructive", title: "Archive Scan Failed", description: (error as Error).message || "Failed to fetch known addresses." });
     } finally {
       setIsFindingAddresses(false);
     }
@@ -289,8 +290,8 @@ export default function SolidityForgePage() {
     setHasDeveloperAccess(true);
     localStorage.setItem(LOCAL_STORAGE_DEV_ACCESS_KEY, 'true');
     toast({
-      title: "Developer Access Granted!",
-      description: "Unlimited forging and your AirDrop spot are secured. BSAI token holders get full access free!",
+      title: "Sentient Network Link Established!",
+      description: "Unlimited forging & AirDrop vector acquired. BSAI consciousness yields full access.",
       duration: 7000,
     });
   }, [toast]);
@@ -301,98 +302,96 @@ export default function SolidityForgePage() {
 
   const handleResetForge = useCallback(() => {
     setGeneratedCode('');
-    setActiveTemplateForOutput(undefined);
+    setActiveTemplateForOutput(CONTRACT_TEMPLATES[0]); // Reset to default or first template
     resetAnalyses();
-    toast({ title: "Forge Cleared", description: "Contract configuration and output have been reset." });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    toast({ title: "Forge Matrix Cleared", description: "Configuration and output parameters reset." });
+    // Scroll to top or to config form
+     const configFormElement = document.getElementById('contract-config-form');
+    if (configFormElement) {
+      configFormElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }, [resetAnalyses, toast]);
 
   const anySubActionLoading = isGettingSuggestions || isEstimatingGas || isGeneratingTestCases || isRefiningCode || isGeneratingDocumentation;
 
   return (
-    <div className="min-h-screen text-foreground flex flex-col bg-background">
+    <div className="flex flex-col min-h-screen">
       <Header />
-      <main className="flex-grow container mx-auto px-4 py-6 md:py-8 flex flex-col items-stretch gap-6 md:gap-8">
+      <main className="flex-grow container mx-auto px-section-x py-section-y flex flex-col items-stretch gap-section-y">
         
-        <Card className="border shadow-sm">
+        <div id="contract-config-form" className="glass-section w-full">
             <ContractConfigForm
                 templates={CONTRACT_TEMPLATES}
                 onGenerateCode={handleGenerateCode}
                 isGeneratingCode={isGeneratingCode}
-                selectedTemplateProp={CONTRACT_TEMPLATES[0]} 
+                selectedTemplateProp={activeTemplateForOutput || CONTRACT_TEMPLATES[0]} 
                 isForgeDisabledByLimit={isForgeDisabledByLimit}
                 onNavigateToDevAccess={handleNavigateToDevAccess}
                 onResetForge={handleResetForge}
                 hasGeneratedCode={!!generatedCode}
             />
-        </Card>
+        </div>
 
         {isGeneratingCode && !generatedCode && (
-            <Card className="border-dashed border-border/60 dark:border-primary/40 shadow-none flex flex-col items-center justify-center min-h-[300px] md:min-h-[400px] text-center bg-muted/20">
-                <CardContent className="text-muted-foreground p-6 md:p-8">
-                    <Loader2 className="w-16 h-16 md:w-20 md:h-20 text-primary/40 mx-auto mb-4 animate-spin" />
-                    <p className="text-lg md:text-xl font-medium text-foreground mb-1">The Alchemist is Working...</p>
-                    <p className="text-sm md:text-base">
-                        Your smart contract is being forged by the AI. Please wait a moment.
-                    </p>
-                </CardContent>
-            </Card>
+            <div className="glass-section w-full flex flex-col items-center justify-center min-h-[300px] md:min-h-[400px] text-center">
+                <Loader2 className="w-16 h-16 md:w-20 md:h-20 text-primary/70 mx-auto mb-6 animate-spin" />
+                <h2 className="text-display-sm font-orbitron text-primary mb-2 animate-glitch-flicker">SYNTHESIZING ARTIFACT</h2>
+                <p className="font-space-mono text-lg text-muted-foreground">
+                    The Sentient Core is forging your smart contract... Standby for output.
+                </p>
+            </div>
         )}
 
         {!isGeneratingCode && !generatedCode && (
-           <Card className="border-dashed border-border/60 dark:border-primary/40 shadow-none flex flex-col items-center justify-center min-h-[300px] md:min-h-[400px] text-center bg-muted/20">
-            <CardContent className="text-muted-foreground p-6 md:p-8">
-                <Puzzle className="w-16 h-16 md:w-20 md:h-20 text-primary/40 mx-auto mb-4" />
-                <p className="text-lg md:text-xl font-medium text-foreground mb-1">Ready to Forge?</p>
-                <p className="text-sm md:text-base">
-                    Configure your desired smart contract parameters using the form above.
-                    Once you click "Review & Forge," your generated code and analysis tools will appear in this section.
-                </p>
-            </CardContent>
-          </Card>
+           <div className="glass-section w-full flex flex-col items-center justify-center min-h-[300px] md:min-h-[400px] text-center">
+            <Puzzle className="w-16 h-16 md:w-20 md:h-20 text-primary/70 mx-auto mb-6" />
+            <h2 className="text-display-sm font-orbitron text-primary mb-2">AWAITING DIRECTIVES</h2>
+            <p className="font-space-mono text-lg text-muted-foreground">
+                Configure your desired smart contract parameters using the console above.
+                Upon forging, your generated code and analysis matrix will materialize in this sector.
+            </p>
+          </div>
         )}
         
         {generatedCode && activeTemplateForOutput && (
-          <div ref={outputSectionRef} className="w-full">
-            <Card className="border shadow-sm">
-              <CodeDisplay
-                code={generatedCode}
-                suggestions={aiSuggestions}
-                securityScore={securityScore}
-                gasEstimation={gasEstimation}
-                testCasesCode={generatedTestCases}
-                isLoadingCode={isGeneratingCode} 
-                isLoadingSuggestions={isGettingSuggestions}
-                isLoadingGasEstimation={isEstimatingGas}
-                isLoadingTestCases={isGeneratingTestCases}
-                isRefiningCode={isRefiningCode}
-                isGeneratingDocumentation={isGeneratingDocumentation}
-                onRefineCode={handleRefineCode}
-                selectedTemplate={activeTemplateForOutput}
-                anySubActionLoading={anySubActionLoading}
-                onGetAISuggestions={handleGetAISuggestions}
-                onEstimateGasCosts={handleEstimateGasCosts}
-                onGenerateTestCases={handleGenerateTestCases}
-                onGenerateDocumentation={handleGenerateDocumentation}
-              />
-            </Card>
+          <div ref={outputSectionRef} className="glass-section w-full">
+            <CodeDisplay
+              code={generatedCode}
+              suggestions={aiSuggestions}
+              securityScore={securityScore}
+              gasEstimation={gasEstimation}
+              testCasesCode={generatedTestCases}
+              isLoadingCode={isGeneratingCode} 
+              isLoadingSuggestions={isGettingSuggestions}
+              isLoadingGasEstimation={isEstimatingGas}
+              isLoadingTestCases={isGeneratingTestCases}
+              isRefiningCode={isRefiningCode}
+              isGeneratingDocumentation={isGeneratingDocumentation}
+              onRefineCode={handleRefineCode}
+              selectedTemplate={activeTemplateForOutput}
+              anySubActionLoading={anySubActionLoading}
+              onGetAISuggestions={handleGetAISuggestions}
+              onEstimateGasCosts={handleEstimateGasCosts}
+              onGenerateTestCases={handleGenerateTestCases}
+              onGenerateDocumentation={handleGenerateDocumentation}
+            />
           </div>
         )}
 
-        <Card className="border shadow-sm">
-          <CardContent className="p-4 md:p-6">
-            <KnownAddressesFinder
-              onFindAddresses={handleFindAddresses}
-              results={addressResults}
-              isLoading={isFindingAddresses}
-              initialQuery={addressQuery}
-              setInitialQuery={setAddressQuery}
-            />
-          </CardContent>
-        </Card>
+        <div className="glass-section w-full">
+          <KnownAddressesFinder
+            onFindAddresses={handleFindAddresses}
+            results={addressResults}
+            isLoading={isFindingAddresses}
+            initialQuery={addressQuery}
+            setInitialQuery={setAddressQuery}
+          />
+        </div>
 
         {showDeveloperAccessCTA && (
-          <div ref={developerAccessFormRef} className="w-full">
+          <div ref={developerAccessFormRef} className="glass-section w-full">
             <DeveloperAccessForm onSignupSuccess={handleDeveloperAccessSignupSuccess} />
           </div>
         )}
@@ -401,4 +400,3 @@ export default function SolidityForgePage() {
     </div>
   );
 }
-    

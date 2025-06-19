@@ -1,22 +1,25 @@
 
 import type { LucideIcon } from 'lucide-react';
-import { Coins, GitFork, ArrowRightLeft, Landmark, FileJson, Puzzle, ShieldCheck, Edit, CircleDollarSign, Gem, Scale, Lock, Unlock, Settings2, Info as InfoIcon, Link as LinkIcon, Image as ImageIcon, FileText as FileTextIcon } from 'lucide-react';
+import { Coins, GitFork, ArrowRightLeft, Landmark, FileJson, Puzzle, ShieldCheck, Edit, CircleDollarSign, Gem, Scale, Lock, Unlock, Settings2, Info as InfoIcon, Link as LinkIcon, Image as ImageIcon, FileText as FileTextIcon, Database, SlidersHorizontal, Palette } from 'lucide-react'; // Added more icons
 
 export type ParameterType = 'string' | 'number' | 'boolean' | 'address' | 'select' | 'textarea';
+export type ParameterCategory = 'core' | 'metadata' | 'feature' | 'control' | 'economics';
+
 
 export interface ContractParameter {
   name: string;
   label: string;
   type: ParameterType;
+  category?: ParameterCategory; // For grouping in UI
   defaultValue?: string | number | boolean;
-  options?: { value: string; label: string }[]; // For select type
+  options?: { value: string; label: string }[];
   placeholder?: string;
   description?: string;
-  rows?: number; // for textarea
-  advancedOnly?: boolean; // True if this parameter should only appear in "Advanced" mode
-  dependsOn?: string; // Name of another parameter that this one depends on
-  dependsOnValue?: any; // Value the dependent parameter should have for this one to be active
-  icon?: LucideIcon; // Optional icon for the parameter
+  rows?: number; 
+  advancedOnly?: boolean; 
+  dependsOn?: string; 
+  dependsOnValue?: any; 
+  icon?: LucideIcon; 
 }
 
 export interface ContractTemplate {
@@ -25,7 +28,7 @@ export interface ContractTemplate {
   description: string;
   icon: LucideIcon;
   parameters: ContractParameter[];
-  aiPromptEnhancement?: string; // Additional context for AI based on template
+  aiPromptEnhancement?: string; 
 }
 
 const COMMON_EVM_TOKEN_ADDRESSES_ETH_MAINNET = {
@@ -37,8 +40,8 @@ const COMMON_EVM_TOKEN_ADDRESSES_ETH_MAINNET = {
 
 const WETH_ADDRESSES_BY_NETWORK = {
   ETH_MAINNET: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-  BNB_CHAIN: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c', // WBNB
-  POLYGON: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270', // WMATIC
+  BNB_CHAIN: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c', 
+  POLYGON: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270', 
   ARBITRUM: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
   OPTIMISM: '0x4200000000000000000000000000000000000006',
 };
@@ -52,155 +55,31 @@ export const CONTRACT_TEMPLATES: ContractTemplate[] = [
     icon: Coins,
     parameters: [
       // Core Details Group
-      { name: 'tokenName', label: 'Token Name', type: 'string', placeholder: 'My Awesome Token', description: 'The full name of your token.', icon: InfoIcon },
-      { name: 'tokenSymbol', label: 'Token Symbol', type: 'string', placeholder: 'MAT', description: 'The ticker symbol for your token (e.g., ETH).', icon: Gem },
-      {
-        name: 'initialSupply',
-        label: 'Initial Supply',
-        type: 'number',
-        placeholder: '1000000',
-        description: 'The total number of tokens to mint at deployment. If mintable is enabled and this is 0, no tokens are minted initially.',
-        icon: CircleDollarSign
-      },
-      {
-        name: 'decimals',
-        label: 'Decimals',
-        type: 'number',
-        defaultValue: 18,
-        description: 'The number of decimal places your token will have (typically 18).',
-        advancedOnly: true,
-        icon: Scale
-      },
-      // Project & Social Links Group
-      {
-        name: 'projectDescription',
-        label: 'Project Description',
-        type: 'textarea',
-        rows: 4,
-        placeholder: 'A brief description of your token project...',
-        description: 'A short summary of the project for on-chain metadata.',
-        icon: FileTextIcon,
-      },
-      {
-        name: 'logoUrl',
-        label: 'Logo URL',
-        type: 'string',
-        placeholder: 'https://example.com/logo.png',
-        description: 'A direct HTTPS URL to the project/token logo image.',
-        icon: ImageIcon,
-      },
-      {
-        name: 'websiteUrl',
-        label: 'Website URL',
-        type: 'string',
-        placeholder: 'https://example.com',
-        description: 'The official website for the project.',
-        icon: LinkIcon,
-      },
-      {
-        name: 'twitterHandle',
-        label: 'X (Twitter) Handle',
-        type: 'string',
-        placeholder: '@MyTokenProject',
-        description: 'The official X (formerly Twitter) handle, including the @.',
-        icon: LinkIcon, // Using generic link icon for brevity
-      },
-      {
-        name: 'telegramLink',
-        label: 'Telegram Link',
-        type: 'string',
-        placeholder: 'https://t.me/MyTokenProject',
-        description: 'The official Telegram group or channel link.',
-        icon: LinkIcon, // Using generic link icon
-      },
+      { name: 'tokenName', label: 'Token Name', type: 'string', placeholder: 'My Awesome Token', description: 'The full name of your token.', icon: InfoIcon, category: 'core' },
+      { name: 'tokenSymbol', label: 'Token Symbol', type: 'string', placeholder: 'MAT', description: 'The ticker symbol for your token (e.g., ETH).', icon: Gem, category: 'core' },
+      { name: 'initialSupply', label: 'Initial Supply', type: 'number', placeholder: '1000000', description: 'Total tokens minted at deployment. If mintable & 0, none initially.', icon: CircleDollarSign, category: 'core' },
+      { name: 'decimals', label: 'Decimals', type: 'number', defaultValue: 18, description: 'Number of decimal places (typically 18).', advancedOnly: true, icon: Scale, category: 'core' },
+      
+      // Project & Social Links Group / Metadata
+      { name: 'projectDescription', label: 'Project Description', type: 'textarea', rows: 3, placeholder: 'Brief description of your token project...', description: 'Short summary for on-chain metadata.', icon: FileTextIcon, category: 'metadata' },
+      { name: 'logoUrl', label: 'Logo URL', type: 'string', placeholder: 'https://example.com/logo.png', description: 'Direct HTTPS URL to the project/token logo.', icon: ImageIcon, category: 'metadata', advancedOnly: true },
+      { name: 'websiteUrl', label: 'Website URL', type: 'string', placeholder: 'https://example.com', description: 'Official project website.', icon: LinkIcon, category: 'metadata', advancedOnly: true },
+      { name: 'twitterHandle', label: 'X (Twitter) Handle', type: 'string', placeholder: '@MyTokenProject', description: 'Official X (Twitter) handle, including @.', icon: LinkIcon, category: 'metadata', advancedOnly: true },
+      { name: 'telegramLink', label: 'Telegram Link', type: 'string', placeholder: 'https://t.me/MyTokenProject', description: 'Official Telegram group/channel link.', icon: LinkIcon, category: 'metadata', advancedOnly: true },
+
       // Features Group
-      {
-        name: 'accessControl',
-        label: 'Access Control',
-        type: 'select',
-        options: [
-          { value: 'None', label: 'None (Public Minting/Burning if enabled)' },
-          { value: 'Ownable', label: 'Ownable (OpenZeppelin)' },
-          { value: 'Roles', label: 'Roles (OpenZeppelin AccessControl)' },
-        ],
-        defaultValue: 'Ownable',
-        description: 'Mechanism for managing administrative functions like minting, pausing, etc.',
-        advancedOnly: false,
-        icon: ShieldCheck
-      },
-      {
-        name: 'mintable',
-        label: 'Enable Minting',
-        type: 'boolean',
-        defaultValue: false,
-        description: 'Allows new tokens to be created after deployment. Requires Access Control.',
-        advancedOnly: false,
-        icon: Edit
-      },
-      {
-        name: 'burnable',
-        label: 'Enable Burning',
-        type: 'boolean',
-        defaultValue: false,
-        description: 'Allows tokens to be destroyed. Users can burn their own. Admins might burn from others if Roles are set up.',
-        advancedOnly: true,
-        icon: Edit // Using Edit as a generic "modification" icon
-      },
-      {
-        name: 'pausable',
-        label: 'Enable Pausable',
-        type: 'boolean',
-        defaultValue: false,
-        description: 'Allows token transfers and other actions to be paused by an admin. Requires Access Control.',
-        advancedOnly: true,
-        icon: Lock
-      },
+      { name: 'accessControl', label: 'Access Control Model', type: 'select', options: [{ value: 'None', label: 'None (Public if applicable)' },{ value: 'Ownable', label: 'Ownable (OpenZeppelin)' },{ value: 'Roles', label: 'Roles (AccessControl)' },], defaultValue: 'Ownable', description: 'Mechanism for admin functions (minting, pausing).', icon: ShieldCheck, category: 'feature' },
+      { name: 'mintable', label: 'Enable Minting', type: 'boolean', defaultValue: false, description: 'Allows new token creation post-deployment. Requires Access Control.', icon: Edit, category: 'feature' },
+      { name: 'burnable', label: 'Enable Burning', type: 'boolean', defaultValue: false, description: 'Allows tokens to be destroyed.', advancedOnly: true, icon: Edit, category: 'feature' },
+      { name: 'pausable', label: 'Enable Pausable', type: 'boolean', defaultValue: false, description: 'Allows pausing token transfers. Requires Access Control.', advancedOnly: true, icon: Lock, category: 'feature' },
+      
       // Economics Group
-      {
-        name: 'transactionFeePercent',
-        label: 'Transaction Fee (%)',
-        type: 'number',
-        defaultValue: 0,
-        placeholder: '0.5',
-        description: 'A percentage fee taken on each transfer (0-100). 0 means no fee. Max 2 decimal places (e.g. 0.25 for 0.25%).',
-        advancedOnly: true,
-        icon: CircleDollarSign
-      },
-      {
-        name: 'feeRecipientAddress',
-        label: 'Fee Recipient Address',
-        type: 'address',
-        placeholder: '0x...',
-        description: 'Address to send transaction fees to. Required if Transaction Fee > 0.',
-        advancedOnly: true,
-        dependsOn: 'transactionFeePercent',
-        dependsOnValue: (val: number) => val > 0,
-        icon: Landmark
-      },
-      {
-        name: 'maxTransactionAmount',
-        label: 'Max Transaction Amount',
-        type: 'number',
-        defaultValue: 0,
-        placeholder: '10000',
-        description: 'Maximum amount of tokens that can be transferred in a single transaction. 0 means no limit.',
-        advancedOnly: true,
-        icon: Scale
-      },
+      { name: 'transactionFeePercent', label: 'Transaction Fee (%)', type: 'number', defaultValue: 0, placeholder: '0.5', description: 'Percentage fee on transfers (0-100). Max 2 decimals (e.g., 0.25).', advancedOnly: true, icon: CircleDollarSign, category: 'economics' },
+      { name: 'feeRecipientAddress', label: 'Fee Recipient Address', type: 'address', placeholder: '0x...', description: 'Address for transaction fees. Required if Fee > 0.', advancedOnly: true, dependsOn: 'transactionFeePercent', dependsOnValue: (val: number) => val > 0, icon: Landmark, category: 'economics' },
+      { name: 'maxTransactionAmount', label: 'Max Tx Amount', type: 'number', defaultValue: 0, placeholder: '10000', description: 'Max tokens per transaction. 0 for no limit.', advancedOnly: true, icon: Scale, category: 'economics' },
+      
       // Control & Upgrades Group
-      {
-        name: 'upgradable',
-        label: 'Upgradability',
-        type: 'select',
-        options: [
-          { value: 'None', label: 'None (Immutable)' },
-          { value: 'UUPS', label: 'UUPS Proxy (OpenZeppelin)' },
-        ],
-        defaultValue: 'None',
-        description: 'Makes the contract upgradable using a proxy pattern. UUPS is recommended.',
-        advancedOnly: true,
-        icon: Settings2
-      },
+      { name: 'upgradable', label: 'Upgradability Model', type: 'select', options: [{ value: 'None', label: 'Immutable' },{ value: 'UUPS', label: 'UUPS Proxy (OpenZeppelin)' },], defaultValue: 'None', description: 'Makes contract upgradable (UUPS recommended).', advancedOnly: true, icon: Settings2, category: 'control' },
     ],
     aiPromptEnhancement: `Generate a feature-rich ERC20 token. Use OpenZeppelin contracts extensively. Default to Solidity pragma ^0.8.20;
 - **Standard Compliance**: Strictly adhere to ERC20 standards. Implement ERC20Metadata.
@@ -246,57 +125,13 @@ export const CONTRACT_TEMPLATES: ContractTemplate[] = [
     description: 'A Uniswap V2-style pair contract for providing liquidity between two specific ERC20 tokens.',
     icon: GitFork,
     parameters: [
-      { name: 'poolName', label: 'Pool Name (for LP Token)', type: 'string', placeholder: 'TokenA/TokenB LP', description: 'A descriptive name for the liquidity pool token that will represent shares in this pair.' },
-      { name: 'poolSymbol', label: 'Pool Symbol (for LP Token)', type: 'string', placeholder: 'LP-AB', description: 'A symbol for the liquidity pool token.' },
-      {
-        name: 'tokenA_Address',
-        label: 'Token A Address',
-        type: 'address',
-        defaultValue: '0x...',
-        placeholder: 'Enter contract address for Token A',
-        description: 'The contract address of the first ERC20 token for the pair.'
-      },
-      {
-        name: 'tokenB_Address',
-        label: 'Token B Address',
-        type: 'address',
-        defaultValue: '0x...',
-        placeholder: 'Enter contract address for Token B',
-        description: 'The contract address of the second ERC20 token for the pair.'
-      },
-      {
-        name: 'feeBps',
-        label: 'Swap Fee (Basis Points)',
-        type: 'number',
-        defaultValue: 30, // 0.3%
-        placeholder: '30',
-        description: 'Swap fee in basis points (e.g., 30 for 0.30%, 25 for 0.25%). Typically between 1 (0.01%) and 10000 (100%). This fee accrues to liquidity providers.',
-        advancedOnly: true
-      },
-      {
-        name: 'accessControl',
-        label: 'Access Control (for admin functions)',
-        type: 'select',
-        options: [
-          { value: 'None', label: 'None' },
-          { value: 'Ownable', label: 'Ownable (for fee changes, pausing etc.)' },
-        ],
-        defaultValue: 'Ownable',
-        description: 'Controls admin functions like changing fees or pausing. Does not affect user liquidity provision.',
-        advancedOnly: true,
-      },
-      {
-        name: 'upgradable',
-        label: 'Upgradability',
-        type: 'select',
-        options: [
-          { value: 'None', label: 'None (Immutable)' },
-          { value: 'UUPS', label: 'UUPS Proxy (OpenZeppelin)' },
-        ],
-        defaultValue: 'None',
-        description: 'Makes the contract upgradable. UUPS is recommended for pairs if upgradability is desired.',
-        advancedOnly: true,
-      },
+      { name: 'poolName', label: 'Pool Name (LP Token)', type: 'string', placeholder: 'TokenA/TokenB LP', description: 'Descriptive name for the liquidity pool token.', icon: Palette, category: 'core' },
+      { name: 'poolSymbol', label: 'Pool Symbol (LP Token)', type: 'string', placeholder: 'LP-AB', description: 'Symbol for the liquidity pool token.', icon: Palette, category: 'core' },
+      { name: 'tokenA_Address', label: 'Token A Address', type: 'address', defaultValue: '0x...', placeholder: 'Contract address for Token A', description: 'Contract address of the first ERC20 token.', icon: Database, category: 'core' },
+      { name: 'tokenB_Address', label: 'Token B Address', type: 'address', defaultValue: '0x...', placeholder: 'Contract address for Token B', description: 'Contract address of the second ERC20 token.', icon: Database, category: 'core' },
+      { name: 'feeBps', label: 'Swap Fee (Basis Points)', type: 'number', defaultValue: 30, placeholder: '30', description: 'Swap fee in basis points (e.g., 30 for 0.30%). Accrues to LPs.', advancedOnly: true, icon: CircleDollarSign, category: 'economics' },
+      { name: 'accessControl', label: 'Access Control (Admin)', type: 'select', options: [{ value: 'None', label: 'None' },{ value: 'Ownable', label: 'Ownable (Fee changes, etc.)' },], defaultValue: 'Ownable', description: 'Controls admin functions like fee changes. Does not affect LP provision.', advancedOnly: true, icon: ShieldCheck, category: 'control' },
+      { name: 'upgradable', label: 'Upgradability', type: 'select', options: [{ value: 'None', label: 'Immutable' },{ value: 'UUPS', label: 'UUPS Proxy' },], defaultValue: 'None', description: 'Makes the contract upgradable (UUPS recommended for pairs).', advancedOnly: true, icon: Settings2, category: 'control' },
     ],
     aiPromptEnhancement: `Generate a Uniswap V2-style Pair contract for two specific ERC20 tokens. Default to Solidity pragma ^0.8.20;
 - **Pair Definition**: The contract will be for a single pair defined by \`tokenA_Address\` and \`tokenB_Address\`. These should be initialized in the constructor (or an \`initialize\` function if upgradable) and determine \`token0\` and \`token1\` (sorted by address).
@@ -323,49 +158,14 @@ export const CONTRACT_TEMPLATES: ContractTemplate[] = [
   {
     id: 'swapProtocol',
     name: 'Swap Protocol (Router)',
-    description: 'A router contract for facilitating swaps across multiple liquidity pools (Uniswap V2 style). Select common WETH addresses or provide custom ones in code.',
+    description: 'A router contract for facilitating swaps across multiple liquidity pools (Uniswap V2 style).',
     icon: ArrowRightLeft,
     parameters: [
-      { name: 'routerName', label: 'Router Name', type: 'string', placeholder: 'MySwap Router', description: 'The name for your swap router contract (not used in bytecode).' },
-      { name: 'factoryAddress', label: 'Pair Factory Address', type: 'address', placeholder: '0x...', description: 'The address of the contract factory that creates liquidity pair contracts (e.g., Uniswap V2 Factory).' },
-      {
-        name: 'wethAddress',
-        label: 'WETH Address (Network Specific)',
-        type: 'select',
-        defaultValue: WETH_ADDRESSES_BY_NETWORK.ETH_MAINNET,
-        options: [
-            { label: "WETH (Ethereum Mainnet)", value: WETH_ADDRESSES_BY_NETWORK.ETH_MAINNET },
-            { label: "WBNB (BNB Chain)", value: WETH_ADDRESSES_BY_NETWORK.BNB_CHAIN },
-            { label: "WMATIC (Polygon)", value: WETH_ADDRESSES_BY_NETWORK.POLYGON },
-            { label: "WETH (Arbitrum One)", value: WETH_ADDRESSES_BY_NETWORK.ARBITRUM },
-            { label: "WETH (Optimism)", value: WETH_ADDRESSES_BY_NETWORK.OPTIMISM },
-        ],
-        description: 'Select the Wrapped Native Token address for your target network (e.g., WETH for Ethereum, WBNB for BNB Chain). Ensure this is correct for your deployment network.'
-      },
-      {
-        name: 'accessControl',
-        label: 'Access Control (for admin functions)',
-        type: 'select',
-        options: [
-          { value: 'None', label: 'None' },
-          { value: 'Ownable', label: 'Ownable (e.g., for pausing, emergency functions)' },
-        ],
-        defaultValue: 'Ownable',
-        description: 'Controls administrative functions if any are implemented (e.g., pausing).',
-        advancedOnly: true,
-      },
-      {
-        name: 'upgradable',
-        label: 'Upgradability',
-        type: 'select',
-        options: [
-          { value: 'None', label: 'None (Immutable)' },
-          { value: 'UUPS', label: 'UUPS Proxy (OpenZeppelin)' },
-        ],
-        defaultValue: 'None',
-        description: 'Makes the router contract upgradable.',
-        advancedOnly: true,
-      },
+      { name: 'routerName', label: 'Router Name', type: 'string', placeholder: 'MySwap Router', description: 'Name for your swap router contract.', icon: Palette, category: 'core' },
+      { name: 'factoryAddress', label: 'Pair Factory Address', type: 'address', placeholder: '0x...', description: 'Address of the factory creating liquidity pairs.', icon: Database, category: 'core' },
+      { name: 'wethAddress', label: 'WETH Address (Network)', type: 'select', defaultValue: WETH_ADDRESSES_BY_NETWORK.ETH_MAINNET, options: [ { label: "WETH (Ethereum Mainnet)", value: WETH_ADDRESSES_BY_NETWORK.ETH_MAINNET },{ label: "WBNB (BNB Chain)", value: WETH_ADDRESSES_BY_NETWORK.BNB_CHAIN },{ label: "WMATIC (Polygon)", value: WETH_ADDRESSES_BY_NETWORK.POLYGON },{ label: "WETH (Arbitrum One)", value: WETH_ADDRESSES_BY_NETWORK.ARBITRUM },{ label: "WETH (Optimism)", value: WETH_ADDRESSES_BY_NETWORK.OPTIMISM },], description: 'Wrapped Native Token address for your target network.', icon: Database, category: 'core' },
+      { name: 'accessControl', label: 'Access Control (Admin)', type: 'select', options: [{ value: 'None', label: 'None' },{ value: 'Ownable', label: 'Ownable (Pausing, etc.)' },], defaultValue: 'Ownable', description: 'Controls admin functions if any (e.g., pausing).', advancedOnly: true, icon: ShieldCheck, category: 'control' },
+      { name: 'upgradable', label: 'Upgradability', type: 'select', options: [{ value: 'None', label: 'Immutable' },{ value: 'UUPS', label: 'UUPS Proxy' },], defaultValue: 'None', description: 'Makes the router contract upgradable.', advancedOnly: true, icon: Settings2, category: 'control' },
     ],
     aiPromptEnhancement: `Generate a Uniswap V2-style Router contract. Default to Solidity pragma ^0.8.20;
 - **Core Functionality**: The router facilitates swaps by interacting with liquidity pair contracts created by the \`factoryAddress\`. It must handle ETH directly by wrapping/unwrapping it using the \`wethAddress\` selected by the user (which corresponds to the wrapped native token of the target chain).
@@ -405,55 +205,16 @@ export const CONTRACT_TEMPLATES: ContractTemplate[] = [
   {
     id: 'dao',
     name: 'DAO (Basic Governance)',
-    description: 'A basic Decentralized Autonomous Organization for voting on proposals using OpenZeppelin Governor.',
+    description: 'A basic DAO for voting on proposals using OpenZeppelin Governor.',
     icon: Landmark,
     parameters: [
-      { name: 'daoName', label: 'DAO Name', type: 'string', placeholder: 'My Governance DAO', description: 'The name of your DAO (used for the Governor contract).' },
-      { name: 'proposalTokenAddress', label: 'Governance Token (ERC20Votes) Address', type: 'address', placeholder: '0x...', description: 'The ERC20Votes-compatible token used for voting power.' },
-      {
-        name: 'votingDelay',
-        label: 'Voting Delay (Blocks)',
-        type: 'number',
-        defaultValue: 1,
-        description: 'Delay in blocks after a proposal is created before voting starts (e.g., 1 block).',
-        advancedOnly: true
-      },
-      {
-        name: 'votingPeriod',
-        label: 'Voting Period (Blocks)',
-        type: 'number',
-        defaultValue: '17280', // ~3 days if 1 block = 15s
-        description: 'Duration in blocks for which a proposal remains open for voting (e.g., 17280 blocks for ~3 days).',
-      },
-      {
-        name: 'proposalThreshold',
-        label: 'Proposal Threshold (Tokens)',
-        type: 'number',
-        defaultValue: 0,
-        description: 'Minimum number of governance tokens required for an account to create a proposal. 0 means any token holder can propose.',
-        advancedOnly: true
-      },
-      {
-        name: 'quorumNumerator',
-        label: 'Quorum Numerator (%)',
-        type: 'number',
-        defaultValue: 4,
-        placeholder: '4',
-        description: 'Percentage of total voting power that must vote for a proposal to be valid (e.g., 4 for 4%). This value is used with GovernorVotesQuorumFraction.',
-        advancedOnly: true
-      },
-      {
-        name: 'upgradable',
-        label: 'Upgradability (Governor Contract)',
-        type: 'select',
-        options: [
-          { value: 'None', label: 'None (Immutable)' },
-          { value: 'UUPS', label: 'UUPS Proxy (OpenZeppelin)' },
-        ],
-        defaultValue: 'None',
-        description: 'Makes the Governor contract itself upgradable. UUPS is recommended.',
-        advancedOnly: true,
-      },
+      { name: 'daoName', label: 'DAO Name', type: 'string', placeholder: 'My Governance DAO', description: 'Name of your DAO (for Governor contract).', icon: Palette, category: 'core' },
+      { name: 'proposalTokenAddress', label: 'Governance Token (ERC20Votes)', type: 'address', placeholder: '0x...', description: 'ERC20Votes-compatible token for voting power.', icon: Database, category: 'core' },
+      { name: 'votingDelay', label: 'Voting Delay (Blocks)', type: 'number', defaultValue: 1, description: 'Delay in blocks after proposal before voting starts (e.g., 1 block).', advancedOnly: true, icon: SlidersHorizontal, category: 'feature' },
+      { name: 'votingPeriod', label: 'Voting Period (Blocks)', type: 'number', defaultValue: '17280', description: 'Duration in blocks for voting (e.g., 17280 for ~3 days).', icon: SlidersHorizontal, category: 'feature' },
+      { name: 'proposalThreshold', label: 'Proposal Threshold (Tokens)', type: 'number', defaultValue: 0, description: 'Min governance tokens to create a proposal. 0 for any holder.', advancedOnly: true, icon: SlidersHorizontal, category: 'feature' },
+      { name: 'quorumNumerator', label: 'Quorum Numerator (%)', type: 'number', defaultValue: 4, placeholder: '4', description: 'Percentage of total voting power needed (e.g., 4 for 4%).', advancedOnly: true, icon: Scale, category: 'feature' },
+      { name: 'upgradable', label: 'Upgradability (Governor)', type: 'select', options: [{ value: 'None', label: 'Immutable' },{ value: 'UUPS', label: 'UUPS Proxy' },], defaultValue: 'None', description: 'Makes Governor contract upgradable (UUPS recommended).', advancedOnly: true, icon: Settings2, category: 'control' },
     ],
     aiPromptEnhancement: `Generate a DAO governance contract using OpenZeppelin Governor. Default to Solidity pragma ^0.8.20;
 - **Base Contracts**: The main contract should inherit from:
@@ -495,12 +256,12 @@ export const CONTRACT_TEMPLATES: ContractTemplate[] = [
   },
   {
     id: 'custom',
-    name: 'Custom Contract',
-    description: 'Describe your custom smart contract needs.',
+    name: 'Custom Contract Logic',
+    description: 'Input custom directives for the AI to synthesize unique contract logic.',
     icon: Puzzle,
     parameters: [
-      { name: 'customDescription', label: 'Contract Description', type: 'textarea', rows: 6, placeholder: 'e.g., A smart contract that manages a decentralized lottery system with weekly draws...', description: 'Detailed description of the contract functionality, features, and any specific requirements.' },
+      { name: 'customDescription', label: 'Contract Directives', type: 'textarea', rows: 6, placeholder: 'e.g., A decentralized oracle system for off-chain data verification with staking and dispute resolution mechanisms...', description: 'Detailed description of contract functionality, features, and specific requirements.', category: 'core', icon: FileJson },
     ],
-    aiPromptEnhancement: "The user will provide a custom description. Generate the Solidity code based on this description. Pay close attention to the details and requirements mentioned by the user. If details are sparse, make reasonable assumptions or create a flexible base. If OpenZeppelin contracts can be used for common patterns (Ownable, Pausable, ReentrancyGuard, ERC standards), please incorporate them. Default to Solidity pragma ^0.8.20;",
+    aiPromptEnhancement: "The user will provide custom directives. Generate the Solidity code based on this description. Pay close attention to the details and requirements mentioned by the user. If details are sparse, make reasonable assumptions or create a flexible base. If OpenZeppelin contracts can be used for common patterns (Ownable, Pausable, ReentrancyGuard, ERC standards), please incorporate them. Default to Solidity pragma ^0.8.20;",
   }
 ];
