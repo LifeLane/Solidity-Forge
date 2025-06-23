@@ -173,9 +173,9 @@ export function CodeDisplay({
     }
   };
   
-  const renderEmptyState = (icon: React.ElementType, title: string, message: string) => (
+  const renderEmptyState = (Icon: React.ElementType, title: string, message: string) => (
     <div className="p-6 md:p-10 text-center text-muted-foreground flex flex-col items-center justify-center h-full min-h-[250px] font-uncut-sans">
-      <icon className="w-12 h-12 md:w-16 md:h-16 mb-4 text-primary/40" />
+      <Icon className="w-12 h-12 md:w-16 md:h-16 mb-4 text-primary/40" />
       <p className="text-lg font-space-mono text-foreground mb-1.5">{title}</p>
       <p className="text-sm">{message}</p>
     </div>
@@ -275,7 +275,7 @@ export function CodeDisplay({
           )}
         </TabsContent>
 
-        <TabsContent value="suggestions" className="flex-grow flex flex-col overflow-hidden rounded-lg border border-glass-section-border/20 bg-[rgba(var(--background-rgb),0.3)]">
+        <TabsContent value="suggestions" className="flex-grow flex col overflow-hidden rounded-lg border border-glass-section-border/20 bg-[rgba(var(--background-rgb),0.3)]">
           <ScrollArea className="h-full flex-grow p-1" style={{maxHeight: 'calc(100vh - 30rem)'}}>
             {isLoadingSuggestions ? (
                renderLoadingState("Accessing AI Oracle for Insights...")
